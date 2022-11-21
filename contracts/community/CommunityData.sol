@@ -67,7 +67,7 @@ contract CommunityData is
         return communities.contains(_community);
     }
 
-    function getCommunities(uint256 _startIndex, uint256 _endIndex) external view returns (address[] memory result) {
+    function getCommunities(uint256 _startIndex, uint256 _endIndex) external override view returns (address[] memory result) {
         require(_startIndex <= _endIndex , "Community: wrong index");
         require(_endIndex < communities.length(), "Community: wrong index");
         uint256 count = _endIndex - _startIndex + 1;
@@ -75,5 +75,9 @@ contract CommunityData is
         for(uint256 i = 0; i < count; i++) {
             result[i] = communities.at(_startIndex + i);
         }
+    }
+
+    function communitiesCount() external override view returns (uint256) {
+        return communities.length();
     }
 }

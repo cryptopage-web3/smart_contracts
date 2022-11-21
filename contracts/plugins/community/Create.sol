@@ -67,7 +67,7 @@ contract Create is Ownable, CloneFactory {
     }
 
     function checkData(uint256 _version, address _sender) private view {
-        require(_version != PLUGIN_VERSION, "Create: wrong _version");
+        require(_version == PLUGIN_VERSION, "Create: wrong _version");
         require(registry.isEnablePlugin(PluginsList.COMMUNITY_CREATE, _version),"Create: plugin is not trusted");
         require(_sender != address(0) , "Create: _sender is not zero");
     }

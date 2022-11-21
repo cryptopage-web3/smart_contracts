@@ -77,6 +77,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
         Plugin storage plugin = plugins[_pluginName][_version];
         require(_pluginContract != plugin.pluginContract, "Registry: contract already installed");
         plugin.enable = true;
+        plugin.pluginContract = _pluginContract;
         plugin.typeInterface = _typeInterface;
 
         emit SetPlugin(_msgSender(), _pluginName, _version, _pluginContract, _typeInterface);

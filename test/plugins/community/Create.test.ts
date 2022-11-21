@@ -25,12 +25,15 @@ describe("Test Create basic functionality", function () {
     let rule = AddressZero;
     let communityData;
 
+    let communityName = "First community";
+
     let pluginName = keccak256(defaultAbiCoder.encode(
             ["string"],
             ["COMMUNITY_CREATE"]
         )
     );
     let version = 1;
+
 
     before(async function () {
         [owner, creator, third] = await getSigners();
@@ -55,6 +58,7 @@ describe("Test Create basic functionality", function () {
 
         const createFactory = await ethers.getContractFactory("contracts/plugins/community/Create.sol:Create");
         pluginCreate = await createFactory.deploy(registry.address, owner.address);
+        await pluginCreate.deployed();
 
         await registry.setPlugin(pluginName, version, pluginCreate.address, 0);
     })
@@ -70,12 +74,28 @@ describe("Test Create basic functionality", function () {
     });
 
     it("Should create community", async function () {
+        let beforeCount = await communityData.communitiesCount();
+
         //bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data
         let id = ethers.utils.formatBytes32String("1");
         // let data = defaultAbiCoder.encode([ "uint", "string" ], [ 1234, "Hello World" ]);
-        let data = defaultAbiCoder.encode([ "string", "bool" ], ["First community", true ]);
+        let data = defaultAbiCoder.encode([ "string", "bool" ], [communityName, true ]);
 
         await executor.run(id, pluginName, version, data);
+
+        let afterCount = await communityData.communitiesCount();
+        expect(afterCount.sub(beforeCount)).to.equal(
+            BigNumber.from(1)
+        );
+
+        let index = afterCount.sub(BigNumber.from(1));
+        let createdCommunityAddress = await communityData.getCommunities(index, index);
+
+        let communityBlank = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
+        let createdCommunity = await communityBlank.attach(createdCommunityAddress[0]);
+
+        expect(await createdCommunity.name()).to.equal(communityName);
+
     });
 
 });
