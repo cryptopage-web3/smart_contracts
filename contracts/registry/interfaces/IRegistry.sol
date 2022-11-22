@@ -19,9 +19,13 @@ interface IRegistry {
 
     function communityData() external view returns (address);
 
+    function account() external view returns (address);
+
     function setExecutor(address _executor) external;
 
     function setCommunityData(address _contract) external;
+
+    function setAccount(address _contract) external;
 
     function setPlugin(
         bytes32 _pluginName,

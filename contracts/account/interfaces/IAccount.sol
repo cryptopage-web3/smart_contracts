@@ -5,10 +5,30 @@ pragma solidity 0.8.15;
 interface IAccount {
     function version() external pure returns (string memory);
 
-//    function setPluginDirect(address account, uint16 typeId, uint16 pluginId) external;
-//
-//    function setPlugin(address publisher, string memory typeName, string memory pluginName) external;
-//
-//    function getPlugin(address publisher, uint16 typeId) external view returns (uint16);
+    function addCommunityUser(
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user
+    ) external returns(bool);
+
+    function removeCommunityUser(
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user
+    ) external returns(bool);
+
+    function getCommunityCounts(address _communityId, address _user) external view returns(
+        uint256 normalUsers,
+        uint256 bannedUsers,
+        uint256 moderatorsUsers
+    );
+
+    function isCommunityUser(address _communityId, address _user) external view returns(bool);
+
+    function isBannedUser(address _communityId, address _user) external view returns(bool);
+
+    function isModerator(address _communityId, address _user) external view returns(bool);
 
 }

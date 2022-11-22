@@ -21,6 +21,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     address public executor;
     address public rule;
     address public communityData;
+    address public account;
 
     bytes32 public constant EMPTY_NAME = bytes32(0);
 
@@ -38,7 +39,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
 
     event SetExecutor(address origin, address sender, address oldValue, address newValue);
     event SetCommunityData(address origin, address sender, address oldValue, address newValue);
-
+    event SetAccount(address origin, address sender, address oldValue, address newValue);
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
@@ -93,6 +94,12 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_contract != address(0), "Registry: address can't be zero");
         emit SetCommunityData(tx.origin, _msgSender(), communityData, _contract);
         communityData = _contract;
+    }
+
+    function setAccount(address _account) external override onlyOwner {
+        require(_account != address(0), "Registry: address can't be zero");
+        emit SetAccount(tx.origin, _msgSender(), account, _account);
+        account = _account;
     }
 
     function changePluginStatus(
