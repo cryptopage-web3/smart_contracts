@@ -25,7 +25,7 @@ describe("Test Create basic functionality", function () {
     let rule = AddressZero;
     let communityData;
 
-    let communityName = "First community";
+    let firstCommunityName = "First community";
 
     let pluginName = keccak256(defaultAbiCoder.encode(
             ["string"],
@@ -79,7 +79,7 @@ describe("Test Create basic functionality", function () {
         //bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data
         let id = ethers.utils.formatBytes32String("1");
         // let data = defaultAbiCoder.encode([ "uint", "string" ], [ 1234, "Hello World" ]);
-        let data = defaultAbiCoder.encode([ "string", "bool" ], [communityName, true ]);
+        let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);
 
         await executor.run(id, pluginName, version, data);
 
@@ -94,7 +94,7 @@ describe("Test Create basic functionality", function () {
         let communityBlank = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
         let createdCommunity = await communityBlank.attach(createdCommunityAddress[0]);
 
-        expect(await createdCommunity.name()).to.equal(communityName);
+        expect(await createdCommunity.name()).to.equal(firstCommunityName);
 
     });
 

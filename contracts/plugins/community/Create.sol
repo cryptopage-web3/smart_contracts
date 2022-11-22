@@ -15,15 +15,15 @@ import "../PluginsList.sol";
 
 contract Create is Ownable, CloneFactory {
 
+    uint256 private constant PLUGIN_VERSION = 1;
+
     IRegistry public registry;
 
     // For first deploy of CommunityBlank contract
     address public blank;
 
-    uint256 private constant PLUGIN_VERSION = 1;
-
     modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Join: caller is not the community");
+        require(registry.executor() == _msgSender(), "Join: caller is not the executor");
         _;
     }
 
