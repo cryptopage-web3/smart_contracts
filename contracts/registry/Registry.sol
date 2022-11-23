@@ -27,14 +27,13 @@ contract Registry is OwnableUpgradeable, IRegistry {
 
     struct Plugin {
         bool enable;
-        uint256 typeInterface;
         address pluginContract;
     }
 
     // pluginName -> version -> Plugin
     mapping(bytes32 => mapping(uint256 => Plugin)) private plugins;
 
-    event SetPlugin(address sender, bytes32 pluginName, uint256 version, address pluginContract, uint256 typeInterface);
+    event SetPlugin(address sender, bytes32 pluginName, uint256 version, address pluginContract);
     event ChangePluginStatus(address sender, bytes32 pluginName, uint256 version, bool newStatus);
 
     event SetExecutor(address origin, address sender, address oldValue, address newValue);
@@ -67,8 +66,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     function setPlugin(
         bytes32 _pluginName,
         uint256 _version,
-        address _pluginContract,
-        uint256 _typeInterface
+        address _pluginContract
     ) external override onlyOwner {
 
         require(_pluginName != EMPTY_NAME, "Registry: plugin name can't be empty");
@@ -79,9 +77,8 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_pluginContract != plugin.pluginContract, "Registry: contract already installed");
         plugin.enable = true;
         plugin.pluginContract = _pluginContract;
-        plugin.typeInterface = _typeInterface;
 
-        emit SetPlugin(_msgSender(), _pluginName, _version, _pluginContract, _typeInterface);
+        emit SetPlugin(_msgSender(), _pluginName, _version, _pluginContract);
     }
 
     function setExecutor(address _contract) external override onlyOwner {
@@ -116,10 +113,9 @@ contract Registry is OwnableUpgradeable, IRegistry {
     function getPlugin(
         bytes32 _pluginName,
         uint256 _version
-    ) external view override returns (bool enable, uint256 typeInterface, address pluginContract)  {
+    ) external view override returns (bool enable, address pluginContract)  {
         Plugin storage plugin = plugins[_pluginName][_version];
         enable = plugin.enable;
-        typeInterface = plugin.typeInterface;
         pluginContract = plugin.pluginContract;
     }
 

@@ -6,18 +6,17 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../registry/interfaces/IRegistry.sol";
-import "../../rules/community/interfaces/ICommunityJoiningRules.sol";
 import "../PluginsList.sol";
 
 
-contract Join is Context {
+contract Quit is Context {
 
     uint256 private constant PLUGIN_VERSION = 1;
 
     IRegistry public registry;
 
     modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Join: caller is not the executor");
+        require(registry.executor() == _msgSender(), "Quit: caller is not the executor");
         _;
     }
 
@@ -37,21 +36,21 @@ contract Join is Context {
         checkData(_version, _sender);
         (address _communityId) = abi.decode(data,(address));
         require(
-            IAccount(registry.account()).addCommunityUser(
-                PluginsList.COMMUNITY_JOIN,
+            IAccount(registry.account()).removeCommunityUser(
+                PluginsList.COMMUNITY_QUIT,
                 _version,
                 _communityId,
                 _sender
             ),
-            "Join: wrong create community"
+            "Quit: wrong create community"
         );
 
         return true;
     }
 
     function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Join: wrong _version");
-        require(registry.isEnablePlugin(PluginsList.COMMUNITY_JOIN, _version),"Join: plugin is not trusted");
-        require(_sender != address(0) , "Join: _sender is zero");
+        require(_version == PLUGIN_VERSION, "Quit: wrong _version");
+        require(registry.isEnablePlugin(PluginsList.COMMUNITY_QUIT, _version),"Quit: plugin is not trusted");
+        require(_sender != address(0) , "Quit: _sender is zero");
     }
 }
