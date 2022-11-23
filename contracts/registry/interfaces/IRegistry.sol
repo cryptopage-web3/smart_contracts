@@ -30,8 +30,7 @@ interface IRegistry {
     function setPlugin(
         bytes32 _pluginName,
         uint256 _version,
-        address _pluginContract,
-        uint256 _typeInterface
+        address _pluginContract
     ) external;
 
     function changePluginStatus(
@@ -42,7 +41,7 @@ interface IRegistry {
     function getPlugin(
         bytes32 _pluginName,
         uint256 _version
-    ) external view returns (bool enable, uint256 typeInterface, address pluginContract);
+    ) external view returns (bool enable, address pluginContract);
 
     function getPluginContract(
         bytes32 _pluginName,

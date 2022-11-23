@@ -57,7 +57,7 @@ export default async function setupContracts() {
     pluginCreate = await createFactory.deploy(registry.address, owner.address);
     await pluginCreate.deployed();
 
-    await registry.setPlugin(pluginName, version, pluginCreate.address, 0);
+    await registry.setPlugin(pluginName, version, pluginCreate.address);
 
     let id = ethers.utils.formatBytes32String("1");
     let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);

@@ -19,6 +19,7 @@ contract Rule is OwnableUpgradeable, IRule {
 
     struct GroupRule {
         address ruleContract;
+//        uint256 version;
         mapping(bytes32 => CommunityRuleSettings) rules;
     }
 

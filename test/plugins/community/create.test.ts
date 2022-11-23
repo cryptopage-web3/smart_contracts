@@ -60,7 +60,7 @@ describe("Test Create basic functionality", function () {
         pluginCreate = await createFactory.deploy(registry.address, owner.address);
         await pluginCreate.deployed();
 
-        await registry.setPlugin(pluginName, version, pluginCreate.address, 0);
+        await registry.setPlugin(pluginName, version, pluginCreate.address);
     })
 
     it("Should set blank", async function () {

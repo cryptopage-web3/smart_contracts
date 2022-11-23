@@ -37,7 +37,7 @@ contract Executor is OwnableUpgradeable, IExecutor {
     }
 
     function run(bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data) external {
-        (bool enable, uint256 typeInterface, address pluginContract) = registry.getPlugin(_pluginName, _version);
+        (bool enable, address pluginContract) = registry.getPlugin(_pluginName, _version);
         checkData(enable, pluginContract, _id);
 
         bytes memory result = pluginContract.functionCall(

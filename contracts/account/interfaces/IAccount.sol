@@ -19,7 +19,7 @@ interface IAccount {
         address _user
     ) external returns(bool);
 
-    function getCommunityCounts(address _communityId, address _user) external view returns(
+    function getCommunityCounts(address _communityId) external view returns(
         uint256 normalUsers,
         uint256 bannedUsers,
         uint256 moderatorsUsers

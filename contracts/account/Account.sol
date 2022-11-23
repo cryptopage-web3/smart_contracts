@@ -86,7 +86,7 @@ contract Account is
         return users.users.remove(_user);
     }
 
-    function getCommunityCounts(address _communityId, address _user) external override view returns(
+    function getCommunityCounts(address _communityId) external override view returns(
         uint256 normalUsers,
         uint256 bannedUsers,
         uint256 moderatorsUsers
