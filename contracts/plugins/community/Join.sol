@@ -33,7 +33,7 @@ contract Join is Ownable {
         uint256 _version,
         address _sender,
         bytes calldata data
-    ) external onlyExecutor {
+    ) external onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (address _communityId) = abi.decode(data,(address));
         require(
@@ -45,11 +45,13 @@ contract Join is Ownable {
             ),
             "Join: wrong create community"
         );
+
+        return true;
     }
 
     function checkData(uint256 _version, address _sender) private view {
         require(_version == PLUGIN_VERSION, "Join: wrong _version");
         require(registry.isEnablePlugin(PluginsList.COMMUNITY_JOIN, _version),"Create: plugin is not trusted");
-        require(_sender != address(0) , "Join: _sender is not zero");
+        require(_sender != address(0) , "Join: _sender is zero");
     }
 }

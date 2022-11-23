@@ -44,7 +44,7 @@ contract Create is Ownable, CloneFactory {
         uint256 _version,
         address _sender,
         bytes calldata data
-    ) external onlyExecutor {
+    ) external onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (string memory _name, bool _isInitial) = abi.decode(data,(string, bool));
         address createdCommunity = createCommunity(_name, _sender, _isInitial);
@@ -56,6 +56,8 @@ contract Create is Ownable, CloneFactory {
             ),
             "Create: wrong create community"
         );
+
+        return true;
     }
 
     function createCommunity(string memory _name, address _creator, bool _isInitial) private returns(address) {
@@ -69,6 +71,6 @@ contract Create is Ownable, CloneFactory {
     function checkData(uint256 _version, address _sender) private view {
         require(_version == PLUGIN_VERSION, "Create: wrong _version");
         require(registry.isEnablePlugin(PluginsList.COMMUNITY_CREATE, _version),"Create: plugin is not trusted");
-        require(_sender != address(0) , "Create: _sender is not zero");
+        require(_sender != address(0) , "Create: _sender is zero");
     }
 }

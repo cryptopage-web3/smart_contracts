@@ -9,7 +9,7 @@ import "../plugins/PluginsList.sol";
 import "./interfaces/IAccount.sol";
 import "../registry/interfaces/IRegistry.sol";
 
-/// @title Contract of Page.Community
+/// @title Contract of Page.Account
 /// @author Crypto.Page Team
 /// @notice
 /// @dev
@@ -69,6 +69,7 @@ contract Account is
         address _communityId,
         address _user
     ) external override onlyJoinPlugin(_pluginName, _version) returns(bool) {
+        require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
         emit AddCommunityUser(_communityId, _user);
         return users.users.add(_user);

@@ -39,7 +39,8 @@ contract Executor is OwnableUpgradeable, IExecutor {
     function run(bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data) external {
         (bool enable, uint256 typeInterface, address pluginContract) = registry.getPlugin(_pluginName, _version);
         checkData(enable, pluginContract, _id);
-        pluginContract.functionCall(
+
+        bytes memory result = pluginContract.functionCall(
             abi.encodeWithSelector(
                 IPlugin.execute.selector,
                 _version,
@@ -47,6 +48,8 @@ contract Executor is OwnableUpgradeable, IExecutor {
                 _data
             )
         );
+        (bool success) = abi.decode(result,(bool));
+        require(success, "Executor: plugin didn't run");
 
         emit Run(tx.origin, _msgSender(), _id, _pluginName, _version, _data);
     }

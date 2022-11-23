@@ -71,11 +71,15 @@ export default async function setupContracts() {
     let communityBlank = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
     let createdCommunity = await communityBlank.attach(createdCommunityAddress[0]);
 
+    const accountFactory = await ethers.getContractFactory("contracts/account/Account.sol:Account");
+    let account = await accountFactory.deploy();
+    await account.initialize(registry.address);
+    await registry.setAccount(account.address);
 
     return {
         owner, creator, third,
         pluginName, version,
         registry, executor, communityData,
-        createdCommunity
+        createdCommunity, account
     };
 }

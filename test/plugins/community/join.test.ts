@@ -18,19 +18,21 @@ describe("Test Join to community basic functionality", function () {
         third: SignerWithAddress;
     let pluginName, version;
     let registry, executor, communityData;
-    let createdCommunity;
+    let createdCommunity, account;
 
     before(async function () {
         ({
             owner, creator, third,
             pluginName, version,
             registry, executor, communityData,
-            createdCommunity
+            createdCommunity, account
         } = await setupContracts());
+
     })
 
-    it("Should check owner", async function () {
-        console.log("owner = ", owner.address)
+    it("Should join user", async function () {
+        console.log("createdCommunity = ", createdCommunity.address);
+        console.log("account = ", account.address);
     });
 
 
