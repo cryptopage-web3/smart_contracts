@@ -15,5 +15,11 @@ interface ICommunityBlank {
 
     function isLinkedPlugin(bytes32 _pluginName, uint256 _version) external view returns (bool);
 
+    function linkRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external;
+
+    function unLinkRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external;
+
+    function isLinkedRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external view returns (bool);
+
     function claimERC20Token(IERC20 _token, address _receiver, uint256 _amount) external;
 }

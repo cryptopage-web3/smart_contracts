@@ -7,14 +7,21 @@ interface IRule {
 
     function version() external pure returns (string memory);
 
-    function setRuleContract(bytes32 ruleGroupName, address ruleContract) external;
+    function setRuleContract(bytes32 _ruleGroupName, uint256 _version, address _ruleContract) external;
 
-    function setCommunityRule(bytes32 ruleGroupName, bytes32 ruleName, bool enable) external;
+    function enableRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external;
 
-    function addCommunityToRule(bytes32 ruleGroupName, bytes32 ruleName, address communityID) external;
+    function disableRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external;
 
-    function removeRuleFromCommunity(bytes32 ruleGroupName, bytes32 ruleName, address communityID) external;
+    function isActiveRule(
+        bytes32 _ruleGroupName,
+        uint256 _version,
+        bytes32 _ruleName
+    ) external view returns (bool);
 
-    function isSupportedRule(bytes32 ruleGroupName, bytes32 ruleName, address communityID) external view returns (bool);
+    function getRuleContract(
+        bytes32 _ruleGroupName,
+        uint256 _version
+    ) external view returns (address);
 
 }
