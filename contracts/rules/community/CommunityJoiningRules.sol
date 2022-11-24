@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../badge/interfaces/IBadge.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
 
@@ -16,14 +17,21 @@ import "./interfaces/ICommunityJoiningRules.sol";
 /// @title Contract of Page.CommunityJoiningRules
 /// @notice This contract contains rules.
 /// @dev .
-contract CommunityJoiningRules is ICommunityJoiningRules {
+contract CommunityJoiningRules is ICommunityJoiningRules, Context {
 
-    uint256 private constant RULES_VERSION = 1;
-    bytes32 private GROUP_RULE = RulesList.COMMUNITY_JOINING_RULES;
+    uint256 public constant RULES_VERSION = 1;
+    bytes32 public GROUP_RULE = RulesList.COMMUNITY_JOINING_RULES;
+    uint256 public constant badgeAllowId = 2;
 
-    IRegistry registry;
-    IBadge badge;
-    uint256 constant badgeAllowId = 2;
+    IRegistry public registry;
+    IBadge public badge;
+
+    modifier onlyPlugin() {
+        require(
+            registry.getPluginContract(PluginsList.COMMUNITY_JOIN, RULES_VERSION) == _msgSender(),
+            "CommunityJoiningRules: caller is not the plugin");
+        _;
+    }
 
     function version() external pure returns (uint256) {
         return RULES_VERSION;
@@ -36,7 +44,7 @@ contract CommunityJoiningRules is ICommunityJoiningRules {
         badge = IBadge(badgeContract);
     }
 
-    function validate(address _communityId, address _user) external view override returns(bool) {
+    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.OPEN_TO_ALL)) {
             // there will be some logic here
         }
