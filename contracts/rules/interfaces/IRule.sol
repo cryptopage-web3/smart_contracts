@@ -13,7 +13,7 @@ interface IRule {
 
     function disableRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external;
 
-    function isActiveRule(
+    function isSupportedRule(
         bytes32 _ruleGroupName,
         uint256 _version,
         bytes32 _ruleName

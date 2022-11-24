@@ -66,7 +66,7 @@ contract Rule is OwnableUpgradeable, IRule {
         emit DisableRule(_ruleGroupName, _version, _ruleName);
     }
 
-    function isActiveRule(
+    function isSupportedRule(
         bytes32 _ruleGroupName,
         uint256 _version,
         bytes32 _ruleName

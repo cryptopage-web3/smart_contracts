@@ -78,7 +78,7 @@ contract CommunityBlank is
 
     function linkRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external override onlyOwner {
         require(
-            IRule(registry.rule()).isActiveRule(_ruleGroupName, _version, _ruleName),
+            IRule(registry.rule()).isSupportedRule(_ruleGroupName, _version, _ruleName),
                 "Community: wrong rule"
         );
         linkedRules[_ruleGroupName][_version][_ruleName] = true;

@@ -4,6 +4,6 @@ pragma solidity 0.8.15;
 
 interface IBaseRules {
 
-    function validate(address communityId, bytes32 ruleName, address user) external view;
+    function validate(address _communityId, address _user) external view returns(bool);
 
 }

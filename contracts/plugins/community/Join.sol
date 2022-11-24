@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../registry/interfaces/IRegistry.sol";
+
+import "../../rules/interfaces/IRule.sol";
+import "../../rules/community/RulesList.sol";
 import "../../rules/community/interfaces/ICommunityJoiningRules.sol";
 import "../PluginsList.sol";
 
@@ -36,6 +39,14 @@ contract Join is Context {
     ) external onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (address _communityId) = abi.decode(data,(address));
+        address groupRules = IRule(registry.rule()).getRuleContract(
+            RulesList.COMMUNITY_JOINING_RULES,
+            PLUGIN_VERSION
+        );
+        require(
+            ICommunityJoiningRules(groupRules).validate(_communityId, _sender),
+            "Join: wrong validate"
+        );
         require(
             IAccount(registry.account()).addCommunityUser(
                 PluginsList.COMMUNITY_JOIN,
