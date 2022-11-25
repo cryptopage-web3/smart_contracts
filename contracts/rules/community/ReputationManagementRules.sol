@@ -2,47 +2,67 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
 import "../../badge/interfaces/IBadge.sol";
-import "./interfaces/IReputationManagementRules.sol";
+import "../../community/interfaces/ICommunityBlank.sol";
+import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
+
+import "./interfaces/IReputationManagementRules.sol";
 
 
 /// @title Contract of Page.ReputationManagementRules
 /// @notice This contract contains rules.
 /// @dev .
-contract ReputationManagementRules is IReputationManagementRules, OwnableUpgradeable {
+contract ReputationManagementRules is IReputationManagementRules, Context {
 
-    IRegistry registry;
-    IBadge badge;
-    uint256 constant badgeAllowId = 2; //this is a temporary value, then it will need to be changed
+    uint256 public constant RULES_VERSION = 1;
+    bytes32 public GROUP_RULE = RulesList.REPUTATION_MANAGEMENT_RULES;
+    uint256 public constant badgeAllowId = 2;
 
-    function version() external pure returns (string memory) {
-        return "1";
-    }
+    IRegistry public registry;
+    IBadge public badge;
 
-    function initialize(address _registry, address _badge) external initializer {
-        __Ownable_init();
-        registry = IRegistry(_registry);
-        badge = IBadge(_badge);
-    }
-
-    function validate(address communityId, bytes32 ruleName, address user) external view override {
+    modifier onlyPlugin() {
         require(
-                IRule(registry.rule()).isSupportedRule(RulesList.REPUTATION_MANAGEMENT_RULES, ruleName, communityId),
-                "ReputationManagementRules: this rule is not supported"
-        );
-        if (ruleName == RulesList.REPUTATION_NOT_USED) {
+        // COMMUNITY_TRANSFER_POST is temporary
+            registry.getPluginContract(PluginsList.COMMUNITY_TRANSFER_POST, RULES_VERSION) == _msgSender(),
+            "ReputationManagementRules: caller is not the plugin");
+        _;
+    }
+
+    function version() external pure returns (uint256) {
+        return RULES_VERSION;
+    }
+
+    constructor(address _registry) {
+        registry = IRegistry(_registry);
+        address badgeContract = registry.badge();
+        require(badgeContract != address(0), "ReputationManagementRules: address can't be zero");
+        badge = IBadge(badgeContract);
+    }
+
+    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+        if (isActiveRule(_communityId, RulesList.REPUTATION_NOT_USED)) {
             // there will be some logic here
         }
-        if (ruleName == RulesList.REPUTATION_CAN_CHANGE) {
+        if (isActiveRule(_communityId, RulesList.REPUTATION_CAN_CHANGE)) {
             require(
-                badge.balanceOf(user, badgeAllowId) > 0,
+                badge.balanceOf(_user, badgeAllowId) > 0,
                 "ReputationManagementRules: you do not have enough Badge tokens"
             );
         }
+
+        return true;
+    }
+
+    function isActiveRule(address _communityId, bytes32 _ruleName) private view returns(bool) {
+        return (
+        ICommunityBlank(_communityId).isLinkedRule(GROUP_RULE, RULES_VERSION, _ruleName)
+        && IRule(registry.rule()).isSupportedRule(GROUP_RULE, RULES_VERSION, _ruleName)
+        );
     }
 }
