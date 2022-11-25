@@ -5,6 +5,6 @@ pragma solidity 0.8.15;
 
 interface IPlugin {
 
-    function execute(uint256 version, address sender, bytes calldata data) external;
+    function execute(bytes32 executedId, uint256 version, address sender, bytes calldata data) external;
 
 }

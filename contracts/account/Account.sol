@@ -31,8 +31,8 @@ contract Account is
     // communityId -> users
     mapping(address => CommunityUsers) private communityUsers;
 
-    event AddCommunityUser(address indexed communityId, address user);
-    event RemoveCommunityUser(address indexed communityId, address user);
+    event AddCommunityUser(bytes32 executedId, address indexed communityId, address user);
+    event RemoveCommunityUser(bytes32 executedId, address indexed communityId, address user);
 
     modifier onlyJoinPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_JOIN, "Account: wrong plugin name");
@@ -64,6 +64,7 @@ contract Account is
     }
 
     function addCommunityUser(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId,
@@ -71,18 +72,19 @@ contract Account is
     ) external override onlyJoinPlugin(_pluginName, _version) returns(bool) {
         require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
-        emit AddCommunityUser(_communityId, _user);
+        emit AddCommunityUser(_executedId, _communityId, _user);
         return users.users.add(_user);
     }
 
     function removeCommunityUser(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId,
         address _user
     ) external override onlyQuitPlugin(_pluginName, _version) returns(bool) {
         CommunityUsers storage users = communityUsers[_communityId];
-        emit RemoveCommunityUser(_communityId, _user);
+        emit RemoveCommunityUser(_executedId, _communityId, _user);
         return users.users.remove(_user);
     }
 

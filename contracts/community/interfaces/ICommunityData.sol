@@ -8,7 +8,12 @@ interface ICommunityData {
 
     function isCommunity(address _community) external view returns (bool);
 
-    function addCommunity(bytes32 _pluginName, uint256 _version, address _communityId) external returns (bool);
+    function addCommunity(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId
+    ) external returns (bool);
 
     function getCommunities(uint256 _startIndex, uint256 _endIndex) external view returns (address[] memory result);
 

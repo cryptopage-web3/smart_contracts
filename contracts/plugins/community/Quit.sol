@@ -29,6 +29,7 @@ contract Quit is Context {
     }
 
     function execute(
+        bytes32 _executedId,
         uint256 _version,
         address _sender,
         bytes calldata data
@@ -37,6 +38,7 @@ contract Quit is Context {
         (address _communityId) = abi.decode(data,(address));
         require(
             IAccount(registry.account()).removeCommunityUser(
+                _executedId,
                 PluginsList.COMMUNITY_QUIT,
                 _version,
                 _communityId,

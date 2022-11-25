@@ -26,7 +26,7 @@ contract CommunityData is
 
     EnumerableSetUpgradeable.AddressSet private communities;
 
-    event AddedCommunity(address indexed sender, address communityId, uint256 timestamp);
+    event AddedCommunity(bytes32 executedId, address indexed sender, address communityId, uint256 timestamp);
 
     modifier onlyCreatePlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_CREATE, "CommunityData: wrong plugin name");
@@ -53,6 +53,7 @@ contract CommunityData is
     }
 
     function addCommunity(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId
@@ -60,7 +61,7 @@ contract CommunityData is
         require(_communityId != address(0) , "Community: wrong communityId");
         result = communities.add(_communityId);
 
-        emit AddedCommunity(_msgSender(), _communityId, block.timestamp);
+        emit AddedCommunity(_executedId, _msgSender(), _communityId, block.timestamp);
     }
 
     function isCommunity(address _community) external view returns (bool) {

@@ -33,6 +33,7 @@ contract Join is Context {
     }
 
     function execute(
+        bytes32 _executedId,
         uint256 _version,
         address _sender,
         bytes calldata data
@@ -49,6 +50,7 @@ contract Join is Context {
         );
         require(
             IAccount(registry.account()).addCommunityUser(
+                _executedId,
                 PluginsList.COMMUNITY_JOIN,
                 _version,
                 _communityId,

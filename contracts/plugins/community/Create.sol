@@ -41,6 +41,7 @@ contract Create is Ownable, CloneFactory {
     }
 
     function execute(
+        bytes32 _executedId,
         uint256 _version,
         address _sender,
         bytes calldata data
@@ -50,6 +51,7 @@ contract Create is Ownable, CloneFactory {
         address createdCommunity = createCommunity(_name, _sender, _isInitial);
         require(
             ICommunityData(registry.communityData()).addCommunity(
+                _executedId,
                 PluginsList.COMMUNITY_CREATE,
                 _version,
                 createdCommunity

@@ -43,6 +43,7 @@ contract Executor is OwnableUpgradeable, IExecutor {
         bytes memory result = pluginContract.functionCall(
             abi.encodeWithSelector(
                 IPlugin.execute.selector,
+                _id,
                 _version,
                 _msgSender(),
                 _data

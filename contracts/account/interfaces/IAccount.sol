@@ -6,6 +6,7 @@ interface IAccount {
     function version() external pure returns (string memory);
 
     function addCommunityUser(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId,
@@ -13,6 +14,7 @@ interface IAccount {
     ) external returns(bool);
 
     function removeCommunityUser(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId,
