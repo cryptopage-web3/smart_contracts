@@ -40,7 +40,7 @@ contract AcceptingPostRules is IAcceptingPostRules, Context {
     constructor(address _registry) {
         registry = IRegistry(_registry);
         address badgeContract = registry.badge();
-        require(badgeContract != address(0), "CommunityJoiningRules: address can't be zero");
+        require(badgeContract != address(0), "AcceptingPostRules: address can't be zero");
         badge = IBadge(badgeContract);
     }
 

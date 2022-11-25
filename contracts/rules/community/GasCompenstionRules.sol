@@ -2,44 +2,66 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
-import "./interfaces/IGasCompenstionRules.sol";
+import "../../badge/interfaces/IBadge.sol";
+import "../../community/interfaces/ICommunityBlank.sol";
+import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
 
+import "./interfaces/IGasCompenstionRules.sol";
 
 /// @title Contract of Page.GasCompenstionRules
 /// @notice This contract contains rules.
 /// @dev .
-contract GasCompenstionRules is IGasCompenstionRules, OwnableUpgradeable {
+contract GasCompenstionRules is IGasCompenstionRules, Context {
 
-    IRegistry registry;
+    uint256 public constant RULES_VERSION = 1;
+    bytes32 public GROUP_RULE = RulesList.GAS_COMPENSATION_RULES;
+    uint256 public constant badgeAllowId = 2;
 
-    function version() external pure returns (string memory) {
-        return "1";
-    }
+    IRegistry public registry;
+    IBadge public badge;
 
-    function initialize(address _registry) external initializer {
-        __Ownable_init();
-        registry = IRegistry(_registry);
-    }
-
-    function validate(address communityId, bytes32 ruleName, address user) external view override {
+    modifier onlyPlugin() {
         require(
-                IRule(registry.rule()).isSupportedRule(RulesList.GAS_COMPENSATION_RULES, ruleName, communityId),
-                "GasCompenstionRules: this rule is not supported"
-        );
-        if (ruleName == RulesList.NO_GAS_COMPENSATION) {
+            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender(),
+            "GasCompenstionRules: caller is not the plugin");
+        _;
+    }
+
+    function version() external pure returns (uint256) {
+        return RULES_VERSION;
+    }
+
+    constructor(address _registry) {
+        registry = IRegistry(_registry);
+        address badgeContract = registry.badge();
+        require(badgeContract != address(0), "GasCompenstionRules: address can't be zero");
+        badge = IBadge(badgeContract);
+    }
+
+    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+        if (isActiveRule(_communityId, RulesList.NO_GAS_COMPENSATION)) {
             // there will be some logic here
         }
-        if (ruleName == RulesList.GAS_COMPENSATION_FOR_COMMUNITY) {
+        if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_COMMUNITY)) {
             // here is the logic for transferring tokens to community
         }
-        if (ruleName == RulesList.GAS_COMPENSATION_FOR_AUTHOR) {
-            require(user != address(0), "GasCompenstionRules: user address is zero");
+        if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_AUTHOR)) {
+            require(_user != address(0), "GasCompenstionRules: user address is zero");
             // some logic for this user
         }
+
+        return true;
+    }
+
+    function isActiveRule(address _communityId, bytes32 _ruleName) private view returns(bool) {
+        return (
+        ICommunityBlank(_communityId).isLinkedRule(GROUP_RULE, RULES_VERSION, _ruleName)
+        && IRule(registry.rule()).isSupportedRule(GROUP_RULE, RULES_VERSION, _ruleName)
+        );
     }
 }
