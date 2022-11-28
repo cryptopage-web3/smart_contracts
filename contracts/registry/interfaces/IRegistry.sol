@@ -31,6 +31,8 @@ interface IRegistry {
 
     function setBadge(address _contract) external;
 
+    function setRule(address _contract) external;
+
     function setPlugin(
         bytes32 _pluginName,
         uint256 _version,

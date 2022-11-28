@@ -14,23 +14,38 @@ export default async function setupContracts() {
         creator: SignerWithAddress,
         third: SignerWithAddress;
 
-    let pluginCreate, registry, executor;
+    let communityCreatePlugin, communityJoinPlugin;
+    let registry, executor;
     let contractBlank;
 
     let bank = AddressZero;
     let token = AddressZero;
     let dao = AddressZero;
     let treasury = AddressZero;
-    let rule = AddressZero;
+    let rule;
     let communityData;
+
+    let communityJoiningRules
 
     let firstCommunityName = "First community";
 
-    let pluginName = keccak256(defaultAbiCoder.encode(
+    let communityCreatePluginName = keccak256(defaultAbiCoder.encode(
             ["string"],
             ["COMMUNITY_CREATE"]
         )
     );
+    let communityJoinPluginName = keccak256(defaultAbiCoder.encode(
+            ["string"],
+            ["COMMUNITY_JOIN"]
+        )
+    );
+
+    let communityJoiningRulesName = keccak256(defaultAbiCoder.encode(
+            ["string"],
+            ["PAGE.COMMUNITY_JOINING_RULES"]
+        )
+    );
+
     let version = 1;
 
     [owner, creator, third] = await getSigners();
@@ -38,7 +53,7 @@ export default async function setupContracts() {
     const registryFactory = await ethers.getContractFactory("contracts/registry/Registry.sol:Registry");
     registry = await registryFactory.deploy();
     await registry.deployed();
-    await registry.initialize(bank, token, dao, treasury, rule);
+    await registry.initialize(bank, token, dao, treasury);
 
     const executorFactory = await ethers.getContractFactory("contracts/executor/Executor.sol:Executor");
     executor = await executorFactory.deploy();
@@ -50,19 +65,34 @@ export default async function setupContracts() {
     await communityData.initialize(registry.address);
     await registry.setCommunityData(communityData.address);
 
+    await registry.setBadge(communityData.address);
+
     const blankFactory = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
     contractBlank = await blankFactory.deploy();
 
-    const createFactory = await ethers.getContractFactory("contracts/plugins/community/Create.sol:Create");
-    pluginCreate = await createFactory.deploy(registry.address, owner.address);
-    await pluginCreate.deployed();
+    const communityCreatePluginFactory = await ethers.getContractFactory("contracts/plugins/community/Create.sol:Create");
+    communityCreatePlugin = await communityCreatePluginFactory.deploy(registry.address, owner.address);
+    await communityCreatePlugin.deployed();
+    await registry.setPlugin(communityCreatePluginName, version, communityCreatePlugin.address);
 
-    await registry.setPlugin(pluginName, version, pluginCreate.address);
+    const communityJoinPluginFactory = await ethers.getContractFactory("contracts/plugins/community/Join.sol:Join");
+    communityJoinPlugin = await communityJoinPluginFactory.deploy(registry.address);
+    await communityJoinPlugin.deployed();
+    await registry.setPlugin(communityJoinPluginName, version, communityJoinPlugin.address);
+
+    const ruleFactory = await ethers.getContractFactory("contracts/rules/Rule.sol:Rule");
+    rule = await ruleFactory.deploy();
+    await rule.initialize();
+    await registry.setRule(rule.address);
+
+    const communityJoiningRulesFactory =  await ethers.getContractFactory("contracts/rules/community/CommunityJoiningRules.sol:CommunityJoiningRules");
+    communityJoiningRules = await communityJoiningRulesFactory.deploy(registry.address);
+    await rule.setRuleContract(communityJoiningRulesName, version, communityJoiningRules.address);
 
     let id = ethers.utils.formatBytes32String("1");
     let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);
 
-    await executor.run(id, pluginName, version, data);
+    await executor.run(id, communityCreatePluginName, version, data);
 
     let afterCount = await communityData.communitiesCount();
     let index = afterCount.sub(BigNumber.from(1));
@@ -78,7 +108,7 @@ export default async function setupContracts() {
 
     return {
         owner, creator, third,
-        pluginName, version,
+        communityCreatePluginName, communityJoinPluginName, version,
         registry, executor, communityData,
         createdCommunity, account
     };

@@ -22,7 +22,6 @@ describe("Test Create basic functionality", function () {
     let dao = AddressZero;
     let treasury = AddressZero;
     let executor;
-    let rule = AddressZero;
     let communityData;
 
     let firstCommunityName = "First community";
@@ -41,7 +40,7 @@ describe("Test Create basic functionality", function () {
         const registryFactory = await ethers.getContractFactory("contracts/registry/Registry.sol:Registry");
         registry = await registryFactory.deploy();
         await registry.deployed();
-        await registry.initialize(bank, token, dao, treasury, rule);
+        await registry.initialize(bank, token, dao, treasury);
 
         const executorFactory = await ethers.getContractFactory("contracts/executor/Executor.sol:Executor");
         executor = await executorFactory.deploy();

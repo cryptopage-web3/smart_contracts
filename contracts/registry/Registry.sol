@@ -41,6 +41,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event SetCommunityData(address origin, address sender, address oldValue, address newValue);
     event SetAccount(address origin, address sender, address oldValue, address newValue);
     event SetBadge(address origin, address sender, address oldValue, address newValue);
+    event SetRule(address origin, address sender, address oldValue, address newValue);
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
@@ -50,15 +51,13 @@ contract Registry is OwnableUpgradeable, IRegistry {
         address _bank,
         address _token,
         address _dao,
-        address _treasury,
-        address _rule
+        address _treasury
     ) external initializer {
         __Ownable_init();
         bank = _bank;
         token = _token;
         dao = _dao;
         treasury = _treasury;
-        rule = _rule;
     }
 
     function version() external pure override returns (string memory) {
@@ -105,6 +104,12 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_contract != address(0), "Registry: address can't be zero");
         emit SetBadge(tx.origin, _msgSender(), badge, _contract);
         badge = _contract;
+    }
+
+    function setRule(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetRule(tx.origin, _msgSender(), rule, _contract);
+        rule = _contract;
     }
 
     function changePluginStatus(

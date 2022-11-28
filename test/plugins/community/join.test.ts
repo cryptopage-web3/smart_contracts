@@ -16,14 +16,14 @@ describe("Test Join to community basic functionality", function () {
     let owner: SignerWithAddress,
         creator: SignerWithAddress,
         third: SignerWithAddress;
-    let pluginName, version;
+    let communityCreatePluginName, communityJoinPluginName, version;
     let registry, executor, communityData;
     let createdCommunity, account;
 
     before(async function () {
         ({
             owner, creator, third,
-            pluginName, version,
+            communityCreatePluginName, communityJoinPluginName, version,
             registry, executor, communityData,
             createdCommunity, account
         } = await setupContracts());
@@ -31,8 +31,21 @@ describe("Test Join to community basic functionality", function () {
     })
 
     it("Should join user", async function () {
-        console.log("createdCommunity = ", createdCommunity.address);
-        console.log("account = ", account.address);
+        let communityAddress = createdCommunity.address;
+
+        let beforeCounts = await account.getCommunityCounts(communityAddress);
+        expect(beforeCounts.normalUsers).to.equal(
+            BigNumber.from(0)
+        );
+
+        let id = ethers.utils.formatBytes32String("2");
+        let data = defaultAbiCoder.encode([ "address" ], [communityAddress]);
+        await executor.connect(third).run(id, communityJoinPluginName, version, data);
+
+        let afterCounts = await account.getCommunityCounts(communityAddress);
+        expect(afterCounts.normalUsers).to.equal(
+            BigNumber.from(1)
+        );
     });
 
 
