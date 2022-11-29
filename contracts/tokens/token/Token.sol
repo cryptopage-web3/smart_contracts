@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 import "./interfaces/IToken.sol";
-import "../registry/interfaces/IRegistry.sol";
+import "../../registry/interfaces/IRegistry.sol";
 
 /// @title Contract of Page.Token
 /// @author Crypto.Page Team

@@ -8,12 +8,12 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./interfaces/INFT.sol";
-import "../registry/interfaces/IRegistry.sol";
-import "../account/interfaces/IAccount.sol";
-import "../community/interfaces/ICommunityData.sol";
+import "../../registry/interfaces/IRegistry.sol";
+import "../../account/interfaces/IAccount.sol";
+import "../../community/interfaces/ICommunityData.sol";
 
 import "./libraries/Counter32bytes.sol";
-import "../libraries/Sets.sol";
+import "../../libraries/Sets.sol";
 
 /// @title Contract of Page.NFT
 /// @author Crypto.Page Team

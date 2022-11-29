@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
-import "../../badge/interfaces/IBadge.sol";
+import "../../tokens/badge/interfaces/IBadge.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";

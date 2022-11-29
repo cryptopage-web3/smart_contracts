@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 
 import "./interfaces/IBank.sol";
 import "../registry/interfaces/IRegistry.sol";
-import "../token/interfaces/IToken.sol";
+import "../tokens/token/interfaces/IToken.sol";
 
 /// @title Contract of Page.Bank
 /// @author Crypto.Page Team
