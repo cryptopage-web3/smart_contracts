@@ -46,6 +46,9 @@ describe("Test Join to community basic functionality", function () {
         expect(afterCounts.normalUsers).to.equal(
             BigNumber.from(1)
         );
+
+        let isCommunityUser = await account.isCommunityUser(communityAddress, third.address);
+        expect(isCommunityUser).to.equal(true);
     });
 
 

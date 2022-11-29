@@ -18,7 +18,7 @@ contract CommentData is OwnableUpgradeable, ICommentData {
         uint256 timestamp;
         bool up;
         bool down;
-        bool visible;
+        bool isView;
     }
 
     //postId -> commentId -> Metadata

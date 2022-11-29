@@ -15,23 +15,27 @@ contract PostData is OwnableUpgradeable, IPostData {
         string ipfsHash;
         string category;
         address creator;
-        bool visible;
-        bool repostable;
+        address repostFromCommunity;
         uint64 upCount;
         uint64 downCount;
         uint256 price;
         uint256 commentCount;
         uint256 encodingType;
+        uint256 timestamp;
+        EnumerableSetUpgradeable.AddressSet upDownUsers;
         Sets.StringSet tags;
+        bool isView;
     }
 
     //postId -> communityId
     mapping(uint256 => address) private communityIdByPostId;
+    //postId -> Metadata
+    mapping(uint256 => Metadata) private post;
 
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
-    constructor() initializer {}
+    //constructor() initializer {}
 
     function initialize() external initializer {
         __Ownable_init();
