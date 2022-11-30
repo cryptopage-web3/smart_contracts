@@ -9,20 +9,7 @@ interface INFT is IERC721EnumerableUpgradeable {
 
     function setBaseTokenURI(string memory baseTokenURI) external;
 
-    function mint(
-        address owner,
-        uint256 tokenId
-    ) external returns (uint256);
-
-    function mint(
-        address _creator,
-//        address _owner,
-        bool _repostable,
-        uint256 _encodingType,
-        string memory _ipfsHash,
-        string memory _category,
-        string[] memory tags
-    ) external returns (uint256);
+    function mint(address _owner) external returns (uint256);
 
     function burn(uint256 tokenId) external;
 

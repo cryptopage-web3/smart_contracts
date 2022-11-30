@@ -26,7 +26,7 @@ contract PostData is Initializable, AccessControlUpgradeable, IPostData {
         uint256 encodingType;
         uint256 timestamp;
         EnumerableSetUpgradeable.AddressSet upDownUsers;
-        Sets.StringSet tags;
+        string[] tags;
         bool isView;
     }
 
@@ -37,6 +37,8 @@ contract PostData is Initializable, AccessControlUpgradeable, IPostData {
     mapping(uint256 => address) private communityIdByPostId;
     //postId -> Metadata
     mapping(uint256 => Metadata) private posts;
+
+    event CreatedPost(bytes32 executedId, uint256 postId, address creator, address owner);
 
     modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
@@ -64,10 +66,29 @@ contract PostData is Initializable, AccessControlUpgradeable, IPostData {
         return posts[tokenId].ipfsHash;
     }
 
-    function createPost(bytes memory _data) external returns(bool) {
-        uint256 tokenId = 1;
-        Metadata storage post = posts[tokenId];
+    function createPost(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _sender,
+        bytes memory _data
+    ) external onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
+        uint256 beforeGas = gasleft();
+        (address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
+            abi.decode(_data,(address, string, uint256, string[]));
 
-        return true;
+        uint256 postId = nft.mint(_owner);
+        require(postId > 0, "PostData: wrong postId");
+
+        Metadata storage post = posts[postId];
+        post.creator = _sender;
+        post.ipfsHash = _ipfsHash;
+        post.timestamp = block.timestamp;
+        post.encodingType = _encodingType;
+        post.tags = _tags;
+        post.price = beforeGas - gasleft();
+        emit CreatedPost(_executedId, postId, _sender, _owner);
+
+        return postId;
     }
 }

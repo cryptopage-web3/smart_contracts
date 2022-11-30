@@ -82,41 +82,10 @@ contract NFT is
         baseTokenURI = _baseTokenURI;
     }
 
-    function mint(
-        address owner,
-        uint256 tokenId
-    ) external override onlyPostData returns (uint256) {
-        _mint(owner, tokenId);
-        return tokenId;
-    }
-
-    function mint(
-        address _creator,
-//        address _owner,
-        bool _repostable,
-        uint256 _encodingType,
-        string memory _ipfsHash,
-        string memory _category,
-        string[] memory tags
-    ) external override returns (uint256) {
-        uint256 gas = gasleft();
-
+    function mint(address _owner) external override returns (uint256) {
         uint256 tokenId = idCounter.current();
-
-        PostMetadata storage post = posts[tokenId];
-        post.ipfsHash = _ipfsHash;
-        post.creator = _creator;
-        post.visible = true;
-        post.repostable = _repostable;
-        post.encodingType = _encodingType;
-        post.category = _category;
-        post.tags._values = tags;
-
-//        community ? communityAssignToken(_owner, tokenId) : accountAssignToken(_owner, tokenId);
+        _mint(_owner, tokenId);
         idCounter.increment();
-
-        gas = gas - gasleft();
-        post.price = gas;
 
         return tokenId;
     }
