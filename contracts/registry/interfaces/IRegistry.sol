@@ -3,6 +3,7 @@
 pragma solidity 0.8.15;
 
 interface IRegistry {
+
     function version() external pure returns (string memory);
 
     function bank() external view returns (address);
@@ -19,19 +20,27 @@ interface IRegistry {
 
     function communityData() external view returns (address);
 
+    function postData() external view returns (address);
+
     function account() external view returns (address);
 
     function badge() external view returns (address);
 
+    function nft() external view returns (address);
+
     function setExecutor(address _executor) external;
 
     function setCommunityData(address _contract) external;
+
+    function setPostData(address _contract) external;
 
     function setAccount(address _contract) external;
 
     function setBadge(address _contract) external;
 
     function setRule(address _contract) external;
+
+    function setNFT(address _contract) external;
 
     function setPlugin(
         bytes32 _pluginName,

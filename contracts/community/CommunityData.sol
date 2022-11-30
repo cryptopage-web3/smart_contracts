@@ -41,10 +41,7 @@ contract CommunityData is
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
     //constructor() initializer {}
 
-    function initialize(address _registry)
-        external
-        initializer
-    {
+    function initialize(address _registry) external initializer {
         registry = IRegistry(_registry);
     }
 

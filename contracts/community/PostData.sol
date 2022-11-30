@@ -2,14 +2,17 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
+import "../registry/interfaces/IRegistry.sol";
+import "../plugins/PluginsList.sol";
 import "../libraries/Sets.sol";
 import "./interfaces/IPostData.sol";
+import "../tokens/nft/interfaces/INFT.sol";
 
 
-contract PostData is OwnableUpgradeable, IPostData {
+contract PostData is Initializable, AccessControlUpgradeable, IPostData {
 
     struct Metadata {
         string ipfsHash;
@@ -27,21 +30,44 @@ contract PostData is OwnableUpgradeable, IPostData {
         bool isView;
     }
 
+    IRegistry public registry;
+    INFT public nft;
+
     //postId -> communityId
     mapping(uint256 => address) private communityIdByPostId;
     //postId -> Metadata
-    mapping(uint256 => Metadata) private post;
+    mapping(uint256 => Metadata) private posts;
 
+    modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "CommunityData: caller is not the plugin"
+        );
+        _;
+    }
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
     //constructor() initializer {}
 
-    function initialize() external initializer {
-        __Ownable_init();
+    function initialize(address _registry) external initializer {
+        registry = IRegistry(_registry);
+        nft = INFT(registry.nft());
     }
 
     function version() external pure override returns (string memory) {
         return "1";
+    }
+
+    function ipfsHashOf(uint256 tokenId) external override view returns (string memory) {
+        return posts[tokenId].ipfsHash;
+    }
+
+    function createPost(bytes memory _data) external returns(bool) {
+        uint256 tokenId = 1;
+        Metadata storage post = posts[tokenId];
+
+        return true;
     }
 }

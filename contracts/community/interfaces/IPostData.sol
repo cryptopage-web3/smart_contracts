@@ -6,4 +6,6 @@ interface IPostData {
 
     function version() external pure returns (string memory);
 
+    function ipfsHashOf(uint256 tokenId) external view returns (string memory);
+
 }

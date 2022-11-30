@@ -21,8 +21,10 @@ contract Registry is OwnableUpgradeable, IRegistry {
     address public executor;
     address public rule;
     address public communityData;
+    address public postData;
     address public account;
     address public badge;
+    address public nft;
 
     bytes32 public constant EMPTY_NAME = bytes32(0);
 
@@ -39,9 +41,11 @@ contract Registry is OwnableUpgradeable, IRegistry {
 
     event SetExecutor(address origin, address sender, address oldValue, address newValue);
     event SetCommunityData(address origin, address sender, address oldValue, address newValue);
+    event SetPostData(address origin, address sender, address oldValue, address newValue);
     event SetAccount(address origin, address sender, address oldValue, address newValue);
     event SetBadge(address origin, address sender, address oldValue, address newValue);
     event SetRule(address origin, address sender, address oldValue, address newValue);
+    event SetNFT(address origin, address sender, address oldValue, address newValue);
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
@@ -94,6 +98,12 @@ contract Registry is OwnableUpgradeable, IRegistry {
         communityData = _contract;
     }
 
+    function setPostData(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetPostData(tx.origin, _msgSender(), postData, _contract);
+        postData = _contract;
+    }
+
     function setAccount(address _account) external override onlyOwner {
         require(_account != address(0), "Registry: address can't be zero");
         emit SetAccount(tx.origin, _msgSender(), account, _account);
@@ -110,6 +120,12 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_contract != address(0), "Registry: address can't be zero");
         emit SetRule(tx.origin, _msgSender(), rule, _contract);
         rule = _contract;
+    }
+
+    function setNFT(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetNFT(tx.origin, _msgSender(), nft, _contract);
+        nft = _contract;
     }
 
     function changePluginStatus(

@@ -28,5 +28,4 @@ interface INFT is IERC721EnumerableUpgradeable {
 
     function tokenURI(uint256 tokenId) external view returns (string memory);
 
-    function ipfsHashOf(uint256 tokenId) external view returns (string memory);
 }

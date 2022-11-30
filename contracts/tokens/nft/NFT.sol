@@ -31,21 +31,11 @@ contract NFT is
     using Counter32bytes for Counter32bytes.Counter;
     using Sets for Sets.StringSet;
 
-    address public registry;
+    IRegistry public registry;
 
     Counter32bytes.Counter public idCounter;
 
     string public baseTokenURI;
-
-    struct CommentMetadata {
-        string ipfsHash;
-        address creator;
-        address owner;
-        uint256 price;
-        bool up;
-        bool down;
-        bool visible;
-    }
 
     struct PostMetadata {
         string ipfsHash;
@@ -59,8 +49,6 @@ contract NFT is
         uint256 commentCount;
         uint256 encodingType;
         Sets.StringSet tags;
-        // commentId -> CommentMetadata
-        mapping(uint256 => CommentMetadata) comments;
         mapping(address => EnumerableSetUpgradeable.UintSet) user2comments;
     }
 
@@ -70,13 +58,18 @@ contract NFT is
     // userAddress -> pluginId
     mapping(address => uint16) public usersPluginReceive;
 
+    modifier onlyPostData() {
+        require(registry.postData() == _msgSender(), "NFT: caller is not the postData");
+        _;
+    }
+
     function initialize(
         address _registry,
         uint8 _blockchainId,
         string memory _baseTokenURI
     ) external initializer {
         __ERC721_init("Crypto.Page NFT", "PAGE.NFT");
-        registry = _registry;
+        registry = IRegistry(_registry);
         baseTokenURI = _baseTokenURI;
         idCounter.set(_blockchainId, 1);
     }
@@ -92,7 +85,7 @@ contract NFT is
     function mint(
         address owner,
         uint256 tokenId
-    ) external override onlyRole(MINTER_ROLE) returns (uint256) {
+    ) external override onlyPostData returns (uint256) {
         _mint(owner, tokenId);
         return tokenId;
     }
@@ -109,9 +102,6 @@ contract NFT is
         uint256 gas = gasleft();
 
         uint256 tokenId = idCounter.current();
-//        bool community = isCommunity(_owner);
-
-//        receivePluginMint(_owner, tokenId);
 
         PostMetadata storage post = posts[tokenId];
         post.ipfsHash = _ipfsHash;
@@ -131,7 +121,7 @@ contract NFT is
         return tokenId;
     }
 
-    function burn(uint256 tokenId) external override {
+    function burn(uint256 tokenId) external override onlyPostData {
         address owner = ERC721Upgradeable.ownerOf(tokenId);
         require(owner == _msgSender(), "NFT: not owner");
 
@@ -171,41 +161,9 @@ contract NFT is
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, posts[tokenId].ipfsHash)) : "";
     }
 
-    function ipfsHashOf(uint256 tokenId) external override view returns (string memory) {
-        return posts[tokenId].ipfsHash;
-    }
-
     function _requireMinted(uint256 tokenId) internal override view virtual {
         require(_exists(tokenId), "ERC721: invalid token ID");
     }
-
-//    function accountAssignToken(address _owner, uint256 _tokenId) private {
-//        IRegistry reg = IRegistry(registry);
-//        uint16 accountId = reg.getId("Page.PersonalAccount");
-//        IAccount account = IAccount(reg.getLayer2(accountId));
-//        //account.assignToken(_owner, _tokenId);
-//    }
-
-//    function communityAssignToken(address _owner, uint256 _tokenId) private {
-//        IRegistry reg = IRegistry(registry);
-//        uint16 communityId = reg.getId("Page.Community");
-//        ICommunity community = ICommunity(reg.getLayer2(communityId));
-//        community.assignToken(_owner, _tokenId);
-//    }
-
-//    function receivePluginMint(address _owner, uint256 tokenId) private {
-//        IRegistry reg = IRegistry(registry);
-//        uint16 nftId = reg.getId("Page.NFT");
-//        uint16 pluginId = usersPluginReceive[_owner];
-//        IReceivePlugin receivePlugin = IReceivePlugin(reg.getPlugin(nftId, pluginId));
-//        receivePlugin.mint(address(this), _msgSender(), _owner, tokenId);
-//    }
-
-//    function isCommunity(address _owner) private view returns(bool) {
-//        IRegistry reg = IRegistry(registry);
-//        uint16 communityId = reg.getId("Page.Community");
-//        return ICommunity(reg.getLayer2(communityId)).isCommunity(_owner);
-//    }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC721EnumerableUpgradeable, IERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
