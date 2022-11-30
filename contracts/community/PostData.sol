@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "../registry/interfaces/IRegistry.sol";
@@ -12,11 +12,12 @@ import "./interfaces/IPostData.sol";
 import "../tokens/nft/interfaces/INFT.sol";
 
 
-contract PostData is Initializable, AccessControlUpgradeable, IPostData {
+contract PostData is Initializable, ContextUpgradeable, IPostData {
 
     struct Metadata {
         string ipfsHash;
         string category;
+        string[] tags;
         address creator;
         address repostFromCommunity;
         uint64 upCount;
@@ -26,7 +27,6 @@ contract PostData is Initializable, AccessControlUpgradeable, IPostData {
         uint256 encodingType;
         uint256 timestamp;
         EnumerableSetUpgradeable.AddressSet upDownUsers;
-        string[] tags;
         bool isView;
     }
 

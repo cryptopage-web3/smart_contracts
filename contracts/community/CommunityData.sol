@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./interfaces/ICommunityData.sol";
@@ -13,14 +13,9 @@ import "../plugins/PluginsList.sol";
 /// @author Crypto.Page Team
 /// @notice
 /// @dev
-contract CommunityData is
-    Initializable,
-    AccessControlUpgradeable,
-    ICommunityData
-{
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+contract CommunityData is Initializable, ContextUpgradeable, ICommunityData {
 
-    bytes32 public constant DEPLOYER_ROLE = keccak256("DEPLOYER_ROLE");
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
     IRegistry public registry;
 
