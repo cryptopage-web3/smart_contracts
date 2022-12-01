@@ -95,7 +95,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         return postId;
     }
 
-    function updatePostFromComment(
+    function updatePostWhenNewComment(
         bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
