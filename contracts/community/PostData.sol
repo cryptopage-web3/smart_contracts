@@ -14,6 +14,8 @@ import "../tokens/nft/interfaces/INFT.sol";
 
 contract PostData is Initializable, ContextUpgradeable, IPostData {
 
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+
     struct Metadata {
         string ipfsHash;
         string category;
@@ -38,7 +40,8 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     //postId -> Metadata
     mapping(uint256 => Metadata) private posts;
 
-    event CreatedPost(bytes32 executedId, uint256 postId, address creator, address owner);
+    event WritePost(bytes32 executedId, uint256 postId, address creator, address owner);
+    event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
 
     modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
@@ -66,7 +69,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         return posts[tokenId].ipfsHash;
     }
 
-    function createPost(
+    function writePost(
         bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
@@ -87,8 +90,44 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         post.encodingType = _encodingType;
         post.tags = _tags;
         post.price = beforeGas - gasleft();
-        emit CreatedPost(_executedId, postId, _sender, _owner);
+        emit WritePost(_executedId, postId, _sender, _owner);
 
         return postId;
+    }
+
+    function updatePostFromComment(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _sender,
+        bytes memory _data
+    ) external onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
+        (uint256 _postId, bool _isUp, bool _isDown) =
+        abi.decode(_data,(uint256, bool, bool));
+        setPostUpDown(_postId, _isUp, _isDown, _sender);
+        emit UpdateUpDown(_executedId, _postId, _sender, _isUp, _isDown);
+
+        return _postId;
+    }
+
+    function setPostUpDown(uint256 _postId, bool _isUp, bool _isDown, address _sender) private {
+        if (!_isUp && !_isDown) {
+            return;
+        }
+        require(!(_isUp && _isUp == _isDown), "PostData: wrong values for Up/Down");
+        require(!isUpDownUser(_postId, _sender), "PostData: wrong user for Up/Down");
+
+        Metadata storage curPost = posts[_postId];
+        if (_isUp) {
+            curPost.upCount++;
+        }
+        if (_isDown) {
+            curPost.downCount++;
+        }
+        curPost.upDownUsers.add(_sender);
+    }
+
+    function isUpDownUser(uint256 _postId, address _user) public view returns(bool) {
+        return posts[_postId].upDownUsers.contains(_user);
     }
 }
