@@ -19,6 +19,7 @@ contract Account is
     IAccount
 {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
 
     IRegistry public registry;
 
@@ -31,8 +32,12 @@ contract Account is
     // communityId -> users
     mapping(address => CommunityUsers) private communityUsers;
 
+    // communityId -> user -> postIds
+    mapping(address => mapping(address => EnumerableSetUpgradeable.UintSet)) private createdPostIdsByUser;
+
     event AddCommunityUser(bytes32 executedId, address indexed communityId, address user);
     event RemoveCommunityUser(bytes32 executedId, address indexed communityId, address user);
+    event AddCreatedPostIdForUser(address indexed communityId, address user, uint256 postId);
 
     modifier onlyJoinPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_JOIN, "Account: wrong plugin name");
@@ -45,6 +50,15 @@ contract Account is
 
     modifier onlyQuitPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_QUIT, "Account: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "Account: caller is not the plugin"
+        );
+        _;
+    }
+
+    modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "Account: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
             "Account: caller is not the plugin"
@@ -88,6 +102,20 @@ contract Account is
         return users.users.remove(_user);
     }
 
+    function addCreatedPostIdForUser(
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user,
+        uint256 _postId
+    ) external override onlyWritePostPlugin(_pluginName, _version) returns(bool) {
+        require(_communityId != address(0) , "Account: address is zero");
+        require(isCommunityUser(_communityId, _user), "Account: wrong community user");
+        emit AddCreatedPostIdForUser(_communityId, _user, _postId);
+
+        return createdPostIdsByUser[_communityId][_user].add(_postId);
+    }
+
     function getCommunityCounts(address _communityId) external override view returns(
         uint256 normalUsers,
         uint256 bannedUsers,
@@ -99,7 +127,7 @@ contract Account is
         moderatorsUsers = users.moderators.length();
     }
 
-    function isCommunityUser(address _communityId, address _user) external override view returns(bool) {
+    function isCommunityUser(address _communityId, address _user) public override view returns(bool) {
         return communityUsers[_communityId].users.contains(_user);
     }
 

@@ -47,7 +47,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "CommunityData: caller is not the plugin"
+            "PostData: caller is not the plugin"
         );
         _;
     }
@@ -77,8 +77,8 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         bytes memory _data
     ) external onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
         uint256 beforeGas = gasleft();
-        (address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
-            abi.decode(_data,(address, string, uint256, string[]));
+        ( , address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
+            abi.decode(_data,(address, address, string, uint256, string[]));
 
         uint256 postId = nft.mint(_owner);
         require(postId > 0, "PostData: wrong postId");
