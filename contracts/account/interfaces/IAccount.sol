@@ -22,6 +22,7 @@ interface IAccount {
     ) external returns(bool);
 
     function addCreatedPostIdForUser(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId,

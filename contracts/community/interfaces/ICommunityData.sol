@@ -15,6 +15,14 @@ interface ICommunityData {
         address _communityId
     ) external returns (bool);
 
+    function addCreatedPostIdForCommunity(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        uint256 _postId
+    ) external returns(bool);
+
     function getCommunities(uint256 _startIndex, uint256 _endIndex) external view returns (address[] memory result);
 
     function communitiesCount() external view returns (uint256);

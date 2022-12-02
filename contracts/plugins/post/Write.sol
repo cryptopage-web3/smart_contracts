@@ -6,12 +6,13 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/IPostData.sol";
+import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
-import "../../rules/community/interfaces/ICommunityJoiningRules.sol";
 import "../PluginsList.sol";
+import "../../rules/community/interfaces/IPostPlacingRules.sol";
 
 
 contract Write is Context{
@@ -45,6 +46,15 @@ contract Write is Context{
         abi.decode(_data,(address, address, string, uint256, string[]));
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
+        address groupRules = IRule(registry.rule()).getRuleContract(
+            RulesList.POST_PLACING_RULES,
+            PLUGIN_VERSION
+        );
+        require(
+            IPostPlacingRules(groupRules).validate(_communityId, _sender),
+            "Write: wrong validate"
+        );
+
         uint256 postId = IPostData(registry.postData()).writePost(
             _executedId,
             PLUGIN_NAME,
@@ -55,16 +65,27 @@ contract Write is Context{
         require(postId > 0, "Write: wrong create post");
 
         require(IAccount(registry.account()).addCreatedPostIdForUser(
+                _executedId,
                 PLUGIN_NAME,
                 PLUGIN_VERSION,
                 _communityId,
                 _sender,
                 postId
             ),
-            "Write: wrong added post id for user"
+            "Write: wrong added postId for user"
         );
 
-        return true;
+        require(ICommunityData(registry.account()).addCreatedPostIdForCommunity(
+                _executedId,
+                PLUGIN_NAME,
+                PLUGIN_VERSION,
+                _communityId,
+                postId
+            ),
+            "Write: wrong added postId for community"
+        );
+
+    return true;
     }
 
     function checkData(uint256 _version, address _sender) private view {

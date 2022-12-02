@@ -37,7 +37,7 @@ contract Account is
 
     event AddCommunityUser(bytes32 executedId, address indexed communityId, address user);
     event RemoveCommunityUser(bytes32 executedId, address indexed communityId, address user);
-    event AddCreatedPostIdForUser(address indexed communityId, address user, uint256 postId);
+    event AddCreatedPostIdForUser(bytes32 executedId, address indexed communityId, address user, uint256 postId);
 
     modifier onlyJoinPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_JOIN, "Account: wrong plugin name");
@@ -103,6 +103,7 @@ contract Account is
     }
 
     function addCreatedPostIdForUser(
+        bytes32 _executedId,
         bytes32 _pluginName,
         uint256 _version,
         address _communityId,
@@ -111,7 +112,7 @@ contract Account is
     ) external override onlyWritePostPlugin(_pluginName, _version) returns(bool) {
         require(_communityId != address(0) , "Account: address is zero");
         require(isCommunityUser(_communityId, _user), "Account: wrong community user");
-        emit AddCreatedPostIdForUser(_communityId, _user, _postId);
+        emit AddCreatedPostIdForUser(_executedId, _communityId, _user, _postId);
 
         return createdPostIdsByUser[_communityId][_user].add(_postId);
     }
