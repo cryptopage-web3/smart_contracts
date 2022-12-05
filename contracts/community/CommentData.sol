@@ -2,10 +2,12 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
-import "./interfaces/ICommentData.sol";
+import "../registry/interfaces/IRegistry.sol";
+import "../plugins/PluginsList.sol";
+import "./interfaces/IPostData.sol";
 
 
 contract CommentData is OwnableUpgradeable, ICommentData {
@@ -30,13 +32,18 @@ contract CommentData is OwnableUpgradeable, ICommentData {
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
-    constructor() initializer {}
+    //constructor() initializer {}
 
-    function initialize() external initializer {
-        __Ownable_init();
+    function initialize(address _registry) external initializer {
+        registry = IRegistry(_registry);
     }
 
     function version() external pure override returns (string memory) {
         return "1";
     }
+
+    function ipfsHashOf(uint256 _postId, uint256 _commentId) external override view returns (string memory) {
+        return comments[_postId][_commentId].ipfsHash;
+    }
+
 }

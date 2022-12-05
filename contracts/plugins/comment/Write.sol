@@ -5,20 +5,20 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
-import "../../community/interfaces/IPostData.sol";
+import "../../community/interfaces/ICommentData.sol";
 import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
-import "../../rules/community/interfaces/IPostPlacingRules.sol";
+import "../../rules/community/interfaces/IPostCommentingRules.sol";
 
 
 contract Write is Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_WRITE_POST;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_WRITE_COMMENT;
 
     IRegistry public registry;
 
@@ -47,15 +47,15 @@ contract Write is Context{
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.POST_PLACING_RULES,
+            RulesList.POST_COMMENTING_RULES,
             PLUGIN_VERSION
         );
         require(
-            IPostPlacingRules(groupRules).validate(_communityId, _sender),
+            IPostCommentingRules(groupRules).validate(_communityId, _sender),
             "Write: wrong validate"
         );
 
-        uint256 postId = IPostData(registry.postData()).writePost(
+        uint256 postId = ICommentData(registry.postData()).writeComment(
             _executedId,
             PLUGIN_NAME,
             PLUGIN_VERSION,

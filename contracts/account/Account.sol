@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 import "../plugins/PluginsList.sol";
 import "./interfaces/IAccount.sol";
 import "../registry/interfaces/IRegistry.sol";
+import "../community/interfaces/ICommunityData.sol";
 
 /// @title Contract of Page.Account
 /// @author Crypto.Page Team
@@ -35,9 +36,19 @@ contract Account is
     // communityId -> user -> postIds
     mapping(address => mapping(address => EnumerableSetUpgradeable.UintSet)) private createdPostIdsByUser;
 
+    // communityId -> user -> postId -> commentIds
+    mapping(address => mapping(address => mapping(uint256 => EnumerableSetUpgradeable.UintSet))) private createdCommentIdsByUser;
+
     event AddCommunityUser(bytes32 executedId, address indexed communityId, address user);
     event RemoveCommunityUser(bytes32 executedId, address indexed communityId, address user);
     event AddCreatedPostIdForUser(bytes32 executedId, address indexed communityId, address user, uint256 postId);
+    event AddCreatedCommentIdForUser(
+        bytes32 executedId,
+        address indexed communityId,
+        address user,
+        uint256 postId,
+        uint256 commentId
+    );
 
     modifier onlyJoinPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_JOIN, "Account: wrong plugin name");
@@ -59,6 +70,15 @@ contract Account is
 
     modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "Account: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "Account: caller is not the plugin"
+        );
+        _;
+    }
+
+    modifier onlyWriteCommentPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_WRITE_COMMENT, "Account: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
             "Account: caller is not the plugin"
@@ -110,11 +130,26 @@ contract Account is
         address _user,
         uint256 _postId
     ) external override onlyWritePostPlugin(_pluginName, _version) returns(bool) {
-        require(_communityId != address(0) , "Account: address is zero");
         require(isCommunityUser(_communityId, _user), "Account: wrong community user");
         emit AddCreatedPostIdForUser(_executedId, _communityId, _user, _postId);
 
         return createdPostIdsByUser[_communityId][_user].add(_postId);
+    }
+
+    function addCreatedCommentIdForUser(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user,
+        uint256 _postId,
+        uint256 _commentId
+    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
+        require(isCommunityUser(_communityId, _user), "Account: wrong community user");
+        require(ICommunityData(registry.communityData()).isLegalPostId(_communityId, _postId), "Account: wrong postId");
+        emit AddCreatedCommentIdForUser(_executedId, _communityId, _user, _postId, _commentId);
+
+        return createdCommentIdsByUser[_communityId][_user][_postId].add(_commentId);
     }
 
     function getCommunityCounts(address _communityId) external override view returns(

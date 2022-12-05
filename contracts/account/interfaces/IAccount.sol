@@ -30,6 +30,16 @@ interface IAccount {
         uint256 _postId
     ) external returns(bool);
 
+    function addCreatedCommentIdForUser(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user,
+        uint256 _postId,
+        uint256 _commentId
+    ) external returns(bool);
+
     function getCommunityCounts(address _communityId) external view returns(
         uint256 normalUsers,
         uint256 bannedUsers,
