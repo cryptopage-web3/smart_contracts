@@ -22,6 +22,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     address public rule;
     address public communityData;
     address public postData;
+    address public commentData;
     address public account;
     address public badge;
     address public nft;
@@ -42,6 +43,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event SetExecutor(address origin, address sender, address oldValue, address newValue);
     event SetCommunityData(address origin, address sender, address oldValue, address newValue);
     event SetPostData(address origin, address sender, address oldValue, address newValue);
+    event SetCommentData(address origin, address sender, address oldValue, address newValue);
     event SetAccount(address origin, address sender, address oldValue, address newValue);
     event SetBadge(address origin, address sender, address oldValue, address newValue);
     event SetRule(address origin, address sender, address oldValue, address newValue);
@@ -102,6 +104,12 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_contract != address(0), "Registry: address can't be zero");
         emit SetPostData(tx.origin, _msgSender(), postData, _contract);
         postData = _contract;
+    }
+
+    function setCommentData(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetCommentData(tx.origin, _msgSender(), commentData, _contract);
+        commentData = _contract;
     }
 
     function setAccount(address _account) external override onlyOwner {

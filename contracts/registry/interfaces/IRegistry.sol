@@ -22,6 +22,8 @@ interface IRegistry {
 
     function postData() external view returns (address);
 
+    function commentData() external view returns (address);
+
     function account() external view returns (address);
 
     function badge() external view returns (address);
@@ -33,6 +35,8 @@ interface IRegistry {
     function setCommunityData(address _contract) external;
 
     function setPostData(address _contract) external;
+
+    function setCommentData(address _contract) external;
 
     function setAccount(address _contract) external;
 

@@ -52,6 +52,15 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         _;
     }
 
+    modifier onlyWriteCommentPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_WRITE_COMMENT, "CommentData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "CommentData: caller is not the plugin"
+        );
+        _;
+    }
+
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
     //constructor() initializer {}
@@ -75,7 +84,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
+    ) external override onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
         uint256 beforeGas = gasleft();
         ( , address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
             abi.decode(_data,(address, address, string, uint256, string[]));
@@ -101,13 +110,13 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
+    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
         (uint256 _postId, bool _isUp, bool _isDown) =
         abi.decode(_data,(uint256, bool, bool));
         setPostUpDown(_postId, _isUp, _isDown, _sender);
         emit UpdateUpDown(_executedId, _postId, _sender, _isUp, _isDown);
 
-        return _postId;
+        return true;
     }
 
     function setPostUpDown(uint256 _postId, bool _isUp, bool _isDown, address _sender) private {

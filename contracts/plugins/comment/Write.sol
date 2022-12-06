@@ -42,7 +42,7 @@ contract Write is Context{
         bytes calldata _data
     ) external onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (address _communityId , , , , ) =
+        (address _communityId , uint256 _postId, , , ) =
         abi.decode(_data,(address, address, string, uint256, string[]));
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
@@ -55,16 +55,16 @@ contract Write is Context{
             "Write: wrong validate"
         );
 
-        uint256 postId = ICommentData(registry.postData()).writeComment(
+        uint256 commentId = ICommentData(registry.commentData()).writeComment(
             _executedId,
             PLUGIN_NAME,
             PLUGIN_VERSION,
             _sender,
             _data
         );
-        require(postId > 0, "Write: wrong create post");
+        require(commentId > 0, "Write: wrong create comment");
 
-        require(IAccount(registry.account()).addCreatedPostIdForUser(
+        require(IAccount(registry.account()).addCreatedCommentIdForUser(
                 _executedId,
                 PLUGIN_NAME,
                 PLUGIN_VERSION,

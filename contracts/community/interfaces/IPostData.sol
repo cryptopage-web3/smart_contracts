@@ -15,4 +15,12 @@ interface IPostData {
         address _sender,
         bytes memory _data
     ) external returns(uint256);
+
+    function updatePostWhenNewComment(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _sender,
+        bytes memory _data
+    ) external returns(bool);
 }
