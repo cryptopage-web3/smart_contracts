@@ -7,10 +7,10 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 
 import "../registry/interfaces/IRegistry.sol";
 import "../plugins/PluginsList.sol";
-import "./interfaces/IPostData.sol";
+import "./interfaces/ICommentData.sol";
 
 
-contract CommentData is OwnableUpgradeable, ICommentData {
+contract CommentData is Initializable, ContextUpgradeable, ICommentData {
 
     struct Metadata {
         string ipfsHash;
@@ -23,14 +23,13 @@ contract CommentData is OwnableUpgradeable, ICommentData {
         bool isView;
     }
 
+    IRegistry public registry;
+
     //postId -> commentId -> Metadata
     mapping(uint256 => mapping(uint256 => Metadata)) private comments;
 
     //postId -> comment counter
     mapping(uint256 => uint256) private commentCount;
-
-    //postId -> user -> commentIds
-    mapping(uint256 => mapping(address => EnumerableSetUpgradeable.UintSet)) private userToCommentIds;
 
     event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
 
@@ -73,8 +72,9 @@ contract CommentData is OwnableUpgradeable, ICommentData {
 
         uint256 count = commentCount[_postId]++;
 
-        Metadata storage comment = comments[postId][count];
+        Metadata storage comment = comments[_postId][count];
         comment.creator = _sender;
+        comment.owner = _owner;
         comment.ipfsHash = _ipfsHash;
         comment.timestamp = block.timestamp;
         comment.up = _up;

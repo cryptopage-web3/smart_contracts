@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/ICommentData.sol";
+import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
@@ -42,8 +43,8 @@ contract Write is Context{
         bytes calldata _data
     ) external onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (address _communityId , uint256 _postId, , , ) =
-        abi.decode(_data,(address, address, string, uint256, string[]));
+        (address _communityId , uint256 _postId, , , , , ) =
+        abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         address groupRules = IRule(registry.rule()).getRuleContract(
@@ -64,25 +65,26 @@ contract Write is Context{
         );
         require(commentId > 0, "Write: wrong create comment");
 
+        require(IPostData(registry.postData()).updatePostWhenNewComment(
+                _executedId,
+                PLUGIN_NAME,
+                PLUGIN_VERSION,
+                _sender,
+                _data
+            ),
+            "Write: wrong added commentId for user"
+        );
+
         require(IAccount(registry.account()).addCreatedCommentIdForUser(
                 _executedId,
                 PLUGIN_NAME,
                 PLUGIN_VERSION,
                 _communityId,
                 _sender,
-                postId
+                _postId,
+                commentId
             ),
-            "Write: wrong added postId for user"
-        );
-
-        require(ICommunityData(registry.communityData()).addCreatedPostIdForCommunity(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _communityId,
-                postId
-            ),
-            "Write: wrong added postId for community"
+            "Write: wrong added commentId for user"
         );
 
     return true;

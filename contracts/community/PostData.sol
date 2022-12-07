@@ -111,8 +111,9 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         address _sender,
         bytes memory _data
     ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
-        (uint256 _postId, bool _isUp, bool _isDown) =
-        abi.decode(_data,(uint256, bool, bool));
+        ( , uint256 _postId, , , bool _isUp, bool _isDown, ) =
+        abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
+
         setPostUpDown(_postId, _isUp, _isDown, _sender);
         emit UpdateUpDown(_executedId, _postId, _sender, _isUp, _isDown);
 
