@@ -15,4 +15,15 @@ interface ICommentData {
         address _sender,
         bytes memory _data
     ) external returns(uint256);
+
+    function readComment(uint256 _postId, uint256 _commentId) external view returns(
+        string memory ipfsHash,
+        address creator,
+        address owner,
+        uint256 price,
+        uint256 timestamp,
+        bool up,
+        bool down,
+        bool isView
+    );
 }

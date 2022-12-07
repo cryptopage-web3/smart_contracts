@@ -25,7 +25,6 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint64 upCount;
         uint64 downCount;
         uint256 price;
-        uint256 commentCount;
         uint256 encodingType;
         uint256 timestamp;
         EnumerableSetUpgradeable.AddressSet upDownUsers;
@@ -118,6 +117,37 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         emit UpdateUpDown(_executedId, _postId, _sender, _isUp, _isDown);
 
         return true;
+    }
+
+    function readPost(uint256 _postId) external view override returns(
+        string memory ipfsHash,
+        string memory category,
+        string[] memory tags,
+        address creator,
+        address repostFromCommunity,
+        uint64 upCount,
+        uint64 downCount,
+        uint256 price,
+        uint256 encodingType,
+        uint256 timestamp,
+        address[] memory upDownUsers,
+        bool isView
+    ) {
+        Metadata storage post = posts[_postId];
+        if(post.isView) {
+            ipfsHash = post.ipfsHash;
+            category = post.category;
+            tags = post.tags;
+            creator = post.creator;
+            repostFromCommunity = post.repostFromCommunity;
+            upCount = post.upCount;
+            downCount = post.downCount;
+            price = post.price;
+            encodingType = post.encodingType;
+            timestamp = post.timestamp;
+            upDownUsers = post.upDownUsers.values();
+            isView = true;
+        }
     }
 
     function setPostUpDown(uint256 _postId, bool _isUp, bool _isDown, address _sender) private {

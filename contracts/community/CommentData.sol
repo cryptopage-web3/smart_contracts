@@ -64,7 +64,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external onlyWriteCommentPlugin(_pluginName, _version) returns(uint256) {
+    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(uint256) {
         uint256 beforeGas = gasleft();
         ( , uint256 _postId, address _owner, string memory _ipfsHash, bool _up, bool _down, bool _isView) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
@@ -81,8 +81,31 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         comment.down = _down;
         comment.isView = _isView;
         comment.price = beforeGas - gasleft();
-        emit WriteComment(_executedId, _postId, count, _sender, _owner);
+        //emit WriteComment(_executedId, _postId, count, _sender, _owner);
 
         return count;
+    }
+
+    function readComment(uint256 _postId, uint256 _commentId) external view override returns(
+        string memory ipfsHash,
+        address creator,
+        address owner,
+        uint256 price,
+        uint256 timestamp,
+        bool up,
+        bool down,
+        bool isView
+    ) {
+        Metadata storage comment = comments[_postId][_commentId];
+        if (comment.isView) {
+            ipfsHash = comment.ipfsHash;
+            creator = comment.creator;
+            owner = comment.owner;
+            price = comment.price;
+            timestamp = comment.timestamp;
+            up = comment.up;
+            down = comment.down;
+            isView = true;
+        }
     }
 }
