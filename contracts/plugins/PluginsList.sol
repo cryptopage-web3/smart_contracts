@@ -15,7 +15,7 @@ library PluginsList {
     bytes32 public constant COMMUNITY_READ_POST = keccak256(abi.encode("COMMUNITY_READ_POST"));
     bytes32 public constant COMMUNITY_BURN_POST = keccak256(abi.encode("COMMUNITY_BURN_POST"));
     bytes32 public constant COMMUNITY_TRANSFER_POST = keccak256(abi.encode("COMMUNITY_TRANSFER_POST"));
-    bytes32 public constant COMMUNITY_VISIBLE_POST = keccak256(abi.encode("COMMUNITY_VISIBLE_POST"));
+    bytes32 public constant COMMUNITY_VISIBILITY_POST = keccak256(abi.encode("COMMUNITY_VISIBILITY_POST"));
 
     bytes32 public constant COMMUNITY_WRITE_COMMENT = keccak256(abi.encode("COMMUNITY_WRITE_COMMENT"));
     bytes32 public constant COMMUNITY_READ_COMMENT = keccak256(abi.encode("COMMUNITY_READ_COMMENT"));

@@ -42,6 +42,8 @@ contract Write is Context{
         address _sender,
         bytes calldata _data
     ) external onlyExecutor returns(bool) {
+        uint256 beforeGas = gasleft();
+
         checkData(_version, _sender);
         (address _communityId , uint256 _postId, , , , , ) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
@@ -85,6 +87,18 @@ contract Write is Context{
                 commentId
             ),
             "Write: wrong added commentId for user"
+        );
+
+        uint256 gasPrice = beforeGas - gasleft();
+        require(
+            ICommentData(registry.commentData()).setPrice(
+                PLUGIN_NAME,
+                PLUGIN_VERSION,
+                _postId,
+                commentId,
+                gasPrice
+            ),
+            "Write: wrong set price"
         );
 
     return true;

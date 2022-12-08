@@ -16,6 +16,14 @@ interface ICommentData {
         bytes memory _data
     ) external returns(uint256);
 
+    function setPrice(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _commentId,
+        uint256 _price
+    ) external returns(bool);
+
     function readComment(uint256 _postId, uint256 _commentId) external view returns(
         string memory ipfsHash,
         address creator,

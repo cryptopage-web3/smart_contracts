@@ -86,6 +86,19 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         return count;
     }
 
+    function setPrice(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _commentId,
+        uint256 _price
+    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
+        Metadata storage comment = comments[_postId][_commentId];
+        comment.price = _price;
+
+        return true;
+    }
+
     function readComment(uint256 _postId, uint256 _commentId) external view override returns(
         string memory ipfsHash,
         address creator,

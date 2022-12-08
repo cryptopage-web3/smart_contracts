@@ -41,9 +41,19 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
 
     event WritePost(bytes32 executedId, uint256 postId, address creator, address owner);
     event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
+    event SetVisibility(bytes32 executedId, uint256 postId, bool isView);
 
     modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "PostData: caller is not the plugin"
+        );
+        _;
+    }
+
+    modifier onlyVisibilityPostPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_VISIBILITY_POST, "PostData: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
             "PostData: caller is not the plugin"
@@ -84,7 +94,6 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         address _sender,
         bytes memory _data
     ) external override onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
-        uint256 beforeGas = gasleft();
         ( , address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
             abi.decode(_data,(address, address, string, uint256, string[]));
 
@@ -97,10 +106,38 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         post.timestamp = block.timestamp;
         post.encodingType = _encodingType;
         post.tags = _tags;
-        post.price = beforeGas - gasleft();
+        post.isView = true;
         emit WritePost(_executedId, postId, _sender, _owner);
 
         return postId;
+    }
+
+    function setVisibility(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        bytes memory _data
+    ) external override onlyVisibilityPostPlugin(_pluginName, _version) returns(bool) {
+        (uint256 _postId, bool _isView) =
+        abi.decode(_data,(uint256, bool));
+
+        Metadata storage post = posts[_postId];
+        post.isView = _isView;
+        emit SetVisibility(_executedId, _postId, _isView);
+
+        return true;
+    }
+
+    function setPrice(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _price
+    ) external override onlyWritePostPlugin(_pluginName, _version) returns(bool) {
+        Metadata storage post = posts[_postId];
+        post.price = _price;
+
+        return true;
     }
 
     function updatePostWhenNewComment(

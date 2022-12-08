@@ -31,6 +31,20 @@ interface IPostData {
         bool isView
     );
 
+    function setVisibility(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        bytes memory _data
+    ) external returns(bool);
+
+    function setPrice(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _price
+    ) external returns(bool);
+
     function updatePostWhenNewComment(
         bytes32 _executedId,
         bytes32 _pluginName,
