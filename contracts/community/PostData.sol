@@ -52,7 +52,16 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         _;
     }
 
-    modifier onlyVisibilityPostPlugin(bytes32 _pluginName, uint256 _version) {
+    modifier onlyReadPostPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_READ_POST, "PostData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "PostData: caller is not the plugin"
+        );
+        _;
+    }
+
+    modifier onlySetVisibilityPostPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_VISIBILITY_POST, "PostData: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
@@ -117,7 +126,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         bytes32 _pluginName,
         uint256 _version,
         bytes memory _data
-    ) external override onlyVisibilityPostPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlySetVisibilityPostPlugin(_pluginName, _version) returns(bool) {
         (uint256 _postId, bool _isView) =
         abi.decode(_data,(uint256, bool));
 
@@ -156,34 +165,29 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         return true;
     }
 
-    function readPost(uint256 _postId) external view override returns(
-        string memory ipfsHash,
-        string memory category,
-        string[] memory tags,
-        address creator,
-        address repostFromCommunity,
-        uint64 upCount,
-        uint64 downCount,
-        uint256 price,
-        uint256 encodingType,
-        uint256 timestamp,
-        address[] memory upDownUsers,
-        bool isView
+    function readPost(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId
+    ) external view override onlyReadPostPlugin(_pluginName, _version) returns(
+        bytes memory _data
     ) {
         Metadata storage post = posts[_postId];
         if(post.isView) {
-            ipfsHash = post.ipfsHash;
-            category = post.category;
-            tags = post.tags;
-            creator = post.creator;
-            repostFromCommunity = post.repostFromCommunity;
-            upCount = post.upCount;
-            downCount = post.downCount;
-            price = post.price;
-            encodingType = post.encodingType;
-            timestamp = post.timestamp;
-            upDownUsers = post.upDownUsers.values();
-            isView = true;
+            _data = abi.encode(
+                post.ipfsHash,
+                post.category,
+                post.tags,
+                post.creator,
+                post.repostFromCommunity,
+                post.upCount,
+                post.downCount,
+                post.price,
+                post.encodingType,
+                post.timestamp,
+                post.upDownUsers.values(),
+                true
+            );
         }
     }
 

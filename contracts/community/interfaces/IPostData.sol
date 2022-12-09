@@ -16,19 +16,8 @@ interface IPostData {
         bytes memory _data
     ) external returns(uint256);
 
-    function readPost(uint256 _postId) external view returns(
-        string memory ipfsHash,
-        string memory category,
-        string[] memory tags,
-        address creator,
-        address repostFromCommunity,
-        uint64 upCount,
-        uint64 downCount,
-        uint256 price,
-        uint256 encodingType,
-        uint256 timestamp,
-        address[] memory upDownUsers,
-        bool isView
+    function readPost(bytes32 _pluginName, uint256 _version, uint256 _postId) external view returns(
+        bytes memory _data
     );
 
     function setVisibility(
