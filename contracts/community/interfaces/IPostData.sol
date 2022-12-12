@@ -20,6 +20,8 @@ interface IPostData {
         bytes memory _data
     );
 
+    function getCommunityId(uint256 _postId) external view returns(address);
+
     function setVisibility(
         bytes32 _executedId,
         bytes32 _pluginName,

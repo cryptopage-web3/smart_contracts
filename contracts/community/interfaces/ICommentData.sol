@@ -24,14 +24,10 @@ interface ICommentData {
         uint256 _price
     ) external returns(bool);
 
-    function readComment(uint256 _postId, uint256 _commentId) external view returns(
-        string memory ipfsHash,
-        address creator,
-        address owner,
-        uint256 price,
-        uint256 timestamp,
-        bool up,
-        bool down,
-        bool isView
-    );
+    function readComment(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _commentId
+    ) external view returns(bytes memory _data);
 }

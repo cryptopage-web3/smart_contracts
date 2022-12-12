@@ -42,6 +42,15 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         _;
     }
 
+    modifier onlyReadCommentPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_READ_COMMENT, "CommentData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "CommentData: caller is not the plugin"
+        );
+        _;
+    }
+
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
     //constructor() initializer {}
@@ -99,26 +108,26 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         return true;
     }
 
-    function readComment(uint256 _postId, uint256 _commentId) external view override returns(
-        string memory ipfsHash,
-        address creator,
-        address owner,
-        uint256 price,
-        uint256 timestamp,
-        bool up,
-        bool down,
-        bool isView
+    function readComment(
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _commentId
+    ) external view override onlyReadCommentPlugin(_pluginName, _version) returns(
+        bytes memory _data
     ) {
         Metadata storage comment = comments[_postId][_commentId];
         if (comment.isView) {
-            ipfsHash = comment.ipfsHash;
-            creator = comment.creator;
-            owner = comment.owner;
-            price = comment.price;
-            timestamp = comment.timestamp;
-            up = comment.up;
-            down = comment.down;
-            isView = true;
+            _data = abi.encode(
+                comment.ipfsHash,
+                comment.creator,
+                comment.owner,
+                comment.price,
+                comment.timestamp,
+                comment.up,
+                comment.down,
+                true
+            );
         }
     }
 }

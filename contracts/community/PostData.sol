@@ -103,11 +103,12 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         address _sender,
         bytes memory _data
     ) external override onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
-        ( , address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
+        (address _communityId, address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
             abi.decode(_data,(address, address, string, uint256, string[]));
 
         uint256 postId = nft.mint(_owner);
         require(postId > 0, "PostData: wrong postId");
+        communityIdByPostId[postId] = _communityId;
 
         Metadata storage post = posts[postId];
         post.creator = _sender;
@@ -189,6 +190,10 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
                 true
             );
         }
+    }
+
+    function getCommunityId(uint256 _postId) external view override returns(address) {
+        return communityIdByPostId[_postId];
     }
 
     function setPostUpDown(uint256 _postId, bool _isUp, bool _isDown, address _sender) private {
