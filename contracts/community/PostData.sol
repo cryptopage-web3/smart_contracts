@@ -40,11 +40,22 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     mapping(uint256 => Metadata) private posts;
 
     event WritePost(bytes32 executedId, uint256 postId, address creator, address owner);
+    event BurnPost(bytes32 executedId, uint256 postId, address sender);
+
     event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
     event SetVisibility(bytes32 executedId, uint256 postId, bool isView);
 
     modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "PostData: caller is not the plugin"
+        );
+        _;
+    }
+
+    modifier onlyBurnPostPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_BURN_POST, "PostData: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
             "PostData: caller is not the plugin"
@@ -120,6 +131,25 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         emit WritePost(_executedId, postId, _sender, _owner);
 
         return postId;
+    }
+
+    function burnPost(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _sender,
+        bytes memory _data
+    ) external override onlyBurnPostPlugin(_pluginName, _version) returns(bool) {
+        (uint256 _postId) =
+        abi.decode(_data,(uint256));
+        require(_postId > 0, "PostData: wrong postId");
+
+        Metadata storage post = posts[_postId];
+        post.ipfsHash = "";
+        post.isView = false;
+        emit BurnPost(_executedId, _postId, _sender);
+
+        return true;
     }
 
     function setVisibility(

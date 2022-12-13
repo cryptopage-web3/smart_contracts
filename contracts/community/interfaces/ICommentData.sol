@@ -16,6 +16,14 @@ interface ICommentData {
         bytes memory _data
     ) external returns(uint256);
 
+    function burnComment(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _sender,
+        bytes memory _data
+    ) external returns(bool);
+
     function setPrice(
         bytes32 _pluginName,
         uint256 _version,

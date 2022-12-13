@@ -5,6 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
+import "../../community/interfaces/ICommentData.sol";
 import "../../community/interfaces/IPostData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
@@ -17,7 +18,7 @@ import "../../rules/community/interfaces/IModerationRules.sol";
 contract Burn is Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_BURN_POST;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_BURN_COMMENT;
 
     IRegistry public registry;
 
@@ -41,8 +42,8 @@ contract Burn is Context{
         bytes calldata _data
     ) external onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (uint256 _postId) =
-        abi.decode(_data,(uint256));
+        (uint256 _postId, ) =
+        abi.decode(_data,(uint256, uint256));
         address _communityId = IPostData(registry.postData()).getCommunityId(_postId);
 
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
@@ -56,7 +57,7 @@ contract Burn is Context{
             "Burn: wrong validate"
         );
 
-        require(IPostData(registry.postData()).burnPost(
+        require(ICommentData(registry.commentData()).burnComment(
                 _executedId,
                 PLUGIN_NAME,
                 PLUGIN_VERSION,

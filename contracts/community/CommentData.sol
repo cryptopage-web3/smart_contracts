@@ -31,10 +31,21 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     //postId -> comment counter
     mapping(uint256 => uint256) private commentCount;
 
-    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
+//    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
+    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId);
+    event BurnComment(bytes32 executedId, uint256 postId, uint256 commentId, address sender);
 
     modifier onlyWriteCommentPlugin(bytes32 _pluginName, uint256 _version) {
         require(_pluginName == PluginsList.COMMUNITY_WRITE_COMMENT, "CommentData: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "CommentData: caller is not the plugin"
+        );
+        _;
+    }
+
+    modifier onlyBurnCommentPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_BURN_COMMENT, "CommentData: wrong plugin name");
         require(
             registry.getPluginContract(_pluginName, _version) == _msgSender(),
             "CommentData: caller is not the plugin"
@@ -74,10 +85,9 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         address _sender,
         bytes memory _data
     ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(uint256) {
-        uint256 beforeGas = gasleft();
         ( , uint256 _postId, address _owner, string memory _ipfsHash, bool _up, bool _down, bool _isView) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
-        require(_postId > 0, "Write: wrong postId");
+        require(_postId > 0, "CommentData: wrong postId");
 
         uint256 count = commentCount[_postId]++;
 
@@ -89,10 +99,31 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         comment.up = _up;
         comment.down = _down;
         comment.isView = _isView;
-        comment.price = beforeGas - gasleft();
-        //emit WriteComment(_executedId, _postId, count, _sender, _owner);
+//        emit WriteComment(_executedId, _postId, count, _sender, _owner);
+        //emit WriteComment(_executedId, _postId, count);
 
         return count;
+    }
+
+    function burnComment(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _sender,
+        bytes memory _data
+    ) external override onlyBurnCommentPlugin(_pluginName, _version) returns(bool) {
+        (uint256 _postId, uint256 _commentId) =
+        abi.decode(_data,(uint256, uint256));
+
+        Metadata storage comment = comments[_postId][_commentId];
+        require(comment.timestamp > 0, "CommentData: wrong postId");
+
+        comment.ipfsHash = "";
+        comment.isView = false;
+
+        emit BurnComment(_executedId, _postId, _commentId, _sender);
+
+        return true;
     }
 
     function setPrice(
