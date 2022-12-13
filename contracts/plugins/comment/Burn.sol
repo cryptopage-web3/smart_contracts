@@ -12,10 +12,11 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
+import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IModerationRules.sol";
 
 
-contract Burn is Context{
+contract Burn is IExecutePlugin, Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_BURN_COMMENT;
@@ -40,7 +41,7 @@ contract Burn is Context{
         uint256 _version,
         address _sender,
         bytes calldata _data
-    ) external onlyExecutor returns(bool) {
+    ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (uint256 _postId, ) =
         abi.decode(_data,(uint256, uint256));

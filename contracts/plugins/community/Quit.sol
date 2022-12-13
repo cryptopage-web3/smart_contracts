@@ -6,10 +6,11 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../registry/interfaces/IRegistry.sol";
+import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
 
 
-contract Quit is Context {
+contract Quit is IExecutePlugin, Context {
 
     uint256 private constant PLUGIN_VERSION = 1;
 
@@ -33,7 +34,7 @@ contract Quit is Context {
         uint256 _version,
         address _sender,
         bytes calldata data
-    ) external onlyExecutor returns(bool) {
+    ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (address _communityId) = abi.decode(data,(address));
         require(

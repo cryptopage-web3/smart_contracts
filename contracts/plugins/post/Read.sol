@@ -12,14 +12,20 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
+import "../interfaces/IReadPlugin.sol";
 import "../../rules/community/interfaces/IPostPlacingRules.sol";
 
 
-contract Read is Context {
+contract Read is IReadPlugin, Context {
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_READ_POST;
 
     IRegistry public registry;
+
+    modifier onlyExecutor() {
+        require(registry.executor() == _msgSender(), "Write: caller is not the executor");
+        _;
+    }
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
@@ -29,10 +35,12 @@ contract Read is Context {
         return PLUGIN_VERSION;
     }
 
-    function execute(
+    function read(
+        uint256 _version,
+        address _sender,
         bytes calldata _inData
-    ) external view returns(bytes memory _outData) {
-        address sender = _msgSender();
+    ) external override onlyExecutor view returns(bytes memory) {
+        checkData(_version, _sender);
 
         (address _communityId , uint256 _postId) =
         abi.decode(_inData,(address, uint256));
@@ -42,14 +50,20 @@ contract Read is Context {
             PLUGIN_VERSION
         );
         require(
-            IPostPlacingRules(groupRules).validate(_communityId, sender),
+            IPostPlacingRules(groupRules).validate(_communityId, _sender),
             "Write: wrong validate"
         );
 
-        _outData = IPostData(registry.postData()).readPost(
+        return IPostData(registry.postData()).readPost(
             PLUGIN_NAME,
             PLUGIN_VERSION,
             _postId
         );
+    }
+
+    function checkData(uint256 _version, address _sender) private view {
+        require(_version == PLUGIN_VERSION, "Write: wrong _version");
+        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Write: plugin is not trusted");
+        require(_sender != address(0) , "Write: _sender is zero");
     }
 }

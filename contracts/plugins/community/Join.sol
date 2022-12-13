@@ -10,10 +10,11 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../../rules/community/interfaces/ICommunityJoiningRules.sol";
+import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
 
 
-contract Join is Context {
+contract Join is IExecutePlugin, Context {
 
     uint256 private constant PLUGIN_VERSION = 1;
 
@@ -37,7 +38,7 @@ contract Join is Context {
         uint256 _version,
         address _sender,
         bytes calldata data
-    ) external onlyExecutor returns(bool) {
+    ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (address _communityId) = abi.decode(data,(address));
         address groupRules = IRule(registry.rule()).getRuleContract(

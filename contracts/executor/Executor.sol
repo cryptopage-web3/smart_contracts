@@ -8,7 +8,8 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 
 import "./interfaces/IExecutor.sol";
 import "../registry/interfaces/IRegistry.sol";
-import "../plugins/interfaces/IPlugin.sol";
+import "../plugins/interfaces/IExecutePlugin.sol";
+import "../plugins/interfaces/IReadPlugin.sol";
 
 
 contract Executor is OwnableUpgradeable, IExecutor {
@@ -38,11 +39,13 @@ contract Executor is OwnableUpgradeable, IExecutor {
 
     function run(bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data) external {
         (bool enable, address pluginContract) = registry.getPlugin(_pluginName, _version);
-        checkData(enable, pluginContract, _id);
+        checkPlugin(enable, pluginContract);
+        require(!executedId[_id], "Executor: wrong id");
+        executedId[_id] = true;
 
         bytes memory result = pluginContract.functionCall(
             abi.encodeWithSelector(
-                IPlugin.execute.selector,
+                IExecutePlugin.execute.selector,
                 _id,
                 _version,
                 _msgSender(),
@@ -55,10 +58,22 @@ contract Executor is OwnableUpgradeable, IExecutor {
         emit Run(tx.origin, _msgSender(), _id, _pluginName, _version, _data);
     }
 
-    function checkData(bool _enable, address _pluginContract, bytes32 _id) private {
+    function read(bytes32 _pluginName, uint256 _version, bytes calldata _inData) external view returns(bytes memory) {
+        (bool enable, address pluginContract) = registry.getPlugin(_pluginName, _version);
+        checkPlugin(enable, pluginContract);
+
+        return pluginContract.functionStaticCall(
+            abi.encodeWithSelector(
+                IReadPlugin.read.selector,
+                _version,
+                _msgSender(),
+                _inData
+            )
+        );
+    }
+
+    function checkPlugin(bool _enable, address _pluginContract) private pure {
         require(_enable, "Executor: wrong enable plugin");
         require(_pluginContract != address(0), "Executor: wrong plugin contract");
-        require(!executedId[_id], "Executor: wrong id");
-        executedId[_id] = true;
     }
 }

@@ -13,10 +13,11 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
+import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IPostCommentingRules.sol";
 
 
-contract Write is Context{
+contract Write is IExecutePlugin, Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_WRITE_COMMENT;
@@ -41,7 +42,7 @@ contract Write is Context{
         uint256 _version,
         address _sender,
         bytes calldata _data
-    ) external onlyExecutor returns(bool) {
+    ) external override onlyExecutor returns(bool) {
         uint256 beforeGas = gasleft();
 
         checkData(_version, _sender);

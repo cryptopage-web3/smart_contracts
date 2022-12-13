@@ -7,13 +7,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../../utils/CloneFactory.sol";
 import "../../community/CommunityBlank.sol";
 import "../../community/interfaces/ICommunityData.sol";
-import "../../plugins/interfaces/IAdrAdr.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../registry/interfaces/IRegistry.sol";
+import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
 
 
-contract Create is Ownable, CloneFactory {
+contract Create is IExecutePlugin, Ownable, CloneFactory {
 
     uint256 private constant PLUGIN_VERSION = 1;
 
@@ -45,7 +45,7 @@ contract Create is Ownable, CloneFactory {
         uint256 _version,
         address _sender,
         bytes calldata data
-    ) external onlyExecutor returns(bool) {
+    ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
         (string memory _name, bool _isInitial) = abi.decode(data,(string, bool));
         address createdCommunity = createCommunity(_name, _sender, _isInitial);
