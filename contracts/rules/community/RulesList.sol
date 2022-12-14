@@ -14,6 +14,20 @@ library  RulesList {
     bytes32 public constant WHEN_JOINING_PAYMENT = keccak256(abi.encode("WHEN_JOINING_PAYMENT"));
     bytes32 public constant PERIODIC_PAYMENT = keccak256(abi.encode("PERIODIC_PAYMENT"));
 
+    // Community Edit Moderators Rules
+    bytes32 public constant COMMUNITY_EDIT_MODERATOR_RULES = keccak256(abi.encode("PAGE.COMMUNITY_ADD_MODERATOR_RULES"));
+    bytes32 public constant NO_EDIT_MODERATOR = keccak256(abi.encode("NO_EDIT_MODERATOR"));
+    bytes32 public constant EDIT_AFTER_VOTED = keccak256(abi.encode("EDIT_AFTER_VOTED"));
+    bytes32 public constant EDIT_ONLY_SUPER_ADMIN = keccak256(abi.encode("EDIT_ONLY_SUPER_ADMIN"));
+    bytes32 public constant EDIT_BY_CREATOR = keccak256(abi.encode("EDIT_BY_CREATOR"));
+
+    // Community Add Moderators Rules
+    bytes32 public constant COMMUNITY_ADD_MODERATOR_RULES = keccak256(abi.encode("PAGE.COMMUNITY_ADD_MODERATOR_RULES"));
+    bytes32 public constant NO_MODERATORS = keccak256(abi.encode("NO_MODERATORS"));
+    bytes32 public constant ADDING_AFTER_VOTED = keccak256(abi.encode("ADDING_AFTER_VOTED"));
+    bytes32 public constant ADDING_ONLY_SUPER_ADMIN = keccak256(abi.encode("ADDING_ONLY_SUPER_ADMIN"));
+    bytes32 public constant ADDING_BY_CREATOR = keccak256(abi.encode("ADDING_BY_CREATOR"));
+
     // Community Post Placing Rules
     bytes32 public constant POST_PLACING_RULES = keccak256(abi.encode("PAGE.POST_PLACING_RULES"));
     bytes32 public constant FREE_FOR_EVERYONE = keccak256(abi.encode("FREE_FOR_EVERYONE"));
