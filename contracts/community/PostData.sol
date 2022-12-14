@@ -28,6 +28,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 encodingType;
         uint256 timestamp;
         EnumerableSetUpgradeable.AddressSet upDownUsers;
+        bool isEncrypted;
         bool isView;
     }
 
@@ -114,8 +115,15 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         address _sender,
         bytes memory _data
     ) external override onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
-        (address _communityId, address _owner, string memory _ipfsHash, uint256 _encodingType, string[] memory _tags) =
-            abi.decode(_data,(address, address, string, uint256, string[]));
+        (
+        address _communityId,
+        address _owner,
+        string memory _ipfsHash,
+        uint256 _encodingType,
+        string[] memory _tags,
+        bool _isEncrypted,
+        bool _isView
+        ) = abi.decode(_data,(address, address, string, uint256, string[], bool, bool));
 
         uint256 postId = nft.mint(_owner);
         require(postId > 0, "PostData: wrong postId");
@@ -127,8 +135,9 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         post.timestamp = block.timestamp;
         post.encodingType = _encodingType;
         post.tags = _tags;
-        post.isView = true;
-        emit WritePost(_executedId, postId, _sender, _owner);
+        post.isEncrypted = _isEncrypted;
+        post.isView = _isView;
+        //emit WritePost(_executedId, postId, _sender, _owner);
 
         return postId;
     }

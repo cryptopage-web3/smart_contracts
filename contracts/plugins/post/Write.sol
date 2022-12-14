@@ -45,8 +45,8 @@ contract Write is IExecutePlugin, Context{
         uint256 beforeGas = gasleft();
 
         checkData(_version, _sender);
-        (address _communityId , , , , ) =
-        abi.decode(_data,(address, address, string, uint256, string[]));
+        (address _communityId , , , , , , ) =
+        abi.decode(_data,(address, address, string, uint256, string[], bool, bool));
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         address groupRules = IRule(registry.rule()).getRuleContract(
