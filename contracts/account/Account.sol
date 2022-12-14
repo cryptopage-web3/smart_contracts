@@ -41,6 +41,8 @@ contract Account is
 
     event AddCommunityUser(bytes32 executedId, address indexed communityId, address user);
     event RemoveCommunityUser(bytes32 executedId, address indexed communityId, address user);
+    event AddCommunityModerator(bytes32 executedId, address indexed communityId, address user);
+    event RemoveCommunityModerator(bytes32 executedId, address indexed communityId, address user);
     event AddCreatedPostIdForUser(bytes32 executedId, address indexed communityId, address user, uint256 postId);
     event AddCreatedCommentIdForUser(
         bytes32 executedId,
@@ -86,6 +88,15 @@ contract Account is
         _;
     }
 
+    modifier onlyEditModeratorsPlugin(bytes32 _pluginName, uint256 _version) {
+        require(_pluginName == PluginsList.COMMUNITY_EDIT_MODERATORS, "Account: wrong plugin name");
+        require(
+            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            "Account: caller is not the plugin"
+        );
+        _;
+    }
+
     function initialize(address _registry)
         external
         initializer
@@ -120,6 +131,32 @@ contract Account is
         CommunityUsers storage users = communityUsers[_communityId];
         emit RemoveCommunityUser(_executedId, _communityId, _user);
         return users.users.remove(_user);
+    }
+
+    function addModerator(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user
+    ) external override onlyEditModeratorsPlugin(_pluginName, _version) returns(bool) {
+        require(_communityId != address(0) , "Account: address is zero");
+        CommunityUsers storage users = communityUsers[_communityId];
+        emit AddCommunityModerator(_executedId, _communityId, _user);
+        return users.moderators.add(_user);
+    }
+
+    function removeModerator(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user
+    ) external override onlyEditModeratorsPlugin(_pluginName, _version) returns(bool) {
+        require(_communityId != address(0) , "Account: address is zero");
+        CommunityUsers storage users = communityUsers[_communityId];
+        emit RemoveCommunityModerator(_executedId, _communityId, _user);
+        return users.moderators.remove(_user);
     }
 
     function addCreatedPostIdForUser(

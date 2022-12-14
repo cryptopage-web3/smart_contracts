@@ -21,6 +21,22 @@ interface IAccount {
         address _user
     ) external returns(bool);
 
+    function addModerator(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user
+    ) external returns(bool);
+
+    function removeModerator(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _communityId,
+        address _user
+    ) external returns(bool);
+
     function addCreatedPostIdForUser(
         bytes32 _executedId,
         bytes32 _pluginName,
