@@ -52,46 +52,10 @@ contract Account is
         uint256 commentId
     );
 
-    modifier onlyJoinPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_JOIN, "Account: wrong plugin name");
+    modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
+        require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
         require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "Account: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyQuitPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_QUIT, "Account: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "Account: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "Account: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "Account: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyWriteCommentPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_WRITE_COMMENT, "Account: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "Account: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyEditModeratorsPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_EDIT_MODERATORS, "Account: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
             "Account: caller is not the plugin"
         );
         _;
@@ -114,7 +78,7 @@ contract Account is
         uint256 _version,
         address _communityId,
         address _user
-    ) external override onlyJoinPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_JOIN, _pluginName, _version) returns(bool) {
         require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
         emit AddCommunityUser(_executedId, _communityId, _user);
@@ -127,7 +91,7 @@ contract Account is
         uint256 _version,
         address _communityId,
         address _user
-    ) external override onlyQuitPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_QUIT, _pluginName, _version) returns(bool) {
         CommunityUsers storage users = communityUsers[_communityId];
         emit RemoveCommunityUser(_executedId, _communityId, _user);
         return users.users.remove(_user);
@@ -139,7 +103,7 @@ contract Account is
         uint256 _version,
         address _communityId,
         address _user
-    ) external override onlyEditModeratorsPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_EDIT_MODERATORS, _pluginName, _version) returns(bool) {
         require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
         emit AddCommunityModerator(_executedId, _communityId, _user);
@@ -152,7 +116,7 @@ contract Account is
         uint256 _version,
         address _communityId,
         address _user
-    ) external override onlyEditModeratorsPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_EDIT_MODERATORS, _pluginName, _version) returns(bool) {
         require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
         emit RemoveCommunityModerator(_executedId, _communityId, _user);
@@ -166,7 +130,7 @@ contract Account is
         address _communityId,
         address _user,
         uint256 _postId
-    ) external override onlyWritePostPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(bool) {
         require(isCommunityUser(_communityId, _user), "Account: wrong community user");
         emit AddCreatedPostIdForUser(_executedId, _communityId, _user, _postId);
 
@@ -181,7 +145,7 @@ contract Account is
         address _user,
         uint256 _postId,
         uint256 _commentId
-    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
         require(isCommunityUser(_communityId, _user), "Account: wrong community user");
         require(ICommunityData(registry.communityData()).isLegalPostId(_communityId, _postId), "Account: wrong postId");
         emit AddCreatedCommentIdForUser(_executedId, _communityId, _user, _postId, _commentId);

@@ -35,29 +35,11 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId);
     event BurnComment(bytes32 executedId, uint256 postId, uint256 commentId, address sender);
 
-    modifier onlyWriteCommentPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_WRITE_COMMENT, "CommentData: wrong plugin name");
+    modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
+        require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
         require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "CommentData: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyBurnCommentPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_BURN_COMMENT, "CommentData: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "CommentData: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyReadCommentPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_READ_COMMENT, "CommentData: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "CommentData: caller is not the plugin"
+            registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
+            "PostData: caller is not the plugin"
         );
         _;
     }
@@ -84,7 +66,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(uint256) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(uint256) {
         ( , uint256 _postId, address _owner, string memory _ipfsHash, bool _up, bool _down, bool _isView) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
         require(_postId > 0, "CommentData: wrong postId");
@@ -111,7 +93,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external override onlyBurnCommentPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_BURN_COMMENT, _pluginName, _version) returns(bool) {
         (uint256 _postId, uint256 _commentId) =
         abi.decode(_data,(uint256, uint256));
 
@@ -132,7 +114,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         uint256 _postId,
         uint256 _commentId,
         uint256 _price
-    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
         Metadata storage comment = comments[_postId][_commentId];
         comment.price = _price;
 
@@ -144,7 +126,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         uint256 _version,
         uint256 _postId,
         uint256 _commentId
-    ) external view override onlyReadCommentPlugin(_pluginName, _version) returns(
+    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_COMMENT, _pluginName, _version) returns(
         bytes memory _data
     ) {
         Metadata storage comment = comments[_postId][_commentId];

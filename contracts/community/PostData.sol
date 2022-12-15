@@ -46,47 +46,11 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
     event SetVisibility(bytes32 executedId, uint256 postId, bool isView);
 
-    modifier onlyWritePostPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_WRITE_POST, "PostData: wrong plugin name");
+    modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
+        require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
         require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
+            registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
             "PostData: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyBurnPostPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_BURN_POST, "PostData: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "PostData: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyReadPostPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_READ_POST, "PostData: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "PostData: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlySetVisibilityPostPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_VISIBILITY_POST, "PostData: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "PostData: caller is not the plugin"
-        );
-        _;
-    }
-
-    modifier onlyWriteCommentPlugin(bytes32 _pluginName, uint256 _version) {
-        require(_pluginName == PluginsList.COMMUNITY_WRITE_COMMENT, "CommentData: wrong plugin name");
-        require(
-            registry.getPluginContract(_pluginName, _version) == _msgSender(),
-            "CommentData: caller is not the plugin"
         );
         _;
     }
@@ -114,7 +78,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external override onlyWritePostPlugin(_pluginName, _version) returns(uint256) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(uint256) {
         (
         address _communityId,
         address _owner,
@@ -148,7 +112,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external override onlyBurnPostPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_BURN_POST, _pluginName, _version) returns(bool) {
         (uint256 _postId) =
         abi.decode(_data,(uint256));
         require(_postId > 0, "PostData: wrong postId");
@@ -166,7 +130,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         bytes32 _pluginName,
         uint256 _version,
         bytes memory _data
-    ) external override onlySetVisibilityPostPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_VISIBILITY_POST, _pluginName, _version) returns(bool) {
         (uint256 _postId, bool _isView) =
         abi.decode(_data,(uint256, bool));
 
@@ -182,7 +146,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         uint256 _postId,
         uint256 _price
-    ) external override onlyWritePostPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(bool) {
         Metadata storage post = posts[_postId];
         post.price = _price;
 
@@ -195,7 +159,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         address _sender,
         bytes memory _data
-    ) external override onlyWriteCommentPlugin(_pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
         ( , uint256 _postId, , , bool _isUp, bool _isDown, ) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
 
@@ -209,7 +173,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         bytes32 _pluginName,
         uint256 _version,
         uint256 _postId
-    ) external view override onlyReadPostPlugin(_pluginName, _version) returns(
+    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_POST, _pluginName, _version) returns(
         bytes memory _data
     ) {
         Metadata storage post = posts[_postId];
