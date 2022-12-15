@@ -31,8 +31,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     //postId -> comment counter
     mapping(uint256 => uint256) private commentCount;
 
-//    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
-    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId);
+    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
     event BurnComment(bytes32 executedId, uint256 postId, uint256 commentId, address sender);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
@@ -82,7 +81,6 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         comment.down = _down;
         comment.isView = _isView;
 //        emit WriteComment(_executedId, _postId, count, _sender, _owner);
-        //emit WriteComment(_executedId, _postId, count);
 
         return count;
     }

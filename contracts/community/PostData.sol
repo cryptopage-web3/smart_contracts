@@ -130,7 +130,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         bytes32 _pluginName,
         uint256 _version,
         bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_VISIBILITY_POST, _pluginName, _version) returns(bool) {
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CHANGE_VISIBILITY_POST, _pluginName, _version) returns(bool) {
         (uint256 _postId, bool _isView) =
         abi.decode(_data,(uint256, bool));
 
