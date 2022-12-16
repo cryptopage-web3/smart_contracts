@@ -24,6 +24,13 @@ interface ICommentData {
         bytes memory _data
     ) external returns(bool);
 
+    function setVisibility(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        bytes memory _data
+    ) external returns(bool);
+
     function setPrice(
         bytes32 _pluginName,
         uint256 _version,

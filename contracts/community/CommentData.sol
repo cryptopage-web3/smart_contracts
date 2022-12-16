@@ -33,6 +33,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
 
     event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
     event BurnComment(bytes32 executedId, uint256 postId, uint256 commentId, address sender);
+    event SetVisibility(bytes32 executedId, uint256 postId, uint256 commentId, bool isView);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
         require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
@@ -102,6 +103,24 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         comment.isView = false;
 
         emit BurnComment(_executedId, _postId, _commentId, _sender);
+
+        return true;
+    }
+
+    function setVisibility(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        bytes memory _data
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CHANGE_VISIBILITY_COMMENT, _pluginName, _version) returns(bool) {
+        (uint256 _postId, uint256 _commentId, bool _isView) =
+        abi.decode(_data,(uint256, uint256, bool));
+
+        Metadata storage comment = comments[_postId][_commentId];
+        require(comment.timestamp > 0, "CommentData: wrong postId");
+
+        comment.isView = _isView;
+        emit SetVisibility(_executedId, _postId, _commentId, _isView);
 
         return true;
     }
