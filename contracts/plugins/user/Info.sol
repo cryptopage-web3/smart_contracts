@@ -42,6 +42,8 @@ contract Info is IReadPlugin, Context {
     ) external override onlyExecutor view returns(bytes memory) {
         checkData(_version, _sender);
 
+        //here will be the code
+
         return _inData;
     }
 
