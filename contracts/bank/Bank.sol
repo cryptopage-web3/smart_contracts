@@ -48,17 +48,7 @@ contract Bank is
         IToken token = IToken(registry.token());
 
         balances[_msgSender()] -= amount;
-        token.transferFrom(address(this), _msgSender(), amount);
-    }
-
-    function transfer(address to, uint256 amount) external override {
-        balances[_msgSender()] -= amount;
-        balances[to] += amount;
-    }
-
-    function transferFrom(address from, address to, uint256 amount) external override onlyRole(BALANCE_MANAGER_ROLE) {
-        balances[from] -= amount;
-        balances[to] += amount;
+        token.transfer(_msgSender(), amount);
     }
 
     function balanceOf(address user) external view override returns (uint256) {
