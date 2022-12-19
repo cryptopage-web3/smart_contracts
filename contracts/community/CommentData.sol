@@ -36,10 +36,10 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     event SetVisibility(bytes32 executedId, uint256 postId, uint256 commentId, bool isView);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
-        require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
+        require(_trustedPluginName == _checkedPluginName, "CommentData: wrong plugin name");
         require(
             registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
-            "PostData: caller is not the plugin"
+            "CommentData: caller is not the plugin"
         );
         _;
     }

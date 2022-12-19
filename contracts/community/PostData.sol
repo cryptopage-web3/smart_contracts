@@ -47,7 +47,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     event SetVisibility(bytes32 executedId, uint256 postId, bool isView);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
-        require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
+        require(_trustedPluginName == _checkedPluginName, "PostData: wrong plugin name");
         require(
             registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
             "PostData: caller is not the plugin"

@@ -30,10 +30,10 @@ contract CommunityData is Initializable, ContextUpgradeable, ICommunityData {
     event AddPostIdForCommunity(bytes32 executedId, address indexed communityId, uint256 postId);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
-        require(_trustedPluginName == _checkedPluginName, "Account: wrong plugin name");
+        require(_trustedPluginName == _checkedPluginName, "CommunityData: wrong plugin name");
         require(
             registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
-            "PostData: caller is not the plugin"
+            "CommunityData: caller is not the plugin"
         );
         _;
     }
