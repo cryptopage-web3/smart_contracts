@@ -11,6 +11,7 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IReadPlugin.sol";
+import "../../bank/interfaces/IBank.sol";
 
 
 contract BalanceOf is IReadPlugin, Context {
@@ -36,12 +37,16 @@ contract BalanceOf is IReadPlugin, Context {
         uint256 _version,
         address _sender,
         bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory) {
+    ) external override onlyExecutor view returns(bytes memory _outData) {
         checkData(_version, _sender);
+        require(_inData.length == 0, "Read: wrong _inData");
 
-        //here will be the code
-
-        return _inData;
+        uint256 amount = IBank(registry.bank()).balanceOf(
+            PluginsList.BANK_BALANCE_OF,
+            _version,
+            _sender
+        );
+        _outData = abi.encode(amount);
     }
 
     function checkData(uint256 _version, address _sender) private view {

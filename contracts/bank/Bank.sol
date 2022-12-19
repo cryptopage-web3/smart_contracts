@@ -58,11 +58,13 @@ contract Bank is
         uint256 _version,
         address _sender,
         uint256 _amount
-    ) external override onlyTrustedPlugin(PluginsList.BANK_DEPOSIT, _pluginName, _version) {
+    ) external override onlyTrustedPlugin(PluginsList.BANK_DEPOSIT, _pluginName, _version) returns(bool) {
         require(_amount > 0, "PageBank: wrong amount");
         require(token.transferFrom(_sender, address(this), _amount), "PageBank: wrong transfer of tokens");
         balances[_sender] += _amount;
         emit Deposit(_executedId, _sender, _amount);
+
+        return true;
     }
 
     function withdraw(
@@ -71,10 +73,12 @@ contract Bank is
         uint256 _version,
         address _sender,
         uint256 _amount
-    ) external override onlyTrustedPlugin(PluginsList.BANK_WITHDRAW, _pluginName, _version) {
+    ) external override onlyTrustedPlugin(PluginsList.BANK_WITHDRAW, _pluginName, _version) returns(bool) {
         balances[_sender] -= _amount;
         require(token.transfer(_sender,  _amount), "PageBank: wrong transfer of tokens");
         emit Withdraw(_executedId, _sender, _amount);
+
+        return true;
     }
 
     function balanceOf(

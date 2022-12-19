@@ -11,6 +11,7 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
+import "../../bank/interfaces/IBank.sol";
 
 
 contract Deposit is IExecutePlugin, Context{
@@ -43,9 +44,13 @@ contract Deposit is IExecutePlugin, Context{
         (uint256 _amount) =
         abi.decode(_data,(uint256));
 
-        //here will be the code
-
-        return true;
+        return IBank(registry.bank()).deposit(
+            _executedId,
+            PluginsList.BANK_DEPOSIT,
+            _version,
+            _sender,
+            _amount
+        );
     }
 
     function checkData(uint256 _version, address _sender) private view {

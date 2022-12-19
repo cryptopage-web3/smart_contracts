@@ -12,7 +12,7 @@ interface IBank {
         uint256 _version,
         address _sender,
         uint256 _amount
-    ) external;
+    ) external returns(bool);
 
     function withdraw(
         bytes32 _executedId,
@@ -20,7 +20,7 @@ interface IBank {
         uint256 _version,
         address _sender,
         uint256 _amount
-    ) external;
+    ) external returns(bool);
 
     function balanceOf(
         bytes32 _pluginName,
