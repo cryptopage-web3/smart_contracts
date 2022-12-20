@@ -28,4 +28,6 @@ interface ICommunityData {
     function communitiesCount() external view returns (uint256);
 
     function isLegalPostId(address _community, uint256 _postId) external view returns (bool);
+
+    function getPostIds(address _community) external view returns (uint[] memory);
 }

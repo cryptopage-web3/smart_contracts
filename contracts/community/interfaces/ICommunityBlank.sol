@@ -9,6 +9,10 @@ interface ICommunityBlank {
 
     function creator() external view returns (address);
 
+    function name() external view returns (string memory);
+
+    function creatingTime() external view returns (uint256);
+
     function linkPlugin(bytes32 _pluginName, uint256 _version) external;
 
     function unLinkPlugin(bytes32 _pluginName, uint256 _version) external;

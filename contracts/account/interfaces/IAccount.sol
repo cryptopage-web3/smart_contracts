@@ -56,10 +56,16 @@ interface IAccount {
         uint256 _commentId
     ) external returns(bool);
 
-    function getCommunityCounts(address _communityId) external view returns(
+    function getCommunityUsersCounts(address _communityId) external view returns(
         uint256 normalUsers,
         uint256 bannedUsers,
         uint256 moderatorsUsers
+    );
+
+    function getCommunityUsers(address _communityId) external view returns(
+        address[] memory normalUsers,
+        address[] memory bannedUsers,
+        address[] memory moderators
     );
 
     function isCommunityUser(address _communityId, address _user) external view returns(bool);

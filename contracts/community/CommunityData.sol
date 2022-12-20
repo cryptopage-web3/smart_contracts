@@ -96,4 +96,8 @@ contract CommunityData is Initializable, ContextUpgradeable, ICommunityData {
     function isLegalPostId(address _community, uint256 _postId) external override view returns (bool) {
         return postIdsByCommunity[_community].contains(_postId);
     }
+
+    function getPostIds(address _community) external override view returns (uint[] memory) {
+        return postIdsByCommunity[_community].values();
+    }
 }

@@ -23,6 +23,7 @@ contract CommunityBlank is
 
     string public name;
     address public creator;
+    uint256 public creatingTime;
 
     IRegistry registry;
 
@@ -54,6 +55,7 @@ contract CommunityBlank is
         if (_isInitial) {
             setInitialPlugins();
         }
+        creatingTime = block.timestamp;
     }
 
     function linkPlugin(bytes32 _pluginName, uint256 _version) external override onlyOwner {

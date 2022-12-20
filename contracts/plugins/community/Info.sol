@@ -3,10 +3,11 @@
 pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../../account/interfaces/IAccount.sol";
-import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/ICommunityData.sol";
+import "../../community/interfaces/ICommunityBlank.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
 import "../../rules/interfaces/IRule.sol";
@@ -39,12 +40,24 @@ contract Info is IReadPlugin, Context {
         uint256 _version,
         address _sender,
         bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory) {
+    ) external override onlyExecutor view returns(bytes memory _outData) {
         checkData(_version, _sender);
+        (address _communityId) =
+        abi.decode(_inData,(address));
 
-        //here will be the code
+        string memory name = ICommunityBlank(_communityId).name();
+        address creator = ICommunityBlank(_communityId).creator();
+        address owner = Ownable(_communityId).owner();
+        uint256 creatingTime = ICommunityBlank(_communityId).creatingTime();
 
-        return _inData;
+        uint256[] memory postIds = ICommunityData(registry.communityData()).getPostIds(_communityId);
+        (
+            address[] memory normalUsers,
+            address[] memory bannedUsers,
+            address[] memory moderators
+        ) = IAccount(registry.account()).getCommunityUsers(_communityId);
+
+        _outData = abi.encode(name, creator, owner, creatingTime, normalUsers, bannedUsers, moderators, postIds);
     }
 
     function checkData(uint256 _version, address _sender) private view {

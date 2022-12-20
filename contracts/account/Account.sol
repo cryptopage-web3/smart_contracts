@@ -153,7 +153,7 @@ contract Account is
         return createdCommentIdsByUser[_communityId][_user][_postId].add(_commentId);
     }
 
-    function getCommunityCounts(address _communityId) external override view returns(
+    function getCommunityUsersCounts(address _communityId) external override view returns(
         uint256 normalUsers,
         uint256 bannedUsers,
         uint256 moderatorsUsers
@@ -174,5 +174,16 @@ contract Account is
 
     function isModerator(address _communityId, address _user) external override view returns(bool) {
         return communityUsers[_communityId].moderators.contains(_user);
+    }
+
+    function getCommunityUsers(address _communityId) external override view returns(
+        address[] memory normalUsers,
+        address[] memory bannedUsers,
+        address[] memory moderators
+    ) {
+        CommunityUsers storage users = communityUsers[_communityId];
+        normalUsers = users.users.values();
+        bannedUsers = users.bannedUsers.values();
+        moderators = users.moderators.values();
     }
 }

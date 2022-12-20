@@ -33,7 +33,7 @@ describe("Test Join to community basic functionality", function () {
     it("Should join user", async function () {
         let communityAddress = createdCommunity.address;
 
-        let beforeCounts = await account.getCommunityCounts(communityAddress);
+        let beforeCounts = await account.getCommunityUsersCounts(communityAddress);
         expect(beforeCounts.normalUsers).to.equal(
             BigNumber.from(0)
         );
@@ -42,7 +42,7 @@ describe("Test Join to community basic functionality", function () {
         let data = defaultAbiCoder.encode([ "address" ], [communityAddress]);
         await executor.connect(third).run(id, communityJoinPluginName, version, data);
 
-        let afterCounts = await account.getCommunityCounts(communityAddress);
+        let afterCounts = await account.getCommunityUsersCounts(communityAddress);
         expect(afterCounts.normalUsers).to.equal(
             BigNumber.from(1)
         );
