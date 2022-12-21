@@ -74,4 +74,11 @@ interface IAccount {
 
     function isModerator(address _communityId, address _user) external view returns(bool);
 
+    function getCommunitiesByUser(address _user) external view returns(
+        address[] memory communities
+    );
+
+    function getPostIdsByUser(address _communityId, address _user) external view returns(
+        uint256[] memory postIds
+    );
 }

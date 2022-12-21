@@ -33,6 +33,9 @@ contract Account is
     // communityId -> users
     mapping(address => CommunityUsers) private communityUsers;
 
+    // user -> communities
+    mapping(address => EnumerableSetUpgradeable.AddressSet) private communitiesByUser;
+
     // communityId -> user -> postIds
     mapping(address => mapping(address => EnumerableSetUpgradeable.UintSet)) private createdPostIdsByUser;
 
@@ -80,6 +83,7 @@ contract Account is
         address _user
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_JOIN, _pluginName, _version) returns(bool) {
         require(_communityId != address(0) , "Account: address is zero");
+        require(communitiesByUser[_user].add(_communityId) , "Account: the user is already in the community");
         CommunityUsers storage users = communityUsers[_communityId];
         emit AddCommunityUser(_executedId, _communityId, _user);
         return users.users.add(_user);
@@ -92,6 +96,7 @@ contract Account is
         address _communityId,
         address _user
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_QUIT, _pluginName, _version) returns(bool) {
+        require(communitiesByUser[_user].remove(_communityId) , "Account: the user is no longer in the community");
         CommunityUsers storage users = communityUsers[_communityId];
         emit RemoveCommunityUser(_executedId, _communityId, _user);
         return users.users.remove(_user);
@@ -185,5 +190,17 @@ contract Account is
         normalUsers = users.users.values();
         bannedUsers = users.bannedUsers.values();
         moderators = users.moderators.values();
+    }
+
+    function getCommunitiesByUser(address _user) external override view returns(
+        address[] memory communities
+    ) {
+        communities = communitiesByUser[_user].values();
+    }
+
+    function getPostIdsByUser(address _communityId, address _user) external override view returns(
+        uint256[] memory postIds
+    ) {
+        postIds = createdPostIdsByUser[_communityId][_user].values();
     }
 }

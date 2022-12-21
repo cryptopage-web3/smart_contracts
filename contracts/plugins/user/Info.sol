@@ -39,12 +39,35 @@ contract Info is IReadPlugin, Context {
         uint256 _version,
         address _sender,
         bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory) {
+    ) external override onlyExecutor view returns(bytes memory _outData) {
         checkData(_version, _sender);
 
-        //here will be the code
+        (address _user) =
+        abi.decode(_inData,(address));
 
-        return _inData;
+        address[] memory communities = IAccount(registry.account()).getCommunitiesByUser(_user);
+
+        uint256 count = getPostsCount(communities, _user);
+
+        uint256[] memory postIds = new uint256[](count);
+        if (count > 0) {
+            for(uint256 i=0; i < communities.length; i++) {
+                uint256[] memory tempIds = IAccount(registry.account()).getPostIdsByUser(communities[i], _user);
+                for(uint256 j=0; j < tempIds.length; j++) {
+                    count--;
+                    postIds[count] = tempIds[j];
+                }
+            }
+        }
+
+        _outData = abi.encode(communities, postIds);
+    }
+
+    function getPostsCount(address[] memory _communities, address _user) private view returns(uint256 _count) {
+        for(uint256 i=0; i < _communities.length; i++) {
+            uint256[] memory tempIds = IAccount(registry.account()).getPostIdsByUser(_communities[i], _user);
+            _count += tempIds.length;
+        }
     }
 
     function checkData(uint256 _version, address _sender) private view {
