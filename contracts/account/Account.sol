@@ -193,14 +193,22 @@ contract Account is
     }
 
     function getCommunitiesByUser(address _user) external override view returns(
-        address[] memory communities
+        address[] memory _communities
     ) {
-        communities = communitiesByUser[_user].values();
+        _communities = communitiesByUser[_user].values();
     }
 
     function getPostIdsByUser(address _communityId, address _user) external override view returns(
-        uint256[] memory postIds
+        uint256[] memory _postIds
     ) {
-        postIds = createdPostIdsByUser[_communityId][_user].values();
+        _postIds = createdPostIdsByUser[_communityId][_user].values();
+    }
+
+    function getCommentIdsByUserAndPost(
+        address _communityId,
+        address _user,
+        uint256 _postId
+    ) external override view returns(uint256[] memory _commentIds) {
+        _commentIds = createdCommentIdsByUser[_communityId][_user][_postId].values();
     }
 }

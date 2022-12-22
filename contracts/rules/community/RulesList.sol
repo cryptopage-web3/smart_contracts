@@ -59,6 +59,11 @@ library  RulesList {
     bytes32 public constant MODERATION_USING_VOTING = keccak256(abi.encode("MODERATION_USING_VOTING"));
     bytes32 public constant MODERATION_USING_MODERATORS = keccak256(abi.encode("MODERATION_USING_MODERATORS"));
 
+    // User Verification Rules
+    bytes32 public constant USER_VERIFICATION_RULES = keccak256(abi.encode("PAGE.USER_VERIFICATION_RULES"));
+    bytes32 public constant NO_VERIFICATION = keccak256(abi.encode("NO_VERIFICATION"));
+    bytes32 public constant USING_VERIFICATION = keccak256(abi.encode("USING_VERIFICATION"));
+
     // Community Gas Compensation Rules
     bytes32 public constant GAS_COMPENSATION_RULES = keccak256(abi.encode("PAGE.GAS_COMPENSATION_RULES"));
     bytes32 public constant NO_GAS_COMPENSATION = keccak256(abi.encode("NO_GAS_COMPENSATION"));
