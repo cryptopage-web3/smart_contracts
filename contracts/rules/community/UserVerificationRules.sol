@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
+import "../../community/interfaces/ICommunityBlank.sol";
 
 import "./interfaces/IUserVerificationRules.sol";
 import "./interfaces/IFractalRegistry.sol";
@@ -45,10 +46,7 @@ contract UserVerificationRules is IUserVerificationRules, Ownable {
             return true;
         }
         if (isActiveRule(_communityId, RulesList.USING_VERIFICATION)) {
-            require(
-                isVerificationUser(_user),
-                "UserVerificationRules: the user did not pass verification"
-            );
+            return isVerificationUser(_user);
         }
 
         return true;

@@ -15,6 +15,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IPostCommentingRules.sol";
+import "../../rules/community/interfaces/IUserVerificationRules.sol";
 
 
 contract Write is IExecutePlugin, Context{
@@ -56,10 +57,19 @@ contract Write is IExecutePlugin, Context{
         );
         require(
             IPostCommentingRules(groupRules).validate(_communityId, _sender),
-            "Write: wrong validate"
+            "Write: wrong validate POST_COMMENTING_RULES"
         );
 
-        uint256 commentId = ICommentData(registry.commentData()).writeComment(
+        groupRules = IRule(registry.rule()).getRuleContract(
+            RulesList.USER_VERIFICATION_RULES,
+            PLUGIN_VERSION
+        );
+        require(
+            IUserVerificationRules(groupRules).validate(_communityId, _sender),
+            "Write: wrong validate USER_VERIFICATION_RULES"
+        );
+
+       uint256 commentId = ICommentData(registry.commentData()).writeComment(
             _executedId,
             PLUGIN_NAME,
             PLUGIN_VERSION,

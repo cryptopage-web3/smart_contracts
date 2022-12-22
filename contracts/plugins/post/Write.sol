@@ -14,6 +14,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IPostPlacingRules.sol";
+import "../../rules/community/interfaces/IUserVerificationRules.sol";
 
 
 contract Write is IExecutePlugin, Context{
@@ -55,7 +56,16 @@ contract Write is IExecutePlugin, Context{
         );
         require(
             IPostPlacingRules(groupRules).validate(_communityId, _sender),
-            "Write: wrong validate"
+            "Write: wrong validate POST_PLACING_RULES"
+        );
+
+        groupRules = IRule(registry.rule()).getRuleContract(
+            RulesList.USER_VERIFICATION_RULES,
+            PLUGIN_VERSION
+        );
+        require(
+            IUserVerificationRules(groupRules).validate(_communityId, _sender),
+            "Write: wrong validate USER_VERIFICATION_RULES"
         );
 
         uint256 postId = IPostData(registry.postData()).writePost(
