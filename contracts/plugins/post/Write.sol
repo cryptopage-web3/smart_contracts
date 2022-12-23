@@ -13,8 +13,7 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
-import "../../rules/community/interfaces/IPostPlacingRules.sol";
-import "../../rules/community/interfaces/IUserVerificationRules.sol";
+import "../../rules/community/interfaces/IBaseRules.sol";
 
 
 contract Write is IExecutePlugin, Context{
@@ -50,23 +49,8 @@ contract Write is IExecutePlugin, Context{
         abi.decode(_data,(address, address, string, uint256, string[], bool, bool));
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.POST_PLACING_RULES,
-            PLUGIN_VERSION
-        );
-        require(
-            IPostPlacingRules(groupRules).validate(_communityId, _sender),
-            "Write: wrong validate POST_PLACING_RULES"
-        );
-
-        groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.USER_VERIFICATION_RULES,
-            PLUGIN_VERSION
-        );
-        require(
-            IUserVerificationRules(groupRules).validate(_communityId, _sender),
-            "Write: wrong validate USER_VERIFICATION_RULES"
-        );
+        checkRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);
+        checkRule(RulesList.POST_PLACING_RULES, _communityId, _sender);
 
         uint256 postId = IPostData(registry.postData()).writePost(
             _executedId,
@@ -110,6 +94,17 @@ contract Write is IExecutePlugin, Context{
         );
 
     return true;
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IBaseRules(rulesContract).validate(_communityId, _sender),
+            "Write: wrong rules validate"
+        );
     }
 
     function checkData(uint256 _version, address _sender) private view {

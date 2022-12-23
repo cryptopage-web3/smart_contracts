@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 import "./interfaces/IBank.sol";
 import "../registry/interfaces/IRegistry.sol";
@@ -13,12 +13,7 @@ import "../tokens/token/interfaces/IToken.sol";
 /// @author Crypto.Page Team
 /// @notice
 /// @dev
-contract Bank is
-    Initializable,
-    AccessControlUpgradeable,
-    IBank
-{
-    bytes32 public constant BALANCE_MANAGER_ROLE = keccak256("BALANCE_MANAGER_ROLE");
+contract Bank is IBank, ContextUpgradeable {
 
     IRegistry public registry;
     IToken public token;
@@ -37,11 +32,7 @@ contract Bank is
         _;
     }
 
-    function initialize(address _registry)
-        external
-        initializer
-    {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    function initialize(address _registry) external initializer {
         registry = IRegistry(_registry);
         token = IToken(registry.token());
     }
