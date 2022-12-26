@@ -30,6 +30,8 @@ interface IRegistry {
 
     function nft() external view returns (address);
 
+    function setBank(address _contract) external;
+
     function setExecutor(address _executor) external;
 
     function setCommunityData(address _contract) external;

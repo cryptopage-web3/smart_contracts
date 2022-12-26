@@ -40,6 +40,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event SetPlugin(address sender, bytes32 pluginName, uint256 version, address pluginContract);
     event ChangePluginStatus(address sender, bytes32 pluginName, uint256 version, bool newStatus);
 
+    event SetBank(address origin, address sender, address oldValue, address newValue);
     event SetExecutor(address origin, address sender, address oldValue, address newValue);
     event SetCommunityData(address origin, address sender, address oldValue, address newValue);
     event SetPostData(address origin, address sender, address oldValue, address newValue);
@@ -54,13 +55,11 @@ contract Registry is OwnableUpgradeable, IRegistry {
     ///constructor() initializer {}
 
     function initialize(
-        address _bank,
         address _token,
         address _dao,
         address _treasury
     ) external initializer {
         __Ownable_init();
-        bank = _bank;
         token = _token;
         dao = _dao;
         treasury = _treasury;
@@ -86,6 +85,12 @@ contract Registry is OwnableUpgradeable, IRegistry {
         plugin.pluginContract = _pluginContract;
 
         emit SetPlugin(_msgSender(), _pluginName, _version, _pluginContract);
+    }
+
+    function setBank(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetBank(tx.origin, _msgSender(), bank, _contract);
+        bank = _contract;
     }
 
     function setExecutor(address _contract) external override onlyOwner {
