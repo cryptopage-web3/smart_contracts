@@ -22,6 +22,7 @@ contract Bank is IBank, ContextUpgradeable {
 
     event Deposit(bytes32 executedId, address indexed user, uint256 amount);
     event Withdraw(bytes32 executedId, address indexed user, uint256 amount);
+    event GasCompensation(bytes32 executedId, address indexed user, uint256 amount);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
         require(_trustedPluginName == _checkedPluginName, "Bank: wrong plugin name");
@@ -68,6 +69,22 @@ contract Bank is IBank, ContextUpgradeable {
         balances[_sender] -= _amount;
         require(token.transfer(_sender,  _amount), "PageBank: wrong transfer of tokens");
         emit Withdraw(_executedId, _sender, _amount);
+
+        return true;
+    }
+
+    function gasCompensation(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _user,
+        uint256 _price
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(bool) {
+        uint256 amount = _price;
+        require(amount > 0, "PageBank: wrong amount");
+        require(token.mint(address(this), amount), "PageBank: wrong mint of tokens");
+        balances[_user] += amount;
+        emit GasCompensation(_executedId, _user, amount);
 
         return true;
     }

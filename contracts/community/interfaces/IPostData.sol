@@ -51,4 +51,14 @@ interface IPostData {
         address _sender,
         bytes memory _data
     ) external returns(bool);
+
+    function setGasCompensation(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId
+    ) external returns(
+        uint256 price,
+        address creator
+    );
 }

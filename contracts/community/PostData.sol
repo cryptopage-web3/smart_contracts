@@ -39,12 +39,15 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     mapping(uint256 => address) private communityIdByPostId;
     //postId -> Metadata
     mapping(uint256 => Metadata) private posts;
+    //postId -> bool
+    mapping(uint256 => bool) private gasCompensation;
 
     event WritePost(bytes32 executedId, uint256 postId, address creator, address owner);
     event BurnPost(bytes32 executedId, uint256 postId, address sender);
 
     event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
     event SetVisibility(bytes32 executedId, uint256 postId, bool isView);
+    event SetGasCompensation(bytes32 executedId, uint256 postId);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
         require(_trustedPluginName == _checkedPluginName, "PostData: wrong plugin name");
@@ -139,6 +142,26 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         emit SetVisibility(_executedId, _postId, _isView);
 
         return true;
+    }
+
+    function setGasCompensation(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(
+        uint256 price,
+        address creator
+    ) {
+        require(_postId > 0, "PostData: wrong postId");
+
+        Metadata storage post = posts[_postId];
+        price = post.price;
+        creator = post.creator;
+        require(!gasCompensation[_postId], "PostData: wrong gas compensation");
+        gasCompensation[_postId] = true;
+
+        emit SetGasCompensation(_executedId, _postId);
     }
 
     function setPrice(

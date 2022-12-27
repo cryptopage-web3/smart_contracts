@@ -22,6 +22,14 @@ interface IBank {
         uint256 _amount
     ) external returns(bool);
 
+    function gasCompensation(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        address _user,
+        uint256 _amount
+    ) external returns(bool);
+
     function balanceOf(
         bytes32 _pluginName,
         uint256 _version,
