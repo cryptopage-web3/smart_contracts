@@ -160,4 +160,8 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
             );
         }
     }
+
+    function getCommentCount(uint256 _postId) external view override returns(uint256) {
+        return commentCount[_postId];
+    }
 }

@@ -45,4 +45,6 @@ interface ICommentData {
         uint256 _postId,
         uint256 _commentId
     ) external view returns(bytes memory _data);
+
+    function getCommentCount(uint256 _postId) external view returns(uint256);
 }

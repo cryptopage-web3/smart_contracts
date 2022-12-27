@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/IPostData.sol";
+import "../../community/interfaces/ICommentData.sol";
 import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
@@ -42,23 +43,28 @@ contract Read is IReadPlugin, Context {
     ) external override onlyExecutor view returns(bytes memory) {
         checkData(_version, _sender);
 
-        (address _communityId , uint256 _postId) =
-        abi.decode(_inData,(address, uint256));
+        (uint256 postId) = abi.decode(_inData,(uint256));
+        address communityId = IPostData(registry.postData()).getCommunityId(postId);
+        uint256 commentCount = ICommentData(registry.commentData()).getCommentCount(postId);
 
         address groupRules = IRule(registry.rule()).getRuleContract(
             RulesList.POST_READING_RULES,
             PLUGIN_VERSION
         );
         require(
-            IPostPlacingRules(groupRules).validate(_communityId, _sender),
+            IPostPlacingRules(groupRules).validate(communityId, _sender),
             "Write: wrong validate"
         );
 
-        return IPostData(registry.postData()).readPost(
+        bytes memory postData = IPostData(registry.postData()).readPost(
             PLUGIN_NAME,
             PLUGIN_VERSION,
-            _postId
+            postId
         );
+
+        bytes memory outData = abi.encode(communityId, commentCount, postData);
+
+        return outData;
     }
 
     function checkData(uint256 _version, address _sender) private view {
