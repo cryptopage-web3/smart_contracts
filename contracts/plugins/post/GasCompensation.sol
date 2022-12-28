@@ -13,7 +13,7 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
-import "../../rules/community/interfaces/IChangeVisibilityContentRules.sol";
+import "../../rules/community/interfaces/IGasCompensationRules.sol";
 
 
 contract GasCompensation is IExecutePlugin, Context{
@@ -45,7 +45,7 @@ contract GasCompensation is IExecutePlugin, Context{
         checkData(_version, _sender);
         (uint256[] memory postIds) = abi.decode(_data,(uint256[]));
 
-        for (uint256 i = 0; i < postIds.length; i++ ) {
+        for (uint256 i = 0; i < postIds.length; i++) {
             uint256 postId = postIds[i];
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
             (uint256 price, address creator) = IPostData(registry.postData()).setGasCompensation(
@@ -54,31 +54,30 @@ contract GasCompensation is IExecutePlugin, Context{
                 PLUGIN_VERSION,
                 postId
             );
-            checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator);
-            require(
-                IBank(registry.bank()).gasCompensation(
-                    _executedId,
-                    PLUGIN_NAME,
-                    PLUGIN_VERSION,
-                    creator,
-                    price
-                ),
-                "GasCompensation: wrong bank"
-            );
+            address user = checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator);
+            if(user != address(0)) {
+                require(
+                    IBank(registry.bank()).gasCompensation(
+                        _executedId,
+                        PLUGIN_NAME,
+                        PLUGIN_VERSION,
+                        user,
+                        price
+                    ),
+                    "GasCompensation: wrong bank"
+                );
+            }
         }
 
         return true;
     }
 
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view returns(address) {
         address rulesContract = IRule(registry.rule()).getRuleContract(
             _groupRulesName,
             PLUGIN_VERSION
         );
-        require(
-            IBaseRules(rulesContract).validate(_communityId, _sender),
-            "GasCompensation: wrong rules validate"
-        );
+        return IGasCompensationRules(rulesContract).validate(_communityId, _sender);
     }
 
     function checkData(uint256 _version, address _sender) private view {

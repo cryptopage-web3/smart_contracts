@@ -11,16 +11,16 @@ import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
 
-import "./interfaces/IGasCompenstionRules.sol";
+import "./interfaces/IGasCompensationRules.sol";
 
 /// @title Contract of Page.GasCompenstionRules
 /// @notice This contract contains rules.
 /// @dev .
-contract GasCompenstionRules is IGasCompenstionRules, Context {
+contract GasCompensationRules is IGasCompensationRules, Context {
 
     uint256 public constant RULES_VERSION = 1;
     bytes32 public GROUP_RULE = RulesList.GAS_COMPENSATION_RULES;
-    uint256 public constant badgeAllowId = 2;
+    address public constant EMPTY_ADDRESS = address(0);
 
     IRegistry public registry;
     IBadge public badge;
@@ -43,19 +43,18 @@ contract GasCompenstionRules is IGasCompenstionRules, Context {
         badge = IBadge(badgeContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+    function validate(address _communityId, address _user) external view override onlyPlugin returns(address) {
         if (isActiveRule(_communityId, RulesList.NO_GAS_COMPENSATION)) {
-            // there will be some logic here
+            return EMPTY_ADDRESS;
         }
         if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_COMMUNITY)) {
-            // here is the logic for transferring tokens to community
+            return _communityId;
         }
         if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_AUTHOR)) {
-            require(_user != address(0), "GasCompenstionRules: user address is zero");
-            // some logic for this user
+            return _user;
         }
 
-        return true;
+        return EMPTY_ADDRESS;
     }
 
     function isActiveRule(address _communityId, bytes32 _ruleName) private view returns(bool) {
