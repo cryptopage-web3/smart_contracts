@@ -15,6 +15,8 @@ import "./interfaces/IRegistry.sol";
 contract Registry is OwnableUpgradeable, IRegistry {
 
     address public bank;
+    address public oracle;
+    address public uniV3Pool;
     address public token;
     address public dao;
     address public treasury;
@@ -41,6 +43,8 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event ChangePluginStatus(address sender, bytes32 pluginName, uint256 version, bool newStatus);
 
     event SetBank(address origin, address sender, address oldValue, address newValue);
+    event SetOracle(address origin, address sender, address oldValue, address newValue);
+    event SetUniV3Pool(address origin, address sender, address oldValue, address newValue);
     event SetExecutor(address origin, address sender, address oldValue, address newValue);
     event SetCommunityData(address origin, address sender, address oldValue, address newValue);
     event SetPostData(address origin, address sender, address oldValue, address newValue);
@@ -91,6 +95,18 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_contract != address(0), "Registry: address can't be zero");
         emit SetBank(tx.origin, _msgSender(), bank, _contract);
         bank = _contract;
+    }
+
+    function setOracle(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetOracle(tx.origin, _msgSender(), oracle, _contract);
+        oracle = _contract;
+    }
+
+    function setUniV3Pool(address _contract) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        emit SetUniV3Pool(tx.origin, _msgSender(), uniV3Pool, _contract);
+        uniV3Pool = _contract;
     }
 
     function setExecutor(address _contract) external override onlyOwner {

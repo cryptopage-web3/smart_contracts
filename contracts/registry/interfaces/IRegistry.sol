@@ -8,6 +8,10 @@ interface IRegistry {
 
     function bank() external view returns (address);
 
+    function oracle() external view returns (address);
+
+    function uniV3Pool() external view returns (address);
+
     function token() external view returns (address);
 
     function dao() external view returns (address);
@@ -31,6 +35,10 @@ interface IRegistry {
     function nft() external view returns (address);
 
     function setBank(address _contract) external;
+
+    function setOracle(address _contract) external;
+
+    function setUniV3Pool(address _contract) external;
 
     function setExecutor(address _executor) external;
 

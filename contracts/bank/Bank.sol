@@ -5,6 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 import "./interfaces/IBank.sol";
+import "./interfaces/IOracle.sol";
 import "../registry/interfaces/IRegistry.sol";
 import "../plugins/PluginsList.sol";
 import "../tokens/token/interfaces/IToken.sol";
@@ -80,7 +81,7 @@ contract Bank is IBank, ContextUpgradeable {
         address _user,
         uint256 _price
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(bool) {
-        uint256 amount = _price;
+        uint256 amount = convertGasToTokenAmount(_price);
         require(amount > 0, "PageBank: wrong amount");
         require(token.mint(address(this), amount), "PageBank: wrong mint of tokens");
         balances[_user] += amount;
@@ -95,5 +96,9 @@ contract Bank is IBank, ContextUpgradeable {
         address _user
     ) external view override onlyTrustedPlugin(PluginsList.BANK_BALANCE_OF, _pluginName, _version) returns (uint256) {
         return balances[_user];
+    }
+
+    function convertGasToTokenAmount(uint256 _gas) private view returns (uint256) {
+        return IOracle(registry.oracle()).getFromWethToPageAmount(_gas);
     }
 }
