@@ -16,7 +16,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         string ipfsHash;
         address creator;
         address owner;
-        uint256 price;
+        uint256 gasConsumption;
         uint256 timestamp;
         bool up;
         bool down;
@@ -125,15 +125,15 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         return true;
     }
 
-    function setPrice(
+    function setGasConsumption(
         bytes32 _pluginName,
         uint256 _version,
         uint256 _postId,
         uint256 _commentId,
-        uint256 _price
+        uint256 _gas
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
         Metadata storage comment = comments[_postId][_commentId];
-        comment.price = _price;
+        comment.gasConsumption = _gas;
 
         return true;
     }
@@ -152,7 +152,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
                 comment.ipfsHash,
                 comment.creator,
                 comment.owner,
-                comment.price,
+                comment.gasConsumption,
                 comment.timestamp,
                 comment.up,
                 comment.down,

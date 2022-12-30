@@ -37,11 +37,11 @@ interface IPostData {
         bytes memory _data
     ) external returns(bool);
 
-    function setPrice(
+    function setGasConsumption(
         bytes32 _pluginName,
         uint256 _version,
         uint256 _postId,
-        uint256 _price
+        uint256 _gas
     ) external returns(bool);
 
     function updatePostWhenNewComment(

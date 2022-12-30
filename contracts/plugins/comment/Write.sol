@@ -86,7 +86,7 @@ contract Write is IExecutePlugin, Context{
 
         uint256 gasPrice = beforeGas - gasleft();
         require(
-            ICommentData(registry.commentData()).setPrice(
+            ICommentData(registry.commentData()).setGasConsumption(
                 PLUGIN_NAME,
                 PLUGIN_VERSION,
                 _postId,

@@ -24,7 +24,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         address repostFromCommunity;
         uint64 upCount;
         uint64 downCount;
-        uint256 price;
+        uint256 gasConsumption;
         uint256 encodingType;
         uint256 timestamp;
         EnumerableSetUpgradeable.AddressSet upDownUsers;
@@ -150,13 +150,13 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         uint256 _version,
         uint256 _postId
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(
-        uint256 price,
+        uint256 gasConsumption,
         address creator
     ) {
         require(_postId > 0, "PostData: wrong postId");
 
         Metadata storage post = posts[_postId];
-        price = post.price;
+        gasConsumption = post.gasConsumption;
         creator = post.creator;
         require(!gasCompensation[_postId], "PostData: wrong gas compensation");
         gasCompensation[_postId] = true;
@@ -164,14 +164,14 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         emit SetGasCompensation(_executedId, _postId);
     }
 
-    function setPrice(
+    function setGasConsumption(
         bytes32 _pluginName,
         uint256 _version,
         uint256 _postId,
-        uint256 _price
+        uint256 _gas
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(bool) {
         Metadata storage post = posts[_postId];
-        post.price = _price;
+        post.gasConsumption = _gas;
 
         return true;
     }
@@ -209,7 +209,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
                 post.repostFromCommunity,
                 post.upCount,
                 post.downCount,
-                post.price,
+                post.gasConsumption,
                 post.encodingType,
                 post.timestamp,
                 post.upDownUsers.values(),

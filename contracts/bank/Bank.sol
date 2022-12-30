@@ -79,9 +79,9 @@ contract Bank is IBank, ContextUpgradeable {
         bytes32 _pluginName,
         uint256 _version,
         address _user,
-        uint256 _price
+        uint256 _gas
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(bool) {
-        uint256 amount = convertGasToTokenAmount(_price);
+        uint256 amount = convertGasToTokenAmount(_gas);
         require(amount > 0, "PageBank: wrong amount");
         require(token.mint(address(this), amount), "PageBank: wrong mint of tokens");
         balances[_user] += amount;

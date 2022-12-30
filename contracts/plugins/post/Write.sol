@@ -82,15 +82,15 @@ contract Write is IExecutePlugin, Context{
             "Write: wrong added postId for community"
         );
 
-        uint256 gasPrice = beforeGas - gasleft();
+        uint256 gasConsumption = beforeGas - gasleft();
         require(
-            IPostData(registry.postData()).setPrice(
+            IPostData(registry.postData()).setGasConsumption(
                 PLUGIN_NAME,
                 PLUGIN_VERSION,
                 postId,
-                gasPrice
+                    gasConsumption
             ),
-            "Write: wrong set price"
+            "Write: wrong set gasConsumption"
         );
 
     return true;
