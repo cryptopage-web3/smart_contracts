@@ -26,6 +26,7 @@ library PluginsList {
     bytes32 public constant COMMUNITY_READ_COMMENT = keccak256(abi.encode("COMMUNITY_READ_COMMENT"));
     bytes32 public constant COMMUNITY_BURN_COMMENT = keccak256(abi.encode("COMMUNITY_BURN_COMMENT"));
     bytes32 public constant COMMUNITY_CHANGE_VISIBILITY_COMMENT = keccak256(abi.encode("COMMUNITY_CHANGE_VISIBILITY_COMMENT"));
+    bytes32 public constant COMMUNITY_COMMENT_GAS_COMPENSATION = keccak256(abi.encode("COMMUNITY_COMMENT_GAS_COMPENSATION"));
 
     bytes32 public constant BANK_DEPOSIT = keccak256(abi.encode("BANK_DEPOSIT"));
     bytes32 public constant BANK_WITHDRAW = keccak256(abi.encode("BANK_WITHDRAW"));

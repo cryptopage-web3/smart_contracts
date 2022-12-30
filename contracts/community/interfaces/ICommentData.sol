@@ -31,6 +31,17 @@ interface ICommentData {
         bytes memory _data
     ) external returns(bool);
 
+    function setGasCompensation(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _commentId
+    ) external returns(
+        uint256 gasConsumption,
+        address creator
+    );
+
     function setGasConsumption(
         bytes32 _pluginName,
         uint256 _version,

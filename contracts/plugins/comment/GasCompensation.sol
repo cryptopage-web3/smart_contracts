@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../account/interfaces/IAccount.sol";
 import "../../bank/interfaces/IBank.sol";
 import "../../community/interfaces/IPostData.sol";
+import "../../community/interfaces/ICommentData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
 import "../../rules/interfaces/IRule.sol";
@@ -19,7 +20,7 @@ import "../../rules/community/interfaces/IGasCompensationRules.sol";
 contract GasCompensation is IExecutePlugin, Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_POST_GAS_COMPENSATION;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_COMMENT_GAS_COMPENSATION;
 
     IRegistry public registry;
 
@@ -43,16 +44,17 @@ contract GasCompensation is IExecutePlugin, Context{
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (uint256[] memory postIds) = abi.decode(_data,(uint256[]));
+        (uint256 postId, uint256[] memory commentIds) = abi.decode(_data,(uint256,uint256[]));
 
-        for (uint256 i = 0; i < postIds.length; i++) {
-            uint256 postId = postIds[i];
+        for (uint256 i = 0; i < commentIds.length; i++) {
+            uint256 commentId = commentIds[i];
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
-            (uint256 price, address creator) = IPostData(registry.postData()).setGasCompensation(
+            (uint256 price, address creator) = ICommentData(registry.commentData()).setGasCompensation(
                 _executedId,
                 PLUGIN_NAME,
                 PLUGIN_VERSION,
-                postId
+                postId,
+                commentId
             );
             address user = checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator);
             if(user != address(0)) {

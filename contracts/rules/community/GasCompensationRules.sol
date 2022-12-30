@@ -27,7 +27,8 @@ contract GasCompensationRules is IGasCompensationRules, Context {
 
     modifier onlyPlugin() {
         require(
-            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender(),
+            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender()
+            || registry.getPluginContract(PluginsList.COMMUNITY_WRITE_COMMENT, RULES_VERSION) == _msgSender(),
             "GasCompenstionRules: caller is not the plugin");
         _;
     }

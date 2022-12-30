@@ -16,6 +16,9 @@ import "../tokens/token/interfaces/IToken.sol";
 /// @dev
 contract Bank is IBank, ContextUpgradeable {
 
+    uint256 public constant ALL_PERCENT = 10000;
+    uint256 public constant TREASURE_FEE = 1000;
+
     IRegistry public registry;
     IToken public token;
 
@@ -84,8 +87,11 @@ contract Bank is IBank, ContextUpgradeable {
         uint256 amount = convertGasToTokenAmount(_gas);
         require(amount > 0, "PageBank: wrong amount");
         require(token.mint(address(this), amount), "PageBank: wrong mint of tokens");
-        balances[_user] += amount;
-        emit GasCompensation(_executedId, _user, amount);
+        uint256 treasureAmount = amount * TREASURE_FEE / ALL_PERCENT;
+        balances[registry.treasury()] += treasureAmount;
+        uint256 userAmount = amount - treasureAmount;
+        balances[_user] += userAmount;
+        emit GasCompensation(_executedId, _user, userAmount);
 
         return true;
     }

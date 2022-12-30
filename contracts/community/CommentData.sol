@@ -28,12 +28,16 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     //postId -> commentId -> Metadata
     mapping(uint256 => mapping(uint256 => Metadata)) private comments;
 
+    //postId -> commentId -> Metadata
+    mapping(uint256 => mapping(uint256 => bool)) private gasCompensation;
+
     //postId -> comment counter
     mapping(uint256 => uint256) private commentCount;
 
     event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
     event BurnComment(bytes32 executedId, uint256 postId, uint256 commentId, address sender);
     event SetVisibility(bytes32 executedId, uint256 postId, uint256 commentId, bool isView);
+    event SetGasCompensation(bytes32 executedId, uint256 postId, uint256 commentId);
 
     modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
         require(_trustedPluginName == _checkedPluginName, "CommentData: wrong plugin name");
@@ -123,6 +127,29 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         emit SetVisibility(_executedId, _postId, _commentId, _isView);
 
         return true;
+    }
+
+    function setGasCompensation(
+        bytes32 _executedId,
+        bytes32 _pluginName,
+        uint256 _version,
+        uint256 _postId,
+        uint256 _commentId
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_COMMENT_GAS_COMPENSATION, _pluginName, _version) returns(
+        uint256 gasConsumption,
+        address creator
+    ) {
+        require(_postId > 0 && _commentId > 0, "CommentData: wrong postId or commentId");
+
+        Metadata storage comment = comments[_postId][_commentId];
+        require(comment.timestamp > 0, "CommentData: wrong postId");
+
+        gasConsumption = comment.gasConsumption;
+        creator = comment.creator;
+        require(!gasCompensation[_postId][_commentId], "CommentData: wrong gas compensation");
+        gasCompensation[_postId][_commentId] = true;
+
+        emit SetGasCompensation(_executedId, _postId, _commentId);
     }
 
     function setGasConsumption(
