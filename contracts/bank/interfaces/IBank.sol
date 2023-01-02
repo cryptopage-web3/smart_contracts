@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.15;
 
+import "../../libraries/DataTypes.sol";
+
+
 interface IBank {
 
     function version() external pure returns (string memory);
@@ -23,11 +26,7 @@ interface IBank {
     ) external returns(bool);
 
     function gasCompensation(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _user,
-        uint256 _amount
+        DataTypes.GasCompensationBank calldata vars
     ) external returns(bool);
 
     function balanceOf(

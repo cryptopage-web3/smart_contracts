@@ -69,6 +69,8 @@ library  RulesList {
     bytes32 public constant NO_GAS_COMPENSATION = keccak256(abi.encode("NO_GAS_COMPENSATION"));
     bytes32 public constant GAS_COMPENSATION_FOR_COMMUNITY = keccak256(abi.encode("GAS_COMPENSATION_FOR_COMMUNITY"));
     bytes32 public constant GAS_COMPENSATION_FOR_AUTHOR = keccak256(abi.encode("GAS_COMPENSATION_FOR_AUTHOR"));
+    bytes32 public constant GAS_COMPENSATION_FOR_OWNER = keccak256(abi.encode("GAS_COMPENSATION_FOR_OWNER"));
+    bytes32 public constant GAS_COMPENSATION_FOR_AUTHOR_AND_OWNER = keccak256(abi.encode("GAS_COMPENSATION_FOR_AUTHOR_AND_OWNER"));
 
     // Community Advertising Placement Rules
     bytes32 public constant ADVERTISING_PLACEMENT_RULES = keccak256(abi.encode("PAGE.ADVERTISING_PLACEMENT_RULES"));

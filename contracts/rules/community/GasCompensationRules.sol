@@ -25,7 +25,7 @@ contract GasCompensationRules is IGasCompensationRules, Context {
     IRegistry public registry;
     IBadge public badge;
 
-    modifier onlyPlugin() {
+    modifier onlyPlugins() {
         require(
             registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender()
             || registry.getPluginContract(PluginsList.COMMUNITY_WRITE_COMMENT, RULES_VERSION) == _msgSender(),
@@ -44,18 +44,32 @@ contract GasCompensationRules is IGasCompensationRules, Context {
         badge = IBadge(badgeContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(address) {
+    function validate(
+        address _communityId,
+        address _author,
+        address _owner
+    ) external view override onlyPlugins returns(address[] memory) {
+        address[] memory users = new address[](2);
         if (isActiveRule(_communityId, RulesList.NO_GAS_COMPENSATION)) {
-            return EMPTY_ADDRESS;
+            return users;
         }
         if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_COMMUNITY)) {
-            return _communityId;
+            users[0] = _communityId;
+            return users;
         }
         if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_AUTHOR)) {
-            return _user;
+            users[0] = _author;
+            return users;
         }
-
-        return EMPTY_ADDRESS;
+        if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_OWNER)) {
+            users[0] = _owner;
+            return users;
+        }
+        if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_AUTHOR_AND_OWNER)) {
+            users[0] = _author;
+            users[0] = _owner;
+        }
+        return users;
     }
 
     function isActiveRule(address _communityId, bytes32 _ruleName) private view returns(bool) {

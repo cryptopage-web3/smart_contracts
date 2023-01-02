@@ -7,6 +7,10 @@ import "./IBaseRules.sol";
 
 interface IGasCompensationRules {
 
-    function validate(address _communityId, address _user) external view returns(address);
+    function validate(
+        address _communityId,
+        address _author,
+        address _owner
+    ) external view returns(address[] memory);
 
 }

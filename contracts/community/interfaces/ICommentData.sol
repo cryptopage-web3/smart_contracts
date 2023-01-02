@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.15;
 
+import "../../libraries/DataTypes.sol";
+
+
 interface ICommentData {
 
     function version() external pure returns (string memory);
@@ -32,14 +35,11 @@ interface ICommentData {
     ) external returns(bool);
 
     function setGasCompensation(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _commentId
+        DataTypes.GasCompensationComment calldata vars
     ) external returns(
         uint256 gasConsumption,
-        address creator
+        address creator,
+        address owner
     );
 
     function setGasConsumption(

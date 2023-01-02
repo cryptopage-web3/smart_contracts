@@ -9,6 +9,7 @@ import "./interfaces/IOracle.sol";
 import "../registry/interfaces/IRegistry.sol";
 import "../plugins/PluginsList.sol";
 import "../tokens/token/interfaces/IToken.sol";
+import "../libraries/DataTypes.sol";
 
 /// @title Contract of Page.Bank
 /// @author Crypto.Page Team
@@ -78,20 +79,16 @@ contract Bank is IBank, ContextUpgradeable {
     }
 
     function gasCompensation(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _user,
-        uint256 _gas
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(bool) {
-        uint256 amount = convertGasToTokenAmount(_gas);
+        DataTypes.GasCompensationBank calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, vars.pluginName, vars.version) returns(bool) {
+        uint256 amount = convertGasToTokenAmount(vars.gas);
         require(amount > 0, "PageBank: wrong amount");
         require(token.mint(address(this), amount), "PageBank: wrong mint of tokens");
         uint256 treasureAmount = amount * TREASURE_FEE / ALL_PERCENT;
         balances[registry.treasury()] += treasureAmount;
         uint256 userAmount = amount - treasureAmount;
-        balances[_user] += userAmount;
-        emit GasCompensation(_executedId, _user, userAmount);
+        balances[vars.user] += userAmount;
+        emit GasCompensation(vars.executedId, vars.user, userAmount);
 
         return true;
     }

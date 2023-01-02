@@ -14,11 +14,14 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IGasCompensationRules.sol";
+import "../../community/interfaces/ICommunityBlank.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract GasCompensation is IExecutePlugin, Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
+    uint256 public constant ALL_PERCENT = 10000;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_POST_GAS_COMPENSATION;
 
     IRegistry public registry;
@@ -42,42 +45,61 @@ contract GasCompensation is IExecutePlugin, Context{
         address _sender,
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
+        DataTypes.GasCompensationBank memory vars;
         checkData(_version, _sender);
         (uint256[] memory postIds) = abi.decode(_data,(uint256[]));
 
         for (uint256 i = 0; i < postIds.length; i++) {
             uint256 postId = postIds[i];
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
-            (uint256 price, address creator) = IPostData(registry.postData()).setGasCompensation(
+            (uint256 gas, address creator) = IPostData(registry.postData()).setGasCompensation(
                 _executedId,
                 PLUGIN_NAME,
                 PLUGIN_VERSION,
                 postId
             );
-            address user = checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator);
-            if(user != address(0)) {
-                require(
-                    IBank(registry.bank()).gasCompensation(
-                        _executedId,
-                        PLUGIN_NAME,
-                        PLUGIN_VERSION,
-                        user,
-                        price
-                    ),
-                    "GasCompensation: wrong bank"
-                );
+            address owner = address(0);
+            address[] memory users = checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator, owner);
+            uint256[] memory gasAmount = new uint256[](2);
+            uint256 step = 1;
+            if(users[1] != address(0)) {
+                step = 2;
+                gasAmount[0] = gas * ICommunityBlank(communityId).authorGasCompensationPercent() / ALL_PERCENT;
+                gasAmount[1] = gas - gasAmount[0];
+            } else {
+                gasAmount[0] = gas;
+            }
+            for(uint256 j = 0; j < step; j++) {
+                if(users[j] != address(0)) {
+                    require(
+                        IBank(registry.bank()).gasCompensation(
+                            vars
+//                                _executedId,
+//                                PLUGIN_NAME,
+//                                PLUGIN_VERSION,
+//                                users[j],
+//                                gasAmount[j]
+                        ),
+                        "GasCompensation: wrong bank"
+                    );
+                }
             }
         }
 
         return true;
     }
 
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view returns(address) {
+    function checkRule(
+        bytes32 _groupRulesName,
+        address _communityId,
+        address _author,
+        address _owner
+    ) private view returns(address[] memory) {
         address rulesContract = IRule(registry.rule()).getRuleContract(
             _groupRulesName,
             PLUGIN_VERSION
         );
-        return IGasCompensationRules(rulesContract).validate(_communityId, _sender);
+        return IGasCompensationRules(rulesContract).validate(_communityId, _author, _owner);
     }
 
     function checkData(uint256 _version, address _sender) private view {

@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 import "../registry/interfaces/IRegistry.sol";
 import "../plugins/PluginsList.sol";
 import "./interfaces/ICommentData.sol";
+import "../libraries/DataTypes.sol";
 
 
 contract CommentData is Initializable, ContextUpgradeable, ICommentData {
@@ -130,26 +131,24 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     }
 
     function setGasCompensation(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _commentId
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_COMMENT_GAS_COMPENSATION, _pluginName, _version) returns(
+        DataTypes.GasCompensationComment calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_COMMENT_GAS_COMPENSATION, vars.pluginName, vars.version) returns(
         uint256 gasConsumption,
-        address creator
+        address creator,
+        address owner
     ) {
-        require(_postId > 0 && _commentId > 0, "CommentData: wrong postId or commentId");
+        require(vars.postId > 0 && vars.commentId > 0, "CommentData: wrong postId or commentId");
 
-        Metadata storage comment = comments[_postId][_commentId];
+        Metadata storage comment = comments[vars.postId][vars.commentId];
         require(comment.timestamp > 0, "CommentData: wrong postId");
 
         gasConsumption = comment.gasConsumption;
         creator = comment.creator;
-        require(!gasCompensation[_postId][_commentId], "CommentData: wrong gas compensation");
-        gasCompensation[_postId][_commentId] = true;
+        owner = comment.owner;
+        require(!gasCompensation[vars.postId][vars.commentId], "CommentData: wrong gas compensation");
+        gasCompensation[vars.postId][vars.commentId] = true;
 
-        emit SetGasCompensation(_executedId, _postId, _commentId);
+        emit SetGasCompensation(vars.executedId, vars.postId, vars.commentId);
     }
 
     function setGasConsumption(

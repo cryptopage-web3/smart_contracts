@@ -24,10 +24,13 @@ contract CommunityBlank is
     string public name;
     address public creator;
     uint256 public creatingTime;
+    uint256 public authorGasCompensationPercent;
+    uint256 public ownerGasCompensationPercent;
 
     IRegistry registry;
 
     uint256 public constant INITIAL_PLUGINS_VERSION = 1;
+    uint256 public constant ALL_PERCENT = 10000;
 
     // pluginName -> version -> linked
     mapping(bytes32 => mapping(uint256 => bool)) private linkedPlugins;
@@ -41,6 +44,7 @@ contract CommunityBlank is
     event UnLinkRule(address origin, address sender, bytes32 ruleGroupName, uint256 version, bytes32 ruleName);
 
     event ClaimERC20Token(address origin, address sender, address token, address receiver, uint256 amount);
+    event SetGasCompensationPercent(address origin, address sender, uint256 authorPercent, uint256 ownerPercent);
 
     function initialize(
         string memory _name,
@@ -94,6 +98,13 @@ contract CommunityBlank is
 
     function isLinkedRule(bytes32 _ruleGroupName, uint256 _version, bytes32 _ruleName) external view override returns (bool) {
         return linkedRules[_ruleGroupName][_version][_ruleName];
+    }
+
+    function setGasCompensationPercent(uint256 _authorPercent) external override onlyOwner {
+        require(_authorPercent <= ALL_PERCENT, "Community: wrong percent");
+        authorGasCompensationPercent = _authorPercent;
+        ownerGasCompensationPercent = ALL_PERCENT - _authorPercent;
+        emit SetGasCompensationPercent(tx.origin, _msgSender(), authorGasCompensationPercent, ownerGasCompensationPercent);
     }
 
     function setInitialPlugins() private {
