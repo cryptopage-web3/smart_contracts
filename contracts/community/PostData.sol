@@ -10,6 +10,7 @@ import "../plugins/PluginsList.sol";
 import "../libraries/Sets.sol";
 import "./interfaces/IPostData.sol";
 import "../tokens/nft/interfaces/INFT.sol";
+import "../libraries/DataTypes.sol";
 
 
 contract PostData is Initializable, ContextUpgradeable, IPostData {
@@ -42,7 +43,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     //postId -> bool
     mapping(uint256 => bool) private gasCompensation;
 
-    event WritePost(bytes32 executedId, uint256 postId, address creator, address owner);
+    event WritePost(bytes32 executedId, uint256 postId, address owner);
     event BurnPost(bytes32 executedId, uint256 postId, address sender);
 
     event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
@@ -76,12 +77,8 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function writePost(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(uint256) {
+        DataTypes.GeneralVar calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(uint256) {
         (
         address _communityId,
         address _owner,
@@ -90,21 +87,21 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         string[] memory _tags,
         bool _isEncrypted,
         bool _isView
-        ) = abi.decode(_data,(address, address, string, uint256, string[], bool, bool));
+        ) = abi.decode(vars.data,(address, address, string, uint256, string[], bool, bool));
 
         uint256 postId = nft.mint(_owner);
         require(postId > 0, "PostData: wrong postId");
         communityIdByPostId[postId] = _communityId;
 
         Metadata storage post = posts[postId];
-        post.creator = _sender;
+        post.creator = vars.user;
         post.ipfsHash = _ipfsHash;
         post.timestamp = block.timestamp;
         post.encodingType = _encodingType;
         post.tags = _tags;
         post.isEncrypted = _isEncrypted;
         post.isView = _isView;
-        //emit WritePost(_executedId, postId, _sender, _owner);
+        emit WritePost(vars.executedId, postId, _owner);
 
         return postId;
     }

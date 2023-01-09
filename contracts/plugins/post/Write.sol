@@ -14,6 +14,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IBaseRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Write is IExecutePlugin, Context{
@@ -43,6 +44,12 @@ contract Write is IExecutePlugin, Context{
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         uint256 beforeGas = gasleft();
+        DataTypes.GeneralVar memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _sender;
+        vars.data = _data;
 
         checkData(_version, _sender);
         (address _communityId , , , , , , ) =
@@ -53,11 +60,7 @@ contract Write is IExecutePlugin, Context{
         checkRule(RulesList.POST_PLACING_RULES, _communityId, _sender);
 
         uint256 postId = IPostData(registry.postData()).writePost(
-            _executedId,
-            PLUGIN_NAME,
-            PLUGIN_VERSION,
-            _sender,
-            _data
+            vars
         );
         require(postId > 0, "Write: wrong create post");
 

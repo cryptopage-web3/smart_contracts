@@ -5,6 +5,14 @@ pragma solidity 0.8.15;
 
 library DataTypes {
 
+    struct  GeneralVar {
+        bytes32 executedId;
+        bytes32 pluginName;
+        uint256 version;
+        address user;
+        bytes data;
+    }
+
     struct GasCompensationComment {
         bytes32 executedId;
         bytes32 pluginName;

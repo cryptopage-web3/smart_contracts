@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.15;
 
+import "../../libraries/DataTypes.sol";
+
+
 interface IPostData {
 
     function version() external pure returns (string memory);
@@ -9,11 +12,7 @@ interface IPostData {
     function ipfsHashOf(uint256 _tokenId) external view returns (string memory);
 
     function writePost(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
+        DataTypes.GeneralVar calldata vars
     ) external returns(uint256);
 
     function burnPost(
