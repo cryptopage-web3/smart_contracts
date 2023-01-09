@@ -77,7 +77,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function writePost(
-        DataTypes.GeneralVar calldata vars
+        DataTypes.GeneralVars calldata vars
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(uint256) {
         (
         address _communityId,

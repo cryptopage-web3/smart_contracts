@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 import "./interfaces/IBadge.sol";
+import "../../registry/interfaces/IRegistry.sol";
 
 /// @title Contract of Page.Badge
 /// @author Crypto.Page Team
@@ -19,13 +20,14 @@ contract Badge is
     bytes32 public constant MINT_ROLE = keccak256("MINT_ROLE");
     bytes32 public constant BURN_ROLE = keccak256("BURN_ROLE");
 
-    address public registry;
+    IRegistry public registry;
 
     function initialize(
         address _registry
     ) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        registry = _registry;
+        require(_registry != address(0), "Token: address cannot be zero");
+        registry = IRegistry(_registry);
     }
 
     function version() external pure returns (string memory) {

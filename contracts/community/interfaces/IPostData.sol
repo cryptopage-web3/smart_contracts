@@ -12,7 +12,7 @@ interface IPostData {
     function ipfsHashOf(uint256 _tokenId) external view returns (string memory);
 
     function writePost(
-        DataTypes.GeneralVar calldata vars
+        DataTypes.GeneralVars calldata vars
     ) external returns(uint256);
 
     function burnPost(

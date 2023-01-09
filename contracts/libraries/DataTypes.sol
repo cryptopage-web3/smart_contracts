@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 
 library DataTypes {
 
-    struct  GeneralVar {
+    struct  GeneralVars {
         bytes32 executedId;
         bytes32 pluginName;
         uint256 version;
