@@ -190,4 +190,10 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     function getCommentCount(uint256 _postId) external view override returns(uint256) {
         return commentCount[_postId];
     }
+
+    function getUpDownForComment(uint256 _postId, uint256 _commentId) external view override returns(bool _up, bool _down) {
+        Metadata memory comment = comments[_postId][_commentId];
+        _up = comment.up;
+        _down = comment.down;
+    }
 }

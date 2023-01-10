@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.15;
 
+import "../../libraries/DataTypes.sol";
+
+
 interface IAccount {
     function version() external pure returns (string memory);
 
@@ -87,4 +90,8 @@ interface IAccount {
         address _user,
         uint256 _postId
     ) external view returns(uint256[] memory _commentIds);
+
+    function getUserRate(
+        address _user
+    ) external view returns(DataTypes.UserRateCount memory _counts);
 }

@@ -13,6 +13,13 @@ library DataTypes {
         bytes data;
     }
 
+    struct UserRateCount {
+        uint256 commentCount;
+        uint256 postCount;
+        uint256 upCount;
+        uint256 downCount;
+    }
+
     struct GasCompensationComment {
         bytes32 executedId;
         bytes32 pluginName;

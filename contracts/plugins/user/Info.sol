@@ -14,6 +14,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IReadPlugin.sol";
 import "../../rules/community/interfaces/IPostPlacingRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Info is IReadPlugin, Context {
@@ -47,7 +48,9 @@ contract Info is IReadPlugin, Context {
 
         address[] memory communities = IAccount(registry.account()).getCommunitiesByUser(_user);
 
-        uint256 count = getPostsCount(communities, _user);
+        DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user);
+
+        uint256 count = rate.postCount;
 
         uint256[] memory postIds = new uint256[](count);
         if (count > 0) {
@@ -60,14 +63,7 @@ contract Info is IReadPlugin, Context {
             }
         }
 
-        _outData = abi.encode(communities, postIds);
-    }
-
-    function getPostsCount(address[] memory _communities, address _user) private view returns(uint256 _count) {
-        for(uint256 i=0; i < _communities.length; i++) {
-            uint256[] memory tempIds = IAccount(registry.account()).getPostIdsByUser(_communities[i], _user);
-            _count += tempIds.length;
-        }
+        _outData = abi.encode(communities, rate.postCount, rate.commentCount, rate.upCount, rate.downCount, postIds);
     }
 
     function checkData(uint256 _version, address _sender) private view {
