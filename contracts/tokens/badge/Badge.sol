@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 
 import "./interfaces/IBadge.sol";
 import "../../registry/interfaces/IRegistry.sol";
+import "../plugins/PluginsList.sol";
 
 /// @title Contract of Page.Badge
 /// @author Crypto.Page Team
@@ -21,6 +22,15 @@ contract Badge is
     bytes32 public constant BURN_ROLE = keccak256("BURN_ROLE");
 
     IRegistry public registry;
+
+    modifier onlyTrustedPlugin(bytes32 _trustedPluginName, bytes32 _checkedPluginName, uint256 _version) {
+        require(_trustedPluginName == _checkedPluginName, "Badge: wrong plugin name");
+        require(
+            registry.getPluginContract(_trustedPluginName, _version) == _msgSender(),
+            "Badge: caller is not the plugin"
+        );
+        _;
+    }
 
     function initialize(
         address _registry
@@ -39,7 +49,7 @@ contract Badge is
         uint256 id,
         uint256 amount,
         bytes memory data
-    ) external override virtual onlyRole(MINT_ROLE) {
+    ) external override virtual onlyTrustedPlugin(PluginsList.BADGE_GENERATE, _pluginName, _version)  {
         require(to != address(0), "Badge: address cannot be zero");
         _mint(to, id, amount, data);
     }

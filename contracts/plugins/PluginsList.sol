@@ -32,6 +32,8 @@ library PluginsList {
     bytes32 public constant BANK_WITHDRAW = keccak256(abi.encode("BANK_WITHDRAW"));
     bytes32 public constant BANK_BALANCE_OF = keccak256(abi.encode("BANK_BALANCE_OF"));
 
+    bytes32 public constant BADGE_GENERATE = keccak256(abi.encode("BADGE_GENERATE"));
+
     function version() external pure returns (string memory) {
         return "1";
     }

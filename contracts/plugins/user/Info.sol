@@ -50,18 +50,7 @@ contract Info is IReadPlugin, Context {
 
         DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user);
 
-        uint256 count = rate.postCount;
-
-        uint256[] memory postIds = new uint256[](count);
-        if (count > 0) {
-            for(uint256 i=0; i < communities.length; i++) {
-                uint256[] memory tempIds = IAccount(registry.account()).getPostIdsByUser(communities[i], _user);
-                for(uint256 j=0; j < tempIds.length; j++) {
-                    count--;
-                    postIds[count] = tempIds[j];
-                }
-            }
-        }
+        uint256[] memory postIds = IAccount(registry.account()).getAllPostIdsByUser(_user);
 
         _outData = abi.encode(communities, rate.postCount, rate.commentCount, rate.upCount, rate.downCount, postIds);
     }

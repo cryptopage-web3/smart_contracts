@@ -201,16 +201,38 @@ contract Account is
         moderators = users.moderators.values();
     }
 
-    function getCommunitiesByUser(address _user) external override view returns(
+    function getCommunitiesByUser(address _user) public override view returns(
         address[] memory _communities
     ) {
         _communities = communitiesByUser[_user].values();
     }
 
-    function getPostIdsByUser(address _communityId, address _user) public override view returns(
+    function getPostIdsByUserAndCommunity(address _communityId, address _user) public override view returns(
         uint256[] memory _postIds
     ) {
         _postIds = createdPostIdsByUser[_communityId][_user].values();
+    }
+
+    function getAllPostIdsByUser(address _user) public override view returns(
+        uint256[] memory
+    ) {
+        DataTypes.UserRateCount memory rate = getUserRate(_user);
+        address[] memory communities = getCommunitiesByUser(_user);
+
+        uint256 count = rate.postCount;
+        uint256[] memory postIds = new uint256[](count);
+
+        if (count > 0) {
+            for(uint256 i=0; i < communities.length; i++) {
+                uint256[] memory tempIds = getPostIdsByUserAndCommunity(communities[i], _user);
+                for(uint256 j=0; j < tempIds.length; j++) {
+                    count--;
+                    postIds[count] = tempIds[j];
+                }
+            }
+        }
+
+        return postIds;
     }
 
     function getCommentIdsByUserAndPost(
@@ -223,13 +245,13 @@ contract Account is
 
     function getUserRate(
         address _user
-    ) external override view returns(DataTypes.UserRateCount memory _counts) {
+    ) public override view returns(DataTypes.UserRateCount memory _counts) {
 
         address[] memory communities = communitiesByUser[_user].values();
 
         for(uint256 i=0; i < communities.length; i++) {
             address communityId = communities[i];
-            uint256[] memory postIds = getPostIdsByUser(communityId, _user);
+            uint256[] memory postIds = getPostIdsByUserAndCommunity(communityId, _user);
             _counts.postCount += postIds.length;
             for(uint256 j=0; j < postIds.length; j++) {
                 uint256 postId = postIds[j];

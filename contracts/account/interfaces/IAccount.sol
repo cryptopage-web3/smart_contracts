@@ -81,9 +81,11 @@ interface IAccount {
         address[] memory _communities
     );
 
-    function getPostIdsByUser(address _communityId, address _user) external view returns(
+    function getPostIdsByUserAndCommunity(address _communityId, address _user) external view returns(
         uint256[] memory _postIds
     );
+
+    function getAllPostIdsByUser(address _user) external view returns(uint256[] memory);
 
     function getCommentIdsByUserAndPost(
         address _communityId,
