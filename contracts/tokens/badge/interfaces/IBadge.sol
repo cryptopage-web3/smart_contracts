@@ -4,32 +4,26 @@ pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 
+import "../../../libraries/DataTypes.sol";
+
+
 interface IBadge is IERC1155Upgradeable {
+
     function version() external pure returns (string memory);
 
     function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
+        DataTypes.BadgeMintBurn calldata vars
     ) external;
 
     function burn(
-        address account,
-        uint256 id,
-        uint256 value
+        DataTypes.BadgeMintBurn calldata vars
     ) external;
 
     function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        DataTypes.BadgeBatchMintBurn calldata vars
     ) external;
 
     function burnBatch(
-        address account,
-        uint256[] memory ids,
-        uint256[] memory values
+        DataTypes.BadgeBatchMintBurn calldata vars
     ) external;
 }

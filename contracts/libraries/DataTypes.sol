@@ -13,6 +13,24 @@ library DataTypes {
         bytes data;
     }
 
+    struct  BadgeMintBurn {
+        bytes32 executedId;
+        bytes32 pluginName;
+        uint256 version;
+        address user;
+        uint256 id;
+        uint256 amount;
+    }
+
+    struct  BadgeBatchMintBurn {
+        bytes32 executedId;
+        bytes32 pluginName;
+        uint256 version;
+        address user;
+        uint256[] ids;
+        uint256[] amounts;
+    }
+
     struct UserRateCount {
         uint256 commentCount;
         uint256 postCount;
