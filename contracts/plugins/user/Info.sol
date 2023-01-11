@@ -48,7 +48,7 @@ contract Info is IReadPlugin, Context {
 
         address[] memory communities = IAccount(registry.account()).getCommunitiesByUser(_user);
 
-        DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user);
+        DataTypes.UserRateCount memory rate = IAccount(registry.account()).getAllCommunitiesUserRate(_user);
 
         uint256[] memory postIds = IAccount(registry.account()).getAllPostIdsByUser(_user);
 

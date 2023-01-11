@@ -216,7 +216,7 @@ contract Account is
     function getAllPostIdsByUser(address _user) public override view returns(
         uint256[] memory
     ) {
-        DataTypes.UserRateCount memory rate = getUserRate(_user);
+        DataTypes.UserRateCount memory rate = getAllCommunitiesUserRate(_user);
         address[] memory communities = getCommunitiesByUser(_user);
 
         uint256 count = rate.postCount;
@@ -244,33 +244,43 @@ contract Account is
     }
 
     function getUserRate(
+        address _user,
+        address _communityId
+    ) public override view returns(DataTypes.UserRateCount memory _counts) {
+        uint256[] memory postIds = getPostIdsByUserAndCommunity(_communityId, _user);
+        _counts.postCount += postIds.length;
+        for(uint256 j=0; j < postIds.length; j++) {
+            uint256 postId = postIds[j];
+            uint256[] memory commentIds = getCommentIdsByUserAndPost(_communityId, _user, postId);
+            _counts.commentCount += commentIds.length;
+            for(uint256 k=0; k < commentIds.length; k++) {
+                uint256 commentId = commentIds[k];
+                (bool isUp, bool isDown) = ICommentData(registry.commentData()).getUpDownForComment(
+                    postId,
+                    commentId
+                );
+                if (isUp) {
+                    _counts.upCount++;
+                }
+                if (isDown) {
+                    _counts.downCount++;
+                }
+            }
+        }
+    }
+
+    function getAllCommunitiesUserRate(
         address _user
     ) public override view returns(DataTypes.UserRateCount memory _counts) {
-
         address[] memory communities = communitiesByUser[_user].values();
 
         for(uint256 i=0; i < communities.length; i++) {
             address communityId = communities[i];
-            uint256[] memory postIds = getPostIdsByUserAndCommunity(communityId, _user);
-            _counts.postCount += postIds.length;
-            for(uint256 j=0; j < postIds.length; j++) {
-                uint256 postId = postIds[j];
-                uint256[] memory commentIds = getCommentIdsByUserAndPost(communityId, _user, postId);
-                _counts.commentCount += commentIds.length;
-                for(uint256 k=0; k < commentIds.length; k++) {
-                    uint256 commentId = commentIds[k];
-                    (bool isUp, bool isDown) = ICommentData(registry.commentData()).getUpDownForComment(
-                        postId,
-                        commentId
-                    );
-                    if (isUp) {
-                        _counts.upCount++;
-                    }
-                    if (isDown) {
-                        _counts.downCount++;
-                    }
-                }
-            }
+            DataTypes.UserRateCount memory communityCounts = getUserRate(_user, communityId);
+            _counts.postCount += communityCounts.postCount;
+            _counts.commentCount += communityCounts.commentCount;
+            _counts.upCount += communityCounts.upCount;
+            _counts.downCount += communityCounts.downCount;
         }
     }
 }

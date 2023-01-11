@@ -94,6 +94,11 @@ interface IAccount {
     ) external view returns(uint256[] memory _commentIds);
 
     function getUserRate(
+        address _user,
+        address _communityId
+    ) external view returns(DataTypes.UserRateCount memory _counts);
+
+    function getAllCommunitiesUserRate(
         address _user
     ) external view returns(DataTypes.UserRateCount memory _counts);
 }
