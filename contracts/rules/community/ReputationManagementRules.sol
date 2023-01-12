@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
-import "../../tokens/badge/interfaces/IBadge.sol";
+import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
@@ -21,10 +21,10 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
 
     uint256 public constant RULES_VERSION = 1;
     bytes32 public GROUP_RULE = RulesList.REPUTATION_MANAGEMENT_RULES;
-    uint256 public constant badgeAllowId = 2;
+    uint256 public constant soulBoundAllowId = 2;
 
     IRegistry public registry;
-    IBadge public badge;
+    ISoulBound public soulBound;
 
     modifier onlyPlugin() {
         require(
@@ -40,9 +40,9 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
-        address badgeContract = registry.badge();
-        require(badgeContract != address(0), "ReputationManagementRules: address can't be zero");
-        badge = IBadge(badgeContract);
+        address soulBoundContract = registry.soulBound();
+        require(soulBoundContract != address(0), "ReputationManagementRules: address can't be zero");
+        soulBound = ISoulBound(soulBoundContract);
     }
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
@@ -51,8 +51,8 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
         }
         if (isActiveRule(_communityId, RulesList.REPUTATION_CAN_CHANGE)) {
             require(
-                badge.balanceOf(_user, badgeAllowId) > 0,
-                "ReputationManagementRules: you do not have enough Badge tokens"
+                soulBound.balanceOf(_user, soulBoundAllowId) > 0,
+                "ReputationManagementRules: you do not have enough SoulBound tokens"
             );
         }
 

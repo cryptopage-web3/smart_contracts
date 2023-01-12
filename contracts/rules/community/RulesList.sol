@@ -10,7 +10,7 @@ library  RulesList {
     // Community Joining Rules
     bytes32 public constant COMMUNITY_JOINING_RULES = keccak256(abi.encode("PAGE.COMMUNITY_JOINING_RULES"));
     bytes32 public constant OPEN_TO_ALL = keccak256(abi.encode("OPEN_TO_ALL"));
-    bytes32 public constant BADGE_TOKENS_USING = keccak256(abi.encode("BADGE_TOKENS_USING"));
+    bytes32 public constant SOULBOUND_TOKENS_USING = keccak256(abi.encode("SOULBOUND_TOKENS_USING"));
     bytes32 public constant WHEN_JOINING_PAYMENT = keccak256(abi.encode("WHEN_JOINING_PAYMENT"));
     bytes32 public constant PERIODIC_PAYMENT = keccak256(abi.encode("PERIODIC_PAYMENT"));
 
@@ -44,7 +44,7 @@ library  RulesList {
     bytes32 public constant POST_COMMENTING_RULES = keccak256(abi.encode("PAGE.POST_COMMENTING_RULES"));
     bytes32 public constant COMMENTING_MANY_TIMES = keccak256(abi.encode("COMMENTING_MANY_TIMES"));
     bytes32 public constant COMMENTING_ONE_TIME = keccak256(abi.encode("COMMENTING_ONE_TIME"));
-    bytes32 public constant COMMENTING_WITH_BADGE_TOKENS = keccak256(abi.encode("COMMENTING_WITH_BADGE_TOKENS"));
+    bytes32 public constant COMMENTING_WITH_SOULBOUND_TOKENS = keccak256(abi.encode("COMMENTING_WITH_SOULBOUND_TOKENS"));
 
     // Change Visibility Content Rules
     bytes32 public constant CHANGE_VISIBILITY_CONTENT_RULES = keccak256(abi.encode("PAGE.CHANGE_VISIBILITY_CONTENT_RULES"));
@@ -81,7 +81,7 @@ library  RulesList {
 
     // Community Profit Distribution Rules
     bytes32 public constant PROFIT_DISTRIBUTION_RULES = keccak256(abi.encode("PAGE.PROFIT_DISTRIBUTION_RULES"));
-    bytes32 public constant DISTRIBUTION_USING_BADGE_TOKENS = keccak256(abi.encode("DISTRIBUTION_USING_BADGE_TOKENS"));
+    bytes32 public constant DISTRIBUTION_USING_SOULBOUND_TOKENS = keccak256(abi.encode("DISTRIBUTION_USING_SOULBOUND_TOKENS"));
     bytes32 public constant DISTRIBUTION_FOR_EVERYONE = keccak256(abi.encode("DISTRIBUTION_FOR_EVERYONE"));
     bytes32 public constant DISTRIBUTION_USING_VOTING = keccak256(abi.encode("DISTRIBUTION_USING_VOTING"));
     bytes32 public constant DISTRIBUTION_FOR_FOUNDERS = keccak256(abi.encode("DISTRIBUTION_FOR_FOUNDERS"));

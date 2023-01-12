@@ -30,7 +30,7 @@ interface IRegistry {
 
     function account() external view returns (address);
 
-    function badge() external view returns (address);
+    function soulBound() external view returns (address);
 
     function nft() external view returns (address);
 
@@ -50,7 +50,7 @@ interface IRegistry {
 
     function setAccount(address _contract) external;
 
-    function setBadge(address _contract) external;
+    function setSoulBound(address _contract) external;
 
     function setRule(address _contract) external;
 

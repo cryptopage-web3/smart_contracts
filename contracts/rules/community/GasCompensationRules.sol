@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
-import "../../tokens/badge/interfaces/IBadge.sol";
+import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
@@ -23,7 +23,7 @@ contract GasCompensationRules is IGasCompensationRules, Context {
     address public constant EMPTY_ADDRESS = address(0);
 
     IRegistry public registry;
-    IBadge public badge;
+    ISoulBound public soulBound;
 
     modifier onlyPlugins() {
         require(
@@ -39,9 +39,9 @@ contract GasCompensationRules is IGasCompensationRules, Context {
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
-        address badgeContract = registry.badge();
-        require(badgeContract != address(0), "GasCompenstionRules: address can't be zero");
-        badge = IBadge(badgeContract);
+        address soulBoundContract = registry.soulBound();
+        require(soulBoundContract != address(0), "GasCompenstionRules: address can't be zero");
+        soulBound = ISoulBound(soulBoundContract);
     }
 
     function validate(

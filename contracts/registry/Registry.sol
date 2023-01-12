@@ -26,7 +26,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     address public postData;
     address public commentData;
     address public account;
-    address public badge;
+    address public soulBound;
     address public nft;
 
     bytes32 public constant EMPTY_NAME = bytes32(0);
@@ -50,7 +50,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event SetPostData(address origin, address sender, address oldValue, address newValue);
     event SetCommentData(address origin, address sender, address oldValue, address newValue);
     event SetAccount(address origin, address sender, address oldValue, address newValue);
-    event SetBadge(address origin, address sender, address oldValue, address newValue);
+    event SetSoulBound(address origin, address sender, address oldValue, address newValue);
     event SetRule(address origin, address sender, address oldValue, address newValue);
     event SetNFT(address origin, address sender, address oldValue, address newValue);
 
@@ -139,10 +139,10 @@ contract Registry is OwnableUpgradeable, IRegistry {
         account = _account;
     }
 
-    function setBadge(address _contract) external override onlyOwner {
+    function setSoulBound(address _contract) external override onlyOwner {
         require(_contract != address(0), "Registry: address can't be zero");
-        emit SetBadge(tx.origin, _msgSender(), badge, _contract);
-        badge = _contract;
+        emit SetSoulBound(tx.origin, _msgSender(), soulBound, _contract);
+        soulBound = _contract;
     }
 
     function setRule(address _contract) external override onlyOwner {

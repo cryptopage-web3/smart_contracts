@@ -7,23 +7,23 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.so
 import "../../../libraries/DataTypes.sol";
 
 
-interface IBadge is IERC1155Upgradeable {
+interface ISoulBound is IERC1155Upgradeable {
 
     function version() external pure returns (string memory);
 
     function mint(
-        DataTypes.BadgeMintBurn calldata vars
+        DataTypes.SoulBoundMintBurn calldata vars
     ) external;
 
     function burn(
-        DataTypes.BadgeMintBurn calldata vars
+        DataTypes.SoulBoundMintBurn calldata vars
     ) external;
 
     function mintBatch(
-        DataTypes.BadgeBatchMintBurn calldata vars
+        DataTypes.SoulBoundBatchMintBurn calldata vars
     ) external;
 
     function burnBatch(
-        DataTypes.BadgeBatchMintBurn calldata vars
+        DataTypes.SoulBoundBatchMintBurn calldata vars
     ) external;
 }

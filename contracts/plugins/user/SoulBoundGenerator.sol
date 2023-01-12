@@ -11,14 +11,14 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
-import "../../tokens/badge/interfaces/IBadge.sol";
+import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../libraries/DataTypes.sol";
 
 
-contract BadgesGenerate is IExecutePlugin, Context{
+contract SoulBoundGenerator is IExecutePlugin, Context{
 
     uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.BADGE_GENERATE;
+    bytes32 public PLUGIN_NAME = PluginsList.SOULBOUND_GENERATE;
 
     struct RedeemedCount {
         uint64[3] messageCount;
@@ -28,16 +28,16 @@ contract BadgesGenerate is IExecutePlugin, Context{
     }
 
     IRegistry public registry;
-    IBadge public badge;
+    ISoulBound public soulBound;
 
     modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "BadgesGenerate: caller is not the executor");
+        require(registry.executor() == _msgSender(), "SoulBoundGenerator: caller is not the executor");
         _;
     }
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
-        badge = IBadge(registry.badge());
+        soulBound = ISoulBound(registry.soulBound());
     }
 
     function version() external pure returns (uint256) {
@@ -61,8 +61,28 @@ contract BadgesGenerate is IExecutePlugin, Context{
     }
 
     function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "BadgesGenerate: wrong _version");
+        require(_version == PLUGIN_VERSION, "SoulBoundGenerator: wrong _version");
         require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Deposit: plugin is not trusted");
-        require(_sender != address(0) , "BadgesGenerate: _sender is zero");
+        require(_sender != address(0) , "SoulBoundGenerator: _sender is zero");
     }
+
+    function checkCommentsByIndex(
+        uint256 tokenId,
+        uint256 communityId,
+        address user,
+        uint256 realCommentsCount,
+        uint256 index
+    ) private {
+        RedeemedCount storage redeemCounter = redeemedCounter[communityId][user];
+
+        uint256 number = realCommentsCount / (10 * 10**index);
+        uint64 mintNumber = uint64(number) - redeemCounter.messageCount[index];
+        if (mintNumber > 0) {
+            redeemCounter.messageCount[index] += mintNumber;
+            userRateToken.mint(
+                user, tokenId + uint256(UserRatesType.TEN_MESSAGE) + index, mintNumber, FOR_RATE_TOKEN_DATA
+            );
+        }
+    }
+
 }

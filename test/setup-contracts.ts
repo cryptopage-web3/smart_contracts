@@ -65,7 +65,7 @@ export default async function setupContracts() {
     await communityData.initialize(registry.address);
     await registry.setCommunityData(communityData.address);
 
-    await registry.setBadge(communityData.address);
+    await registry.setSoulBound(communityData.address);
 
     const blankFactory = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
     contractBlank = await blankFactory.deploy();

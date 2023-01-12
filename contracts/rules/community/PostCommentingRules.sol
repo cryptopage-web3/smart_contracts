@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
-import "../../tokens/badge/interfaces/IBadge.sol";
+import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
@@ -21,10 +21,10 @@ contract PostCommentingRules is IPostCommentingRules, Context {
 
     uint256 public constant RULES_VERSION = 1;
     bytes32 public GROUP_RULE = RulesList.POST_COMMENTING_RULES;
-    uint256 public constant badgeAllowId = 2;
+    uint256 public constant soulBoundAllowId = 2;
 
     IRegistry public registry;
-    IBadge public badge;
+    ISoulBound public soulBound;
 
     modifier onlyPlugin() {
         require(
@@ -39,9 +39,9 @@ contract PostCommentingRules is IPostCommentingRules, Context {
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
-        address badgeContract = registry.badge();
-        require(badgeContract != address(0), "PostCommentingRules: address can't be zero");
-        badge = IBadge(badgeContract);
+        address soulBoundContract = registry.soulBound();
+        require(soulBoundContract != address(0), "PostCommentingRules: address can't be zero");
+        soulBound = ISoulBound(soulBoundContract);
     }
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
@@ -52,10 +52,10 @@ contract PostCommentingRules is IPostCommentingRules, Context {
         if (isActiveRule(_communityId, RulesList.COMMENTING_ONE_TIME)) {
             // check previous comments from this user
         }
-        if (isActiveRule(_communityId, RulesList.COMMENTING_WITH_BADGE_TOKENS)) {
+        if (isActiveRule(_communityId, RulesList.COMMENTING_WITH_SOULBOUND_TOKENS)) {
             require(
-                badge.balanceOf(_user, badgeAllowId) > 0,
-                "PostCommentingRules: you do not have enough Badge tokens"
+                soulBound.balanceOf(_user, soulBoundAllowId) > 0,
+                "PostCommentingRules: you do not have enough SoulBound tokens"
             );
             // some logic for this user
         }
