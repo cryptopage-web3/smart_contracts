@@ -13,19 +13,15 @@ import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../libraries/DataTypes.sol";
+import "../../libraries/MakeId.sol";
 
 
 contract SoulBoundGenerator is IExecutePlugin, Context{
 
+    using MakeId for address;
+
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.SOULBOUND_GENERATE;
-
-    struct RedeemedCount {
-        uint64[3] messageCount;
-        uint64[3] postCount;
-        uint64[2] upCount;
-        uint64[2] downCount;
-    }
 
     IRegistry public registry;
     ISoulBound public soulBound;
@@ -56,6 +52,10 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
 
         DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user, _communityId);
 
+        makeMint(_user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
+        makeMint(_user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
+        makeMint(_user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
+        makeMint(_user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
 
         return true;
     }
@@ -66,23 +66,18 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
         require(_sender != address(0) , "SoulBoundGenerator: _sender is zero");
     }
 
-    function checkCommentsByIndex(
-        uint256 tokenId,
-        uint256 communityId,
-        address user,
-        uint256 realCommentsCount,
-        uint256 index
-    ) private {
-        RedeemedCount storage redeemCounter = redeemedCounter[communityId][user];
-
-        uint256 number = realCommentsCount / (10 * 10**index);
-        uint64 mintNumber = uint64(number) - redeemCounter.messageCount[index];
-        if (mintNumber > 0) {
-            redeemCounter.messageCount[index] += mintNumber;
-            userRateToken.mint(
-                user, tokenId + uint256(UserRatesType.TEN_MESSAGE) + index, mintNumber, FOR_RATE_TOKEN_DATA
-            );
+    function makeMint(address _user, address _communityId, uint256 _rateAmount, uint256 _rateId) private {
+        uint256 tokenId = _communityId.getSoulBoundTokenId(_rateId);
+        uint256 existTokensCount = soulBound.balanceOf(_user, tokenId);
+        uint256 diff = _rateAmount - existTokensCount;
+        if (diff > 0) {
+            DataTypes.SoulBoundMintBurn memory vars;
+            vars.user = _user;
+            vars.pluginName = PLUGIN_NAME;
+            vars.version = PLUGIN_VERSION;
+            vars.id = tokenId;
+            vars.amount = diff;
+            soulBound.mint(vars);
         }
     }
-
 }

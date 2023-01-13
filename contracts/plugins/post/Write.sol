@@ -44,6 +44,7 @@ contract Write is IExecutePlugin, Context{
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         uint256 beforeGas = gasleft();
+
         DataTypes.GeneralVars memory vars;
         vars.executedId = _executedId;
         vars.pluginName = PLUGIN_NAME;

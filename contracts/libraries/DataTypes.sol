@@ -5,6 +5,11 @@ pragma solidity 0.8.15;
 
 library DataTypes {
 
+    enum UserRatesType {
+        RESERVE, FOR_POST, FOR_COMMENT, FOR_UP, FOR_DOWN,
+        FOR_DEAL_GUARANTOR, FOR_DEAL_SELLER, FOR_DEAL_BUYER
+    }
+
     struct  GeneralVars {
         bytes32 executedId;
         bytes32 pluginName;
