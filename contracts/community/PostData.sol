@@ -107,20 +107,16 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function burnPost(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_BURN_POST, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_BURN_POST, vars.pluginName, vars.version) returns(bool) {
         (uint256 _postId) =
-        abi.decode(_data,(uint256));
+        abi.decode(vars.data,(uint256));
         require(_postId > 0, "PostData: wrong postId");
 
         Metadata storage post = posts[_postId];
         post.ipfsHash = "";
         post.isView = false;
-        emit BurnPost(_executedId, _postId, _sender);
+        emit BurnPost(vars.executedId, _postId, vars.user);
 
         return true;
     }

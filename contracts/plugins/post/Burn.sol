@@ -13,6 +13,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IModerationRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Burn is IExecutePlugin, Context{
@@ -57,13 +58,14 @@ contract Burn is IExecutePlugin, Context{
             "Burn: wrong validate"
         );
 
-        require(IPostData(registry.postData()).burnPost(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _sender,
-                _data
-            ),
+        DataTypes.GeneralVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _sender;
+        vars.data = _data;
+
+        require(IPostData(registry.postData()).burnPost(vars),
             "Burn: wrong burning"
         );
 

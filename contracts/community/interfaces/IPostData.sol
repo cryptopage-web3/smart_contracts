@@ -16,11 +16,7 @@ interface IPostData {
     ) external returns(uint256);
 
     function burnPost(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function readPost(bytes32 _pluginName, uint256 _version, uint256 _postId) external view returns(
