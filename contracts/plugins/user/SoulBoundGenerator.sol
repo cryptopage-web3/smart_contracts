@@ -9,6 +9,7 @@ import "../../account/interfaces/IAccount.sol";
 
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
+import "../../rules/community/interfaces/IReputationManagementRules.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
@@ -50,12 +51,20 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
         (address _user, address _communityId) =
         abi.decode(_data,(address,address));
 
-        DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user, _communityId);
+        require(IAccount(registry.account()).isCommunityUser(_communityId, _user), "SoulBoundGenerator: wrong _user");
 
-        makeMint(_user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
-        makeMint(_user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
-        makeMint(_user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
-        makeMint(_user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
+        address groupRules = IRule(registry.rule()).getRuleContract(
+            RulesList.REPUTATION_MANAGEMENT_RULES,
+            PLUGIN_VERSION
+        );
+        if(IReputationManagementRules(groupRules).validate(_communityId, _user)) {
+            DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user, _communityId);
+
+            makeMint(_user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
+            makeMint(_user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
+            makeMint(_user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
+            makeMint(_user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
+        }
 
         return true;
     }

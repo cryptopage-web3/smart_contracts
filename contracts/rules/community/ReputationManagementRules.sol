@@ -5,7 +5,6 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
-import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
@@ -21,15 +20,13 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
 
     uint256 public constant RULES_VERSION = 1;
     bytes32 public GROUP_RULE = RulesList.REPUTATION_MANAGEMENT_RULES;
-    uint256 public constant soulBoundAllowId = 2;
 
     IRegistry public registry;
-    ISoulBound public soulBound;
 
     modifier onlyPlugin() {
         require(
         // COMMUNITY_TRANSFER_POST is temporary
-            registry.getPluginContract(PluginsList.COMMUNITY_TRANSFER_POST, RULES_VERSION) == _msgSender(),
+            registry.getPluginContract(PluginsList.SOULBOUND_GENERATE, RULES_VERSION) == _msgSender(),
             "ReputationManagementRules: caller is not the plugin");
         _;
     }
@@ -39,21 +36,16 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
     }
 
     constructor(address _registry) {
+        require(_registry != address(0), "ReputationManagementRules: address can't be zero");
         registry = IRegistry(_registry);
-        address soulBoundContract = registry.soulBound();
-        require(soulBoundContract != address(0), "ReputationManagementRules: address can't be zero");
-        soulBound = ISoulBound(soulBoundContract);
     }
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.REPUTATION_NOT_USED)) {
-            // there will be some logic here
+            return false;
         }
         if (isActiveRule(_communityId, RulesList.REPUTATION_CAN_CHANGE)) {
-            require(
-                soulBound.balanceOf(_user, soulBoundAllowId) > 0,
-                "ReputationManagementRules: you do not have enough SoulBound tokens"
-            );
+            return true;
         }
 
         return true;
