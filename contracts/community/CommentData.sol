@@ -154,13 +154,12 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     }
 
     function readComment(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _commentId
-    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_COMMENT, _pluginName, _version) returns(
+        DataTypes.MinSimpleVars calldata vars
+    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_COMMENT, vars.pluginName, vars.version) returns(
         bytes memory _data
     ) {
+        (uint256 _postId, uint256 _commentId) = abi.decode(vars.data,(uint256,uint256));
+
         Metadata storage comment = comments[_postId][_commentId];
         if (comment.isView) {
             _data = abi.encode(

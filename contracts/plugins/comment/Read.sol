@@ -15,6 +15,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IReadPlugin.sol";
 import "../../rules/community/interfaces/IPostCommentingRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Read is IReadPlugin, Context {
@@ -43,25 +44,29 @@ contract Read is IReadPlugin, Context {
     ) external override onlyExecutor view returns(bytes memory) {
         checkData(_version, _sender);
 
-        (uint256 _postId, uint256 _commentId) =
+        (uint256 _postId, ) =
         abi.decode(_inData,(uint256, uint256));
 
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.POST_COMMENTING_RULES,
+        address _communityId = IPostData(registry.postData()).getCommunityId(_postId);
+
+        checkRule(RulesList.POST_COMMENTING_RULES, _communityId, _sender);
+
+        DataTypes.MinSimpleVars memory vars;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.data = _inData;
+
+        return ICommentData(registry.commentData()).readComment(vars);
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
             PLUGIN_VERSION
         );
-
-        address _communityId = IPostData(registry.postData()).getCommunityId(_postId);
         require(
-            IPostCommentingRules(groupRules).validate(_communityId, _sender),
-            "Write: wrong validate"
-        );
-
-        return ICommentData(registry.commentData()).readComment(
-            PLUGIN_NAME,
-            PLUGIN_VERSION,
-            _postId,
-            _commentId
+            IPostCommentingRules(rulesContract).validate(_communityId, _sender),
+            "Write: wrong rules validate"
         );
     }
 

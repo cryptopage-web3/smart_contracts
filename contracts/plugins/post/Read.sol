@@ -15,6 +15,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IReadPlugin.sol";
 import "../../rules/community/interfaces/IPostPlacingRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Read is IReadPlugin, Context {
@@ -47,24 +48,29 @@ contract Read is IReadPlugin, Context {
         address communityId = IPostData(registry.postData()).getCommunityId(postId);
         uint256 commentCount = ICommentData(registry.commentData()).getCommentCount(postId);
 
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.POST_READING_RULES,
-            PLUGIN_VERSION
-        );
-        require(
-            IPostPlacingRules(groupRules).validate(communityId, _sender),
-            "Write: wrong validate"
-        );
+        checkRule(RulesList.POST_READING_RULES, communityId, _sender);
 
-        bytes memory postData = IPostData(registry.postData()).readPost(
-            PLUGIN_NAME,
-            PLUGIN_VERSION,
-            postId
-        );
+        DataTypes.MinSimpleVars memory vars;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.data = _inData;
+
+        bytes memory postData = IPostData(registry.postData()).readPost(vars);
 
         bytes memory outData = abi.encode(communityId, commentCount, postData);
 
         return outData;
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IPostPlacingRules(rulesContract).validate(_communityId, _sender),
+            "Write: wrong rules validate"
+        );
     }
 
     function checkData(uint256 _version, address _sender) private view {

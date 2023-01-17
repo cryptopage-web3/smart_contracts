@@ -40,10 +40,7 @@ interface ICommentData {
     ) external returns(bool);
 
     function readComment(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _commentId
+        DataTypes.MinSimpleVars calldata vars
     ) external view returns(bytes memory _data);
 
     function getCommentCount(uint256 _postId) external view returns(uint256);

@@ -179,12 +179,11 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function readPost(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId
-    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_POST, _pluginName, _version) returns(
+        DataTypes.MinSimpleVars calldata vars
+    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_POST, vars.pluginName, vars.version) returns(
         bytes memory _data
     ) {
+        (uint256 _postId) = abi.decode(vars.data,(uint256));
         Metadata storage post = posts[_postId];
         if(post.isView) {
             _data = abi.encode(

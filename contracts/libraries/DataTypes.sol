@@ -10,6 +10,12 @@ library DataTypes {
         FOR_DEAL_GUARANTOR, FOR_DEAL_SELLER, FOR_DEAL_BUYER
     }
 
+    struct MinSimpleVars {
+        bytes32 pluginName;
+        uint256 version;
+        bytes data;
+    }
+
     struct SimpleVars {
         bytes32 executedId;
         bytes32 pluginName;
