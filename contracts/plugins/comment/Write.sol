@@ -15,6 +15,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IBaseRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Write is IExecutePlugin, Context{
@@ -53,22 +54,17 @@ contract Write is IExecutePlugin, Context{
         checkRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);
         checkRule(RulesList.POST_COMMENTING_RULES, _communityId, _sender);
 
-       uint256 commentId = ICommentData(registry.commentData()).writeComment(
-            _executedId,
-            PLUGIN_NAME,
-            PLUGIN_VERSION,
-            _sender,
-            _data
-        );
+        DataTypes.GeneralVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _sender;
+        vars.data = _data;
+
+        uint256 commentId = ICommentData(registry.commentData()).writeComment(vars);
         require(commentId > 0, "Write: wrong create comment");
 
-        require(IPostData(registry.postData()).updatePostWhenNewComment(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _sender,
-                _data
-            ),
+        require(IPostData(registry.postData()).updatePostWhenNewComment(vars),
             "Write: wrong added commentId for user"
         );
 

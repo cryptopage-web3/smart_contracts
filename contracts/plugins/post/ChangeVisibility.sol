@@ -13,6 +13,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IChangeVisibilityContentRules.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract ChangeVisibility is IExecutePlugin, Context{
@@ -57,12 +58,13 @@ contract ChangeVisibility is IExecutePlugin, Context{
             "ChangeVisibility: wrong validate"
         );
 
-        require(IPostData(registry.postData()).setVisibility(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _data
-            ),
+        DataTypes.SimpleVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.data = _data;
+
+        require(IPostData(registry.postData()).setVisibility(vars),
             "ChangeVisibility: wrong set visibility"
         );
 

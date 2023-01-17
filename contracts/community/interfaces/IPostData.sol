@@ -26,10 +26,7 @@ interface IPostData {
     function getCommunityId(uint256 _postId) external view returns(address);
 
     function setVisibility(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        bytes memory _data
+        DataTypes.SimpleVars calldata vars
     ) external returns(bool);
 
     function setGasConsumption(
@@ -40,11 +37,7 @@ interface IPostData {
     ) external returns(bool);
 
     function updatePostWhenNewComment(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function setGasCompensation(

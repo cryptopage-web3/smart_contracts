@@ -43,7 +43,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     //postId -> bool
     mapping(uint256 => bool) private gasCompensation;
 
-    event WritePost(bytes32 executedId, uint256 postId, address owner);
+    event WritePost(bytes32 executedId, uint256 postId);
     event BurnPost(bytes32 executedId, uint256 postId, address sender);
 
     event UpdateUpDown(bytes32 executedId, uint256 postId, address sender, bool isUp, bool isDown);
@@ -101,7 +101,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         post.tags = _tags;
         post.isEncrypted = _isEncrypted;
         post.isView = _isView;
-        emit WritePost(vars.executedId, postId, _owner);
+        emit WritePost(vars.executedId, postId);
 
         return postId;
     }
@@ -122,17 +122,14 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function setVisibility(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CHANGE_VISIBILITY_POST, _pluginName, _version) returns(bool) {
+        DataTypes.SimpleVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CHANGE_VISIBILITY_POST, vars.pluginName, vars.version) returns(bool) {
         (uint256 _postId, bool _isView) =
-        abi.decode(_data,(uint256, bool));
+        abi.decode(vars.data,(uint256, bool));
 
         Metadata storage post = posts[_postId];
         post.isView = _isView;
-        emit SetVisibility(_executedId, _postId, _isView);
+        emit SetVisibility(vars.executedId, _postId, _isView);
 
         return true;
     }
@@ -170,17 +167,13 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function updatePostWhenNewComment(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, vars.pluginName, vars.version) returns(bool) {
         ( , uint256 _postId, , , bool _isUp, bool _isDown, ) =
-        abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
+        abi.decode(vars.data,(address, uint256, address, string, bool, bool, bool));
 
-        setPostUpDown(_postId, _isUp, _isDown, _sender);
-        emit UpdateUpDown(_executedId, _postId, _sender, _isUp, _isDown);
+        setPostUpDown(_postId, _isUp, _isDown, vars.user);
+        emit UpdateUpDown(vars.executedId, _postId, vars.user, _isUp, _isDown);
 
         return true;
     }

@@ -35,7 +35,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     //postId -> comment counter
     mapping(uint256 => uint256) private commentCount;
 
-    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId, address creator, address owner);
+    event WriteComment(bytes32 executedId, uint256 postId, uint256 commentId);
     event BurnComment(bytes32 executedId, uint256 postId, uint256 commentId, address sender);
     event SetVisibility(bytes32 executedId, uint256 postId, uint256 commentId, bool isView);
     event SetGasCompensation(bytes32 executedId, uint256 postId, uint256 commentId);
@@ -66,40 +66,32 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     }
 
     function writeComment(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(uint256) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, vars.pluginName, vars.version) returns(uint256) {
         ( , uint256 _postId, address _owner, string memory _ipfsHash, bool _up, bool _down, bool _isView) =
-        abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
+        abi.decode(vars.data,(address, uint256, address, string, bool, bool, bool));
         require(_postId > 0, "CommentData: wrong postId");
 
         uint256 count = commentCount[_postId]++;
 
         Metadata storage comment = comments[_postId][count];
-        comment.creator = _sender;
+        comment.creator = vars.user;
         comment.owner = _owner;
         comment.ipfsHash = _ipfsHash;
         comment.timestamp = block.timestamp;
         comment.up = _up;
         comment.down = _down;
         comment.isView = _isView;
-//        emit WriteComment(_executedId, _postId, count, _sender, _owner);
+        emit WriteComment(vars.executedId, _postId, count);
 
         return count;
     }
 
     function burnComment(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_BURN_COMMENT, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_BURN_COMMENT, vars.pluginName, vars.version) returns(bool) {
         (uint256 _postId, uint256 _commentId) =
-        abi.decode(_data,(uint256, uint256));
+        abi.decode(vars.data,(uint256, uint256));
 
         Metadata storage comment = comments[_postId][_commentId];
         require(comment.timestamp > 0, "CommentData: wrong postId");
@@ -107,25 +99,22 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         comment.ipfsHash = "";
         comment.isView = false;
 
-        emit BurnComment(_executedId, _postId, _commentId, _sender);
+        emit BurnComment(vars.executedId, _postId, _commentId, vars.user);
 
         return true;
     }
 
     function setVisibility(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        bytes memory _data
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CHANGE_VISIBILITY_COMMENT, _pluginName, _version) returns(bool) {
+        DataTypes.SimpleVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CHANGE_VISIBILITY_COMMENT, vars.pluginName, vars.version) returns(bool) {
         (uint256 _postId, uint256 _commentId, bool _isView) =
-        abi.decode(_data,(uint256, uint256, bool));
+        abi.decode(vars.data,(uint256, uint256, bool));
 
         Metadata storage comment = comments[_postId][_commentId];
         require(comment.timestamp > 0, "CommentData: wrong postId");
 
         comment.isView = _isView;
-        emit SetVisibility(_executedId, _postId, _commentId, _isView);
+        emit SetVisibility(vars.executedId, _postId, _commentId, _isView);
 
         return true;
     }

@@ -58,13 +58,14 @@ contract Burn is IExecutePlugin, Context{
             "Burn: wrong validate"
         );
 
-        require(ICommentData(registry.commentData()).burnComment(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _sender,
-                _data
-            ),
+        DataTypes.GeneralVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _sender;
+        vars.data = _data;
+
+        require(ICommentData(registry.commentData()).burnComment(vars),
             "Burn: wrong burning"
         );
 

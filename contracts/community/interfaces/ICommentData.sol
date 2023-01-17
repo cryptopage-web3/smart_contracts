@@ -12,26 +12,15 @@ interface ICommentData {
     function ipfsHashOf(uint256 _postId, uint256 _commentId) external view returns (string memory);
 
     function writeComment(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
+        DataTypes.GeneralVars calldata vars
     ) external returns(uint256);
 
     function burnComment(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _sender,
-        bytes memory _data
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function setVisibility(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        bytes memory _data
+        DataTypes.SimpleVars calldata vars
     ) external returns(bool);
 
     function setGasCompensation(

@@ -58,12 +58,13 @@ contract ChangeVisibility is IExecutePlugin, Context{
             "ChangeVisibility: wrong validate"
         );
 
-        require(ICommentData(registry.commentData()).setVisibility(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _data
-            ),
+        DataTypes.SimpleVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.data = _data;
+
+        require(ICommentData(registry.commentData()).setVisibility(vars),
             "ChangeVisibility: wrong set visibility"
         );
 
