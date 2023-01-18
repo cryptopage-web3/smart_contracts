@@ -45,12 +45,17 @@ contract Write is IExecutePlugin, Context{
     ) external override onlyExecutor returns(bool) {
         uint256 beforeGas = gasleft();
 
-        DataTypes.GeneralVars memory vars;
-        vars.executedId = _executedId;
-        vars.pluginName = PLUGIN_NAME;
-        vars.version = PLUGIN_VERSION;
-        vars.user = _sender;
-        vars.data = _data;
+        DataTypes.GeneralVars memory postVars;
+        postVars.executedId = _executedId;
+        postVars.pluginName = PLUGIN_NAME;
+        postVars.version = PLUGIN_VERSION;
+        postVars.user = _sender;
+        postVars.data = _data;
+
+        DataTypes.MinSimpleVars memory gasVars;
+        gasVars.pluginName = PLUGIN_NAME;
+        gasVars.version = PLUGIN_VERSION;
+        gasVars.data = _data;
 
         checkData(_version, _sender);
         (address _communityId , , , , , , ) =
@@ -60,9 +65,8 @@ contract Write is IExecutePlugin, Context{
         checkRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);
         checkRule(RulesList.POST_PLACING_RULES, _communityId, _sender);
 
-        uint256 postId = IPostData(registry.postData()).writePost(
-            vars
-        );
+        uint256 postId = IPostData(registry.postData()).writePost(postVars);
+
         require(postId > 0, "Write: wrong create post");
 
         require(IAccount(registry.account()).addCreatedPostIdForUser(
@@ -87,17 +91,14 @@ contract Write is IExecutePlugin, Context{
         );
 
         uint256 gasConsumption = beforeGas - gasleft();
+        bytes memory gasData = abi.encode(postId, gasConsumption);
+        gasVars.data = gasData;
         require(
-            IPostData(registry.postData()).setGasConsumption(
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                postId,
-                    gasConsumption
-            ),
+            IPostData(registry.postData()).setGasConsumption(gasVars),
             "Write: wrong set gasConsumption"
         );
 
-    return true;
+        return true;
     }
 
     function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {

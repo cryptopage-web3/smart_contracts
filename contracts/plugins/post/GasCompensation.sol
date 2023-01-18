@@ -45,19 +45,26 @@ contract GasCompensation is IExecutePlugin, Context{
         address _sender,
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
-        DataTypes.GasCompensationBank memory vars;
+        DataTypes.SimpleVars memory postVars;
+        postVars.executedId = _executedId;
+        postVars.pluginName = PLUGIN_NAME;
+        postVars.version = PLUGIN_VERSION;
+
+        DataTypes.GasCompensationBank memory bankVars;
+        bankVars.executedId = _executedId;
+        bankVars.pluginName = PLUGIN_NAME;
+        bankVars.version = PLUGIN_VERSION;
+
         checkData(_version, _sender);
         (uint256[] memory postIds) = abi.decode(_data,(uint256[]));
 
         for (uint256 i = 0; i < postIds.length; i++) {
             uint256 postId = postIds[i];
+            bytes memory postData = abi.encode(postId);
+            postVars.data = postData;
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
-            (uint256 gas, address creator) = IPostData(registry.postData()).setGasCompensation(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                postId
-            );
+            (uint256 gas, address creator) = IPostData(registry.postData()).setGasCompensation(postVars);
+
             address owner = address(0);
             address[] memory users = checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator, owner);
             uint256[] memory gasAmount = new uint256[](2);
@@ -71,15 +78,10 @@ contract GasCompensation is IExecutePlugin, Context{
             }
             for(uint256 j = 0; j < step; j++) {
                 if(users[j] != address(0)) {
+                    bankVars.user = users[j];
+                    bankVars.gas = gasAmount[j];
                     require(
-                        IBank(registry.bank()).gasCompensation(
-                            vars
-//                                _executedId,
-//                                PLUGIN_NAME,
-//                                PLUGIN_VERSION,
-//                                users[j],
-//                                gasAmount[j]
-                        ),
+                        IBank(registry.bank()).gasCompensation(bankVars),
                         "GasCompensation: wrong bank"
                     );
                 }

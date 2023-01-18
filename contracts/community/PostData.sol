@@ -135,31 +135,31 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     }
 
     function setGasCompensation(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _pluginName, _version) returns(
+        DataTypes.SimpleVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, vars.pluginName, vars.version) returns(
         uint256 gasConsumption,
         address creator
     ) {
+        (uint256 _postId) = abi.decode(vars.data,(uint256));
+
         require(_postId > 0, "PostData: wrong postId");
 
         Metadata storage post = posts[_postId];
+        require(post.isView, "PostData: wrong post view");
         gasConsumption = post.gasConsumption;
         creator = post.creator;
+
         require(!gasCompensation[_postId], "PostData: wrong gas compensation");
         gasCompensation[_postId] = true;
 
-        emit SetGasCompensation(_executedId, _postId);
+        emit SetGasCompensation(vars.executedId, _postId);
     }
 
     function setGasConsumption(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _gas
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(bool) {
+        DataTypes.MinSimpleVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(bool) {
+        (uint256 _postId, uint256 _gas) = abi.decode(vars.data,(uint256,uint256));
+
         Metadata storage post = posts[_postId];
         post.gasConsumption = _gas;
 

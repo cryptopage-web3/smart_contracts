@@ -32,10 +32,7 @@ interface IPostData {
     ) external returns(bool);
 
     function setGasConsumption(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _gas
+        DataTypes.MinSimpleVars calldata vars
     ) external returns(bool);
 
     function updatePostWhenNewComment(
@@ -43,10 +40,7 @@ interface IPostData {
     ) external returns(bool);
 
     function setGasCompensation(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId
+        DataTypes.SimpleVars calldata vars
     ) external returns(
         uint256 price,
         address creator
