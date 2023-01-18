@@ -32,11 +32,7 @@ interface ICommentData {
     );
 
     function setGasConsumption(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _commentId,
-        uint256 _gas
+        DataTypes.MinSimpleVars calldata vars
     ) external returns(bool);
 
     function readComment(

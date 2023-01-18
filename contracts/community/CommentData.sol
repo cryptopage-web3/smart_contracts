@@ -141,12 +141,10 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     }
 
     function setGasConsumption(
-        bytes32 _pluginName,
-        uint256 _version,
-        uint256 _postId,
-        uint256 _commentId,
-        uint256 _gas
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
+        DataTypes.MinSimpleVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, vars.pluginName, vars.version) returns(bool) {
+        (uint256 _postId, uint256 _commentId, uint256 _gas) = abi.decode(vars.data,(uint256,uint256,uint256));
+
         Metadata storage comment = comments[_postId][_commentId];
         comment.gasConsumption = _gas;
 

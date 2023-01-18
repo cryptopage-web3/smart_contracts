@@ -61,6 +61,10 @@ contract Write is IExecutePlugin, Context{
         vars.user = _sender;
         vars.data = _data;
 
+        DataTypes.MinSimpleVars memory gasVars;
+        gasVars.pluginName = PLUGIN_NAME;
+        gasVars.version = PLUGIN_VERSION;
+
         uint256 commentId = ICommentData(registry.commentData()).writeComment(vars);
         require(commentId > 0, "Write: wrong create comment");
 
@@ -68,31 +72,19 @@ contract Write is IExecutePlugin, Context{
             "Write: wrong added commentId for user"
         );
 
-        require(IAccount(registry.account()).addCreatedCommentIdForUser(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _communityId,
-                _sender,
-                _postId,
-                commentId
-            ),
+        vars.data = abi.encode(_communityId, _postId, commentId);
+        require(IAccount(registry.account()).addCreatedCommentIdForUser(vars),
             "Write: wrong added commentId for user"
         );
 
         uint256 gasPrice = beforeGas - gasleft();
+        gasVars.data = abi.encode(_postId, commentId, gasPrice);
         require(
-            ICommentData(registry.commentData()).setGasConsumption(
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _postId,
-                commentId,
-                gasPrice
-            ),
+            ICommentData(registry.commentData()).setGasConsumption(gasVars),
             "Write: wrong set price"
         );
 
-    return true;
+        return true;
     }
 
     function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {

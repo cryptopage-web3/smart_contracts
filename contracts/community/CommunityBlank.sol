@@ -38,7 +38,9 @@ contract CommunityBlank is
     mapping(bytes32 => mapping(uint256 => mapping(bytes32 => bool))) private linkedRules;
 
     event LinkPlugin(address origin, address sender, bytes32 pluginName, uint256 version);
+    event LinkPluginBatch(address origin, address sender, bytes32[] pluginNames, uint256[] versions);
     event UnLinkPlugin(address origin, address sender, bytes32 pluginName, uint256 version);
+    event UnLinkPluginBatch(address origin, address sender, bytes32[] pluginNames, uint256[] versions);
 
     event LinkRule(address origin, address sender, bytes32 ruleGroupName, uint256 version, bytes32 ruleName);
     event UnLinkRule(address origin, address sender, bytes32 ruleGroupName, uint256 version, bytes32 ruleName);
@@ -68,9 +70,19 @@ contract CommunityBlank is
         emit LinkPlugin(tx.origin, _msgSender(), _pluginName, _version);
     }
 
+    function linkPluginBatch(bytes32[] calldata _pluginNames, uint256[] calldata _versions) external override onlyOwner {
+        setStatusBatch(_pluginNames, _versions, true);
+        emit LinkPluginBatch(tx.origin, _msgSender(), _pluginNames, _versions);
+    }
+
     function unLinkPlugin(bytes32 _pluginName, uint256 _version) external override onlyOwner {
         linkedPlugins[_pluginName][_version] = false;
         emit UnLinkPlugin(tx.origin, _msgSender(), _pluginName, _version);
+    }
+
+    function unLinkPluginBatch(bytes32[] calldata _pluginNames, uint256[] calldata _versions) external override onlyOwner {
+        setStatusBatch(_pluginNames, _versions, false);
+        emit UnLinkPluginBatch(tx.origin, _msgSender(), _pluginNames, _versions);
     }
 
     function isLinkedPlugin(bytes32 _pluginName, uint256 _version) external view override returns (bool) {
@@ -114,5 +126,14 @@ contract CommunityBlank is
         linkedPlugins[PluginsList.COMMUNITY_WRITE_POST][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_READ_COMMENT][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_WRITE_COMMENT][INITIAL_PLUGINS_VERSION] = true;
+    }
+
+    function setStatusBatch(bytes32[] calldata _pluginNames, uint256[] calldata _versions, bool _status) private {
+        uint256 len = _pluginNames.length;
+        require(len == _versions.length, "Community: wrong arrays length");
+        for(uint256 i = 0; i < len; i++ ) {
+            require(registry.isEnablePlugin(_pluginNames[i], _versions[i]), "Community: wrong plugin");
+            linkedPlugins[_pluginNames[i]][_versions[i]] = _status;
+        }
     }
 }

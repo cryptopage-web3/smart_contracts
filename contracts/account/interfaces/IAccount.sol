@@ -50,13 +50,7 @@ interface IAccount {
     ) external returns(bool);
 
     function addCreatedCommentIdForUser(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user,
-        uint256 _postId,
-        uint256 _commentId
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function getCommunityUsersCounts(address _communityId) external view returns(

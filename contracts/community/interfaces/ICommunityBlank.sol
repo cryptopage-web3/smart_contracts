@@ -19,7 +19,11 @@ interface ICommunityBlank {
 
     function linkPlugin(bytes32 _pluginName, uint256 _version) external;
 
+    function linkPluginBatch(bytes32[] calldata _pluginNames, uint256[] calldata _versions) external;
+
     function unLinkPlugin(bytes32 _pluginName, uint256 _version) external;
+
+    function unLinkPluginBatch(bytes32[] calldata _pluginNames, uint256[] calldata _versions) external;
 
     function isLinkedPlugin(bytes32 _pluginName, uint256 _version) external view returns (bool);
 

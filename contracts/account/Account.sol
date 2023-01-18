@@ -152,19 +152,15 @@ contract Account is
     }
 
     function addCreatedCommentIdForUser(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user,
-        uint256 _postId,
-        uint256 _commentId
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, _pluginName, _version) returns(bool) {
-        require(isCommunityUser(_communityId, _user), "Account: wrong community user");
-        require(ICommunityData(registry.communityData()).isLegalPostId(_communityId, _postId), "Account: wrong postId");
-        emit AddCreatedCommentIdForUser(_executedId, _communityId, _user, _postId, _commentId);
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId, uint256 _postId, uint256 _commentId) = abi.decode(vars.data,(address,uint256,uint256));
 
-        return createdCommentIdsByUser[_communityId][_user][_postId].add(_commentId);
+        require(isCommunityUser(_communityId, vars.user), "Account: wrong community user");
+        require(ICommunityData(registry.communityData()).isLegalPostId(_communityId, _postId), "Account: wrong postId");
+        emit AddCreatedCommentIdForUser(vars.executedId, _communityId, vars.user, _postId, _commentId);
+
+        return createdCommentIdsByUser[_communityId][vars.user][_postId].add(_commentId);
     }
 
     function getCommunityUsersCounts(address _communityId) external override view returns(
