@@ -12,11 +12,13 @@ import "../../rules/community/RulesList.sol";
 import "../../rules/community/interfaces/ICommunityJoiningRules.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Join is IExecutePlugin, Context {
 
     uint256 private constant PLUGIN_VERSION = 1;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_JOIN;
 
     IRegistry public registry;
 
@@ -37,35 +39,42 @@ contract Join is IExecutePlugin, Context {
         bytes32 _executedId,
         uint256 _version,
         address _sender,
-        bytes calldata data
+        bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (address _communityId) = abi.decode(data,(address));
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.COMMUNITY_JOINING_RULES,
-            PLUGIN_VERSION
-        );
+        (address _communityId) = abi.decode(_data,(address));
+
+        checkRule(RulesList.COMMUNITY_JOINING_RULES, _communityId, _sender);
+
+        DataTypes.GeneralVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _sender;
+        vars.data = _data;
+
         require(
-            ICommunityJoiningRules(groupRules).validate(_communityId, _sender),
-            "Join: wrong validate"
-        );
-        require(
-            IAccount(registry.account()).addCommunityUser(
-                _executedId,
-                PluginsList.COMMUNITY_JOIN,
-                _version,
-                _communityId,
-                _sender
-            ),
+            IAccount(registry.account()).addCommunityUser(vars),
             "Join: wrong create community"
         );
 
         return true;
     }
 
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            ICommunityJoiningRules(rulesContract).validate(_communityId, _sender),
+            "Join: wrong rules validate"
+        );
+    }
+
     function checkData(uint256 _version, address _sender) private view {
         require(_version == PLUGIN_VERSION, "Join: wrong _version");
-        require(registry.isEnablePlugin(PluginsList.COMMUNITY_JOIN, _version),"Join: plugin is not trusted");
+        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Join: plugin is not trusted");
         require(_sender != address(0) , "Join: _sender is zero");
     }
 }

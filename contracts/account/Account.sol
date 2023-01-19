@@ -85,30 +85,26 @@ contract Account is
     }
 
     function addCommunityUser(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_JOIN, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_JOIN, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId) = abi.decode(vars.data,(address));
         require(_communityId != address(0) , "Account: address is zero");
-        require(communitiesByUser[_user].add(_communityId) , "Account: the user is already in the community");
+        require(communitiesByUser[vars.user].add(_communityId) , "Account: the user is already in the community");
+
         CommunityUsers storage users = communityUsers[_communityId];
-        emit AddCommunityUser(_executedId, _communityId, _user);
-        return users.users.add(_user);
+        emit AddCommunityUser(vars.executedId, _communityId, vars.user);
+        return users.users.add(vars.user);
     }
 
     function removeCommunityUser(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_QUIT, _pluginName, _version) returns(bool) {
-        require(communitiesByUser[_user].remove(_communityId) , "Account: the user is no longer in the community");
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_QUIT, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId) = abi.decode(vars.data,(address));
+        require(communitiesByUser[vars.user].remove(_communityId) , "Account: the user is no longer in the community");
+
         CommunityUsers storage users = communityUsers[_communityId];
-        emit RemoveCommunityUser(_executedId, _communityId, _user);
-        return users.users.remove(_user);
+        emit RemoveCommunityUser(vars.executedId, _communityId, vars.user);
+        return users.users.remove(vars.user);
     }
 
     function addModerator(

@@ -13,6 +13,7 @@ import "../PluginsList.sol";
 contract Quit is IExecutePlugin, Context {
 
     uint256 private constant PLUGIN_VERSION = 1;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_QUIT;
 
     IRegistry public registry;
 
@@ -33,18 +34,19 @@ contract Quit is IExecutePlugin, Context {
         bytes32 _executedId,
         uint256 _version,
         address _sender,
-        bytes calldata data
+        bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (address _communityId) = abi.decode(data,(address));
+
+        DataTypes.GeneralVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _sender;
+        vars.data = _data;
+
         require(
-            IAccount(registry.account()).removeCommunityUser(
-                _executedId,
-                PluginsList.COMMUNITY_QUIT,
-                _version,
-                _communityId,
-                _sender
-            ),
+            IAccount(registry.account()).removeCommunityUser(vars),
             "Quit: wrong create community"
         );
 
@@ -53,7 +55,7 @@ contract Quit is IExecutePlugin, Context {
 
     function checkData(uint256 _version, address _sender) private view {
         require(_version == PLUGIN_VERSION, "Quit: wrong _version");
-        require(registry.isEnablePlugin(PluginsList.COMMUNITY_QUIT, _version),"Quit: plugin is not trusted");
+        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Quit: plugin is not trusted");
         require(_sender != address(0) , "Quit: _sender is zero");
     }
 }
