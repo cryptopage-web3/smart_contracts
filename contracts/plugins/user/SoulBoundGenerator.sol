@@ -60,10 +60,10 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
         if(IReputationManagementRules(groupRules).validate(_communityId, _user)) {
             DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user, _communityId);
 
-            makeMint(_user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
-            makeMint(_user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
-            makeMint(_user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
-            makeMint(_user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
+            makeMint(_executedId, _user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
+            makeMint(_executedId, _user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
+            makeMint(_executedId, _user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
+            makeMint(_executedId, _user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
         }
 
         return true;
@@ -75,12 +75,13 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
         require(_sender != address(0) , "SoulBoundGenerator: _sender is zero");
     }
 
-    function makeMint(address _user, address _communityId, uint256 _rateAmount, uint256 _rateId) private {
+    function makeMint(bytes32 _executedId, address _user, address _communityId, uint256 _rateAmount, uint256 _rateId) private {
         uint256 tokenId = _communityId.getSoulBoundTokenId(_rateId);
         uint256 existTokensCount = soulBound.balanceOf(_user, tokenId);
         uint256 diff = _rateAmount - existTokensCount;
         if (diff > 0) {
             DataTypes.SoulBoundMintBurn memory vars;
+            vars.executedId = _executedId;
             vars.user = _user;
             vars.pluginName = PLUGIN_NAME;
             vars.version = PLUGIN_VERSION;

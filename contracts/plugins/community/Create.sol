@@ -11,11 +11,13 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
+import "../../libraries/DataTypes.sol";
 
 
 contract Create is IExecutePlugin, Ownable, CloneFactory {
 
     uint256 private constant PLUGIN_VERSION = 1;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_CREATE;
 
     IRegistry public registry;
 
@@ -44,18 +46,20 @@ contract Create is IExecutePlugin, Ownable, CloneFactory {
         bytes32 _executedId,
         uint256 _version,
         address _sender,
-        bytes calldata data
+        bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (string memory _name, bool _isInitial) = abi.decode(data,(string, bool));
+        (string memory _name, bool _isInitial) = abi.decode(_data,(string, bool));
         address createdCommunity = createCommunity(_name, _sender, _isInitial);
+
+        DataTypes.SimpleVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PLUGIN_NAME;
+        vars.version = PLUGIN_VERSION;
+        vars.data = abi.encode(createdCommunity);
+
         require(
-            ICommunityData(registry.communityData()).addCommunity(
-                _executedId,
-                PluginsList.COMMUNITY_CREATE,
-                _version,
-                createdCommunity
-            ),
+            ICommunityData(registry.communityData()).addCommunity(vars),
             "Create: wrong create community"
         );
 
@@ -72,7 +76,7 @@ contract Create is IExecutePlugin, Ownable, CloneFactory {
 
     function checkData(uint256 _version, address _sender) private view {
         require(_version == PLUGIN_VERSION, "Create: wrong _version");
-        require(registry.isEnablePlugin(PluginsList.COMMUNITY_CREATE, _version),"Create: plugin is not trusted");
+        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Create: plugin is not trusted");
         require(_sender != address(0) , "Create: _sender is zero");
     }
 }

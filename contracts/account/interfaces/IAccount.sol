@@ -17,28 +17,15 @@ interface IAccount {
     ) external returns(bool);
 
     function addModerator(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function removeModerator(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function addCreatedPostIdForUser(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user,
-        uint256 _postId
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function addCreatedCommentIdForUser(

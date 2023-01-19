@@ -51,26 +51,22 @@ contract CommunityData is Initializable, ContextUpgradeable, ICommunityData {
     }
 
     function addCommunity(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CREATE, _pluginName, _version) returns(bool result) {
+        DataTypes.SimpleVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_CREATE, vars.pluginName, vars.version) returns(bool result) {
+        (address _communityId) = abi.decode(vars.data,(address));
         require(_communityId != address(0) , "Community: wrong communityId");
         result = communities.add(_communityId);
 
-        emit AddedCommunity(_executedId, _msgSender(), _communityId, block.timestamp);
+        emit AddedCommunity(vars.executedId, _msgSender(), _communityId, block.timestamp);
     }
 
     function addCreatedPostIdForCommunity(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        uint256 _postId
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId, uint256 _postId) = abi.decode(vars.data,(address, uint256));
+
         require(_communityId != address(0) , "CommunityData: address is zero");
-        emit AddPostIdForCommunity(_executedId, _communityId, _postId);
+        emit AddPostIdForCommunity(vars.executedId, _communityId, _postId);
 
         return postIdsByCommunity[_communityId].add(_postId);
     }

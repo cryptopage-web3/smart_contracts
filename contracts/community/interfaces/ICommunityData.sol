@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.15;
 
+import "../../libraries/DataTypes.sol";
+
+
 interface ICommunityData {
 
     function version() external pure returns (string memory);
@@ -9,18 +12,11 @@ interface ICommunityData {
     function isCommunity(address _community) external view returns (bool);
 
     function addCommunity(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId
+        DataTypes.SimpleVars calldata vars
     ) external returns (bool);
 
     function addCreatedPostIdForCommunity(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        uint256 _postId
+        DataTypes.GeneralVars calldata vars
     ) external returns(bool);
 
     function getCommunities(uint256 _startIndex, uint256 _endIndex) external view returns (address[] memory result);

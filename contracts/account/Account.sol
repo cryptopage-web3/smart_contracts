@@ -108,43 +108,36 @@ contract Account is
     }
 
     function addModerator(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_EDIT_MODERATORS, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_EDIT_MODERATORS, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId, , ) = abi.decode(vars.data,(address, address, bool));
+
         require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
-        emit AddCommunityModerator(_executedId, _communityId, _user);
-        return users.moderators.add(_user);
+        emit AddCommunityModerator(vars.executedId, _communityId, vars.user);
+        return users.moderators.add(vars.user);
     }
 
     function removeModerator(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_EDIT_MODERATORS, _pluginName, _version) returns(bool) {
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_EDIT_MODERATORS, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId, , ) = abi.decode(vars.data,(address, address, bool));
+
         require(_communityId != address(0) , "Account: address is zero");
         CommunityUsers storage users = communityUsers[_communityId];
-        emit RemoveCommunityModerator(_executedId, _communityId, _user);
-        return users.moderators.remove(_user);
+        emit RemoveCommunityModerator(vars.executedId, _communityId, vars.user);
+        return users.moderators.remove(vars.user);
     }
 
     function addCreatedPostIdForUser(
-        bytes32 _executedId,
-        bytes32 _pluginName,
-        uint256 _version,
-        address _communityId,
-        address _user,
-        uint256 _postId
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, _pluginName, _version) returns(bool) {
-        require(isCommunityUser(_communityId, _user), "Account: wrong community user");
-        emit AddCreatedPostIdForUser(_executedId, _communityId, _user, _postId);
+        DataTypes.GeneralVars calldata vars
+    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(bool) {
+        (address _communityId, uint256 _postId) = abi.decode(vars.data,(address, uint256));
 
-        return createdPostIdsByUser[_communityId][_user].add(_postId);
+        require(isCommunityUser(_communityId, vars.user), "Account: wrong community user");
+        emit AddCreatedPostIdForUser(vars.executedId, _communityId, vars.user, _postId);
+
+        return createdPostIdsByUser[_communityId][vars.user].add(_postId);
     }
 
     function addCreatedCommentIdForUser(

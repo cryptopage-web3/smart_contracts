@@ -37,43 +37,44 @@ contract EditModerators is IExecutePlugin, Context {
         bytes32 _executedId,
         uint256 _version,
         address _sender,
-        bytes calldata data
+        bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (address _communityId, address _user, bool _isAdding) = abi.decode(data,(address, address, bool));
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.COMMUNITY_EDIT_MODERATOR_RULES,
-            PLUGIN_VERSION
-        );
-        require(
-            ICommunityEditModeratorsRules(groupRules).validate(_communityId, _sender),
-            "EditModerators: wrong validate"
-        );
+        (address _communityId, address _user, bool _isAdding) = abi.decode(_data,(address, address, bool));
+
+        checkRule(RulesList.COMMUNITY_EDIT_MODERATOR_RULES, _communityId, _sender);
+
+        DataTypes.GeneralVars memory vars;
+        vars.executedId = _executedId;
+        vars.pluginName = PluginsList.COMMUNITY_EDIT_MODERATORS;
+        vars.version = PLUGIN_VERSION;
+        vars.user = _user;
+        vars.data = _data;
+
         if (_isAdding) {
             require(
-                IAccount(registry.account()).addModerator(
-                    _executedId,
-                    PluginsList.COMMUNITY_JOIN,
-                    _version,
-                    _communityId,
-                    _user
-                ),
+                IAccount(registry.account()).addModerator(vars),
                 "EditModerators: wrong add moderator"
             );
         } else {
             require(
-                IAccount(registry.account()).removeModerator(
-                    _executedId,
-                    PluginsList.COMMUNITY_JOIN,
-                    _version,
-                    _communityId,
-                    _user
-                ),
+                IAccount(registry.account()).removeModerator(vars),
                 "EditModerators: wrong remove moderator"
             );
         }
 
         return true;
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            ICommunityEditModeratorsRules(rulesContract).validate(_communityId, _sender),
+            "EditModerators: wrong rules validate"
+        );
     }
 
     function checkData(uint256 _version, address _sender) private view {

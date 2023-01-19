@@ -66,27 +66,16 @@ contract Write is IExecutePlugin, Context{
         checkRule(RulesList.POST_PLACING_RULES, _communityId, _sender);
 
         uint256 postId = IPostData(registry.postData()).writePost(postVars);
-
         require(postId > 0, "Write: wrong create post");
 
-        require(IAccount(registry.account()).addCreatedPostIdForUser(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _communityId,
-                _sender,
-                postId
-            ),
+        bytes memory newData = abi.encode(_communityId, postId);
+        postVars.data = newData;
+
+        require(IAccount(registry.account()).addCreatedPostIdForUser(postVars),
             "Write: wrong added postId for user"
         );
 
-        require(ICommunityData(registry.communityData()).addCreatedPostIdForCommunity(
-                _executedId,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                _communityId,
-                postId
-            ),
+        require(ICommunityData(registry.communityData()).addCreatedPostIdForCommunity(postVars),
             "Write: wrong added postId for community"
         );
 
