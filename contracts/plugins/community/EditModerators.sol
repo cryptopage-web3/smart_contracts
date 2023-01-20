@@ -17,6 +17,7 @@ import "../PluginsList.sol";
 contract EditModerators is IExecutePlugin, Context {
 
     uint256 private constant PLUGIN_VERSION = 1;
+    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_EDIT_MODERATORS;
 
     IRegistry public registry;
 
@@ -46,7 +47,7 @@ contract EditModerators is IExecutePlugin, Context {
 
         DataTypes.GeneralVars memory vars;
         vars.executedId = _executedId;
-        vars.pluginName = PluginsList.COMMUNITY_EDIT_MODERATORS;
+        vars.pluginName = PLUGIN_NAME;
         vars.version = PLUGIN_VERSION;
         vars.user = _user;
         vars.data = _data;
@@ -79,7 +80,7 @@ contract EditModerators is IExecutePlugin, Context {
 
     function checkData(uint256 _version, address _sender) private view {
         require(_version == PLUGIN_VERSION, "EditModerators: wrong _version");
-        require(registry.isEnablePlugin(PluginsList.COMMUNITY_JOIN, _version),"EditModerators: plugin is not trusted");
+        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"EditModerators: plugin is not trusted");
         require(_sender != address(0) , "EditModerators: _sender is zero");
     }
 }

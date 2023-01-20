@@ -19,9 +19,9 @@ export default async function setupContracts() {
     let contractBlank;
 
     let bank = AddressZero;
-    let token = AddressZero;
+    let token;
     let dao = AddressZero;
-    let treasury = AddressZero;
+    let treasury;
     let rule;
     let communityData;
 
@@ -53,7 +53,8 @@ export default async function setupContracts() {
     const registryFactory = await ethers.getContractFactory("contracts/registry/Registry.sol:Registry");
     registry = await registryFactory.deploy();
     await registry.deployed();
-    await registry.initialize(token, dao, treasury);
+    treasury = registry.address;
+    await registry.initialize(dao, treasury);
 
     const executorFactory = await ethers.getContractFactory("contracts/executor/Executor.sol:Executor");
     executor = await executorFactory.deploy();
@@ -64,6 +65,11 @@ export default async function setupContracts() {
     communityData = await communityDataFactory.deploy();
     await communityData.initialize(registry.address);
     await registry.setCommunityData(communityData.address);
+
+    const tokenFactory = await ethers.getContractFactory("contracts/tokens/token/Token.sol:Token");
+    token = await tokenFactory.deploy();
+    await token.initialize(registry.address);
+    await registry.setToken(token.address);
 
     await registry.setSoulBound(communityData.address);
 

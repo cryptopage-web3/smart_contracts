@@ -36,6 +36,8 @@ interface IRegistry {
 
     function setBank(address _contract) external;
 
+    function setToken(address _contract) external;
+
     function setOracle(address _contract) external;
 
     function setUniV3Pool(address _contract) external;
