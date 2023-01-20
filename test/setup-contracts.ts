@@ -18,11 +18,9 @@ export default async function setupContracts() {
     let registry, executor;
     let contractBlank;
 
-    let bank = AddressZero;
-    let token;
+    let bank, token, soulBound, rule;
     let dao = AddressZero;
     let treasury;
-    let rule;
     let communityData;
 
     let communityJoiningRules
@@ -37,6 +35,12 @@ export default async function setupContracts() {
     let communityJoinPluginName = keccak256(defaultAbiCoder.encode(
             ["string"],
             ["COMMUNITY_JOIN"]
+        )
+    );
+
+    let communityJoiningRulesName = keccak256(defaultAbiCoder.encode(
+            ["string"],
+            ["PAGE.COMMUNITY_JOINING_RULES"]
         )
     );
 
@@ -71,6 +75,16 @@ export default async function setupContracts() {
     await token.initialize(registry.address);
     await registry.setToken(token.address);
 
+    const bankFactory = await ethers.getContractFactory("contracts/bank/Bank.sol:Bank");
+    bank = await bankFactory.deploy();
+    await bank.initialize(registry.address);
+    await registry.setToken(bank.address);
+
+    const soulBoundFactory = await ethers.getContractFactory("contracts/tokens/soulbound/SoulBound.sol:SoulBound");
+    soulBound = await soulBoundFactory.deploy();
+    await soulBound.initialize(registry.address);
+    await registry.setSoulBound(soulBound.address);
+
     await registry.setSoulBound(communityData.address);
 
     const blankFactory = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
@@ -94,6 +108,10 @@ export default async function setupContracts() {
     const communityJoiningRulesFactory =  await ethers.getContractFactory("contracts/rules/community/CommunityJoiningRules.sol:CommunityJoiningRules");
     communityJoiningRules = await communityJoiningRulesFactory.deploy(registry.address);
     await rule.setRuleContract(communityJoiningRulesName, version, communityJoiningRules.address);
+
+    const communityUserVerificationRulesFactory =  await ethers.getContractFactory("contracts/rules/community/UserVerificationRules.sol:UserVerificationRules");
+    communityUserVerificationRules = await communityUserVerificationRulesFactory.deploy(registry.address);
+    await rule.setRuleContract(communityJoiningRulesName, version, communityUserVerificationRules.address);
 
     let id = ethers.utils.formatBytes32String("1");
     let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);
