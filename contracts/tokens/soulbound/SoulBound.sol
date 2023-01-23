@@ -87,4 +87,18 @@ contract SoulBound is
     ) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override(ERC1155Upgradeable) {
+        if (operator != address(0) && from != address(0)) {
+            revert("SoulBound: rejected transferring tokens");
+        }
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
 }
