@@ -8,6 +8,23 @@ import { BigNumber } from "ethers";
 const { getContract, getSigners, provider } = ethers;
 const { AddressZero, HashZero } = ethers.constants;
 
+let communityCreatePluginName = keccak256(defaultAbiCoder.encode(["string"],
+        ["COMMUNITY_CREATE"])
+);
+let communityJoinPluginName = keccak256(defaultAbiCoder.encode(["string"],
+        ["COMMUNITY_JOIN"])
+);
+let communityQuitPluginName = keccak256(defaultAbiCoder.encode(["string"],
+    ["COMMUNITY_QUIT"])
+);
+let writePostPluginName = keccak256(defaultAbiCoder.encode(["string"],
+    ["COMMUNITY_WRITE_POST"])
+);
+let readPostPluginName = keccak256(defaultAbiCoder.encode(["string"],
+    ["COMMUNITY_READ_POST"])
+);
+
+
 export default async function setupContracts() {
 
     let owner: SignerWithAddress,
@@ -26,29 +43,6 @@ export default async function setupContracts() {
     let communityJoiningRules
 
     let firstCommunityName = "First community";
-
-    let communityCreatePluginName = keccak256(defaultAbiCoder.encode(
-            ["string"],
-            ["COMMUNITY_CREATE"]
-        )
-    );
-    let communityJoinPluginName = keccak256(defaultAbiCoder.encode(
-            ["string"],
-            ["COMMUNITY_JOIN"]
-        )
-    );
-
-    let communityJoiningRulesName = keccak256(defaultAbiCoder.encode(
-            ["string"],
-            ["PAGE.COMMUNITY_JOINING_RULES"]
-        )
-    );
-
-    let communityJoiningRulesName = keccak256(defaultAbiCoder.encode(
-            ["string"],
-            ["PAGE.COMMUNITY_JOINING_RULES"]
-        )
-    );
 
     let version = 1;
 
@@ -85,33 +79,16 @@ export default async function setupContracts() {
     await soulBound.initialize(registry.address);
     await registry.setSoulBound(soulBound.address);
 
-    await registry.setSoulBound(communityData.address);
-
     const blankFactory = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
     contractBlank = await blankFactory.deploy();
-
-    const communityCreatePluginFactory = await ethers.getContractFactory("contracts/plugins/community/Create.sol:Create");
-    communityCreatePlugin = await communityCreatePluginFactory.deploy(registry.address, owner.address);
-    await communityCreatePlugin.deployed();
-    await registry.setPlugin(communityCreatePluginName, version, communityCreatePlugin.address);
-
-    const communityJoinPluginFactory = await ethers.getContractFactory("contracts/plugins/community/Join.sol:Join");
-    communityJoinPlugin = await communityJoinPluginFactory.deploy(registry.address);
-    await communityJoinPlugin.deployed();
-    await registry.setPlugin(communityJoinPluginName, version, communityJoinPlugin.address);
 
     const ruleFactory = await ethers.getContractFactory("contracts/rules/Rule.sol:Rule");
     rule = await ruleFactory.deploy();
     await rule.initialize();
     await registry.setRule(rule.address);
 
-    const communityJoiningRulesFactory =  await ethers.getContractFactory("contracts/rules/community/CommunityJoiningRules.sol:CommunityJoiningRules");
-    communityJoiningRules = await communityJoiningRulesFactory.deploy(registry.address);
-    await rule.setRuleContract(communityJoiningRulesName, version, communityJoiningRules.address);
-
-    const communityUserVerificationRulesFactory =  await ethers.getContractFactory("contracts/rules/community/UserVerificationRules.sol:UserVerificationRules");
-    communityUserVerificationRules = await communityUserVerificationRulesFactory.deploy(registry.address);
-    await rule.setRuleContract(communityJoiningRulesName, version, communityUserVerificationRules.address);
+    await setupCommonPlugins(registry, version, owner);
+    await setupCommonRules(registry,version, rule);
 
     let id = ethers.utils.formatBytes32String("1");
     let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);
@@ -136,4 +113,44 @@ export default async function setupContracts() {
         registry, executor, communityData,
         createdCommunity, account
     };
+}
+
+async function setupCommonPlugins(_registryContract, version, user) {
+
+    let pluginFactory = await ethers.getContractFactory("contracts/plugins/community/Create.sol:Create");
+    let communityCreatePlugin = await pluginFactory.deploy(_registryContract.address, user.address);
+    await communityCreatePlugin.deployed();
+    await _registryContract.setPlugin(communityCreatePluginName, version, communityCreatePlugin.address);
+
+    await setupPlugin(_registryContract, version, "contracts/plugins/community/Join.sol:Join", communityJoinPluginName);
+    await setupPlugin(_registryContract, version, "contracts/plugins/community/Quit.sol:Quit", communityQuitPluginName);
+
+    await setupPlugin(_registryContract, version, "contracts/plugins/post/Write.sol:Write", writePostPluginName);
+    await setupPlugin(_registryContract, version, "contracts/plugins/post/Read.sol:Read", readPostPluginName);
+}
+
+async function setupPlugin(_registryContract, version, pathName, pluginName) {
+    let pluginFactory = await ethers.getContractFactory(pathName);
+    let pluginContract = await pluginFactory.deploy(_registryContract.address);
+    await pluginContract.deployed();
+    await _registryContract.setPlugin(pluginName, version, pluginContract.address);
+}
+
+async function setupCommonRules(_registryContract, _version, _ruleContract) {
+    let communityJoiningRulesName = keccak256(defaultAbiCoder.encode(["string"],
+        ["PAGE.COMMUNITY_JOINING_RULES"])
+    );
+    let userVerificationRulesName = keccak256(defaultAbiCoder.encode(["string"],
+        ["PAGE.USER_VERIFICATION_RULES"])
+    );
+
+    await setupRule(_registryContract, _ruleContract, _version, "contracts/rules/community/CommunityJoiningRules.sol:CommunityJoiningRules", communityJoiningRulesName);
+    await setupRule(_registryContract, _ruleContract, _version, "contracts/rules/community/UserVerificationRules.sol:UserVerificationRules", userVerificationRulesName);
+
+}
+
+async function setupRule(_registryContract, _rule, _version, pathName, _ruleName) {
+    const rulesFactory =  await ethers.getContractFactory(pathName);
+    const rulesContract = await rulesFactory.deploy(_registryContract.address);
+    await _rule.setRuleContract(_ruleName, _version, rulesContract.address);
 }
