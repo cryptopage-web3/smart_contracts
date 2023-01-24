@@ -15,7 +15,7 @@ library  RulesList {
     bytes32 public constant PERIODIC_PAYMENT = keccak256(abi.encode("PERIODIC_PAYMENT"));
 
     // Community Edit Moderators Rules
-    bytes32 public constant COMMUNITY_EDIT_MODERATOR_RULES = keccak256(abi.encode("PAGE.COMMUNITY_ADD_MODERATOR_RULES"));
+    bytes32 public constant COMMUNITY_EDIT_MODERATOR_RULES = keccak256(abi.encode("PAGE.COMMUNITY_EDIT_MODERATOR_RULES"));
     bytes32 public constant NO_EDIT_MODERATOR = keccak256(abi.encode("NO_EDIT_MODERATOR"));
     bytes32 public constant EDIT_AFTER_VOTED = keccak256(abi.encode("EDIT_AFTER_VOTED"));
     bytes32 public constant EDIT_ONLY_SUPER_ADMIN = keccak256(abi.encode("EDIT_ONLY_SUPER_ADMIN"));

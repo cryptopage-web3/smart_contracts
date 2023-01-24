@@ -16,15 +16,20 @@ describe("Test Write post basic functionality", function () {
     let owner: SignerWithAddress,
         creator: SignerWithAddress,
         third: SignerWithAddress;
-    let communityCreatePluginName, communityJoinPluginName, version;
-    let registry, executor, communityData;
+    let version;
+    let registry, executor, communityData, postData, commentData;
     let createdCommunity, account;
+
+    let communityJoinPluginName = keccak256(defaultAbiCoder.encode(["string"],
+        ["COMMUNITY_JOIN"])
+    );
 
     before(async function () {
         ({
             owner, creator, third,
-            communityCreatePluginName, communityJoinPluginName, version,
-            registry, executor, communityData,
+            version,
+            registry, executor,
+            communityData, postData, commentData,
             createdCommunity, account
         } = await setupContracts());
 
