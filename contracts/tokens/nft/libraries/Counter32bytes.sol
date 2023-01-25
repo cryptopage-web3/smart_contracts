@@ -9,7 +9,7 @@ library Counter32bytes {
     }
 
     function current(Counter storage counter) internal view returns (uint256) {
-        return (uint256(counter._blockchainId) << 248) | uint256(counter._value);
+        return (uint256(counter._blockchainId) * 1e12) + uint256(counter._value);
     }
 
     function increment(Counter storage counter) internal {

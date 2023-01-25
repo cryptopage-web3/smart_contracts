@@ -37,27 +37,6 @@ contract NFT is
 
     string public baseTokenURI;
 
-    struct PostMetadata {
-        string ipfsHash;
-        string category;
-        address creator;
-        bool visible;
-        bool repostable;
-        uint64 upCount;
-        uint64 downCount;
-        uint256 price;
-        uint256 commentCount;
-        uint256 encodingType;
-        Sets.StringSet tags;
-        mapping(address => EnumerableSetUpgradeable.UintSet) user2comments;
-    }
-
-    // tokenId -> PostMetadata
-    mapping(uint256 => PostMetadata) internal posts;
-
-    // userAddress -> pluginId
-    mapping(address => uint16) public usersPluginReceive;
-
     modifier onlyPostData() {
         require(registry.postData() == _msgSender(), "NFT: caller is not the postData");
         _;
@@ -93,9 +72,7 @@ contract NFT is
     function burn(uint256 tokenId) external override onlyPostData {
         address owner = ERC721Upgradeable.ownerOf(tokenId);
         require(owner == _msgSender(), "NFT: not owner");
-
-        PostMetadata storage post = posts[tokenId];
-        post.visible = false;
+        _burn(tokenId);
     }
 
     function transferFrom(
@@ -127,7 +104,7 @@ contract NFT is
         _requireMinted(tokenId);
 
         string memory baseURI = baseTokenURI;
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, posts[tokenId].ipfsHash)) : "";
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId)) : "";
     }
 
     function _requireMinted(uint256 tokenId) internal override view virtual {

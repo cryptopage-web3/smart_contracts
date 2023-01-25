@@ -62,17 +62,32 @@ describe("Test Write post basic functionality", function () {
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
 
-        let postId = Number(postIds[0]);
+        let postId = postIds[0].toNumber();
         console.log("postId = ", postId);
 
         data = defaultAbiCoder.encode(
             [ "uint256" ],
             [ postId ]
         );
-        id = ethers.utils.formatBytes32String("12");
-        let postInfo = await executor.connect(third).run(id, pluginList.COMMUNITY_READ_POST(), version, data);
-        console.log("postInfo = ", postInfo);
 
+        let readInfo = await executor.connect(third).read(pluginList.COMMUNITY_READ_POST(), version, data);
+        console.log("readInfo = ", readInfo);
+
+        //0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000400000000000000000000000009467a509da43cb50eb332187602534991be1fea40000000000000000000000000000000000000000000000000000000000000001
+        //0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000009467a509da43cb50eb332187602534991be1fea4
+        data = defaultAbiCoder.decode(
+            // [ "uint256", "uint256", "uint256", "address", "bytes" ],
+            [ "uint256", "uint256", "uint256", "address" ],
+            readInfo
+        );
+
+        // let postInfo = defaultAbiCoder.decode(
+        //     // [ "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]" ],
+        //     [ "string", "string", "string[]", "address", "address" ],
+        //     data[4]
+        // );
+
+        console.log("postInfo = ", data);
 
     });
 
