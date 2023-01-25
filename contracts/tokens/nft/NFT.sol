@@ -82,7 +82,7 @@ contract NFT is
         baseTokenURI = _baseTokenURI;
     }
 
-    function mint(address _owner) external override returns (uint256) {
+    function mint(address _owner) external override onlyPostData returns (uint256) {
         uint256 tokenId = idCounter.current();
         _mint(_owner, tokenId);
         idCounter.increment();

@@ -16,9 +16,10 @@ describe("Test Join to community basic functionality", function () {
     let owner: SignerWithAddress,
         creator: SignerWithAddress,
         third: SignerWithAddress;
-    let version;
-    let registry, executor,communityData, postData, commentData;
+    let version, ruleList, pluginList;
+    let registry, executor, bank, communityData, postData, commentData;
     let createdCommunity, account;
+    let token, nft, soulBound;
 
     let communityJoinPluginName = keccak256(defaultAbiCoder.encode(["string"],
         ["COMMUNITY_JOIN"])
@@ -27,10 +28,11 @@ describe("Test Join to community basic functionality", function () {
     before(async function () {
         ({
             owner, creator, third,
-            version,
-            registry, executor,
-            communityData, postData, commentData,
-            createdCommunity, account
+            version, ruleList, pluginList,
+            registry, executor, bank,
+            token, nft, soulBound,
+            communityData, postData, commentData, account,
+            createdCommunity
         } = await setupContracts());
 
     })
