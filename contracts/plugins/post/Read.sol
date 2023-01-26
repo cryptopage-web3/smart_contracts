@@ -55,9 +55,8 @@ contract Read is IReadPlugin, Context {
         vars.version = PLUGIN_VERSION;
         vars.data = _inData;
 
-        bytes memory postData = IPostData(registry.postData()).readPost(vars);
-
-        bytes memory outData = abi.encode(communityId, commentCount, postData);
+        DataTypes.PostMetadata memory postData = IPostData(registry.postData()).readPost(vars);
+        bytes memory outData = abi.encode(commentCount, communityId, postData);
 
         return outData;
     }

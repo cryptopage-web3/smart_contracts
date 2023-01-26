@@ -2,8 +2,23 @@
 
 pragma solidity 0.8.15;
 
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+
 
 library DataTypes {
+
+    struct PostMetadata {
+        address creator;
+        address repostFromCommunity;
+        string ipfsHash;
+        string category;
+        string[] tags;
+        uint64 upCount;
+        uint64 downCount;
+        uint256 encodingType;
+        uint256 timestamp;
+        bool isEncrypted;
+    }
 
     enum UserRatesType {
         RESERVE, FOR_POST, FOR_COMMENT, FOR_UP, FOR_DOWN,

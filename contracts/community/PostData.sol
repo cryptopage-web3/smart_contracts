@@ -181,30 +181,21 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     function readPost(
         DataTypes.MinSimpleVars calldata vars
     ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_POST, vars.pluginName, vars.version) returns(
-        bytes memory _data
+        DataTypes.PostMetadata memory outData
     ) {
         (uint256 _postId) = abi.decode(vars.data,(uint256));
         Metadata storage post = posts[_postId];
         if(post.isView) {
-            _data = abi.encode(
-                post.ipfsHash,
-                post.category,
-                post.tags,
-                post.creator,
-                post.repostFromCommunity,
-                post.upCount,
-                post.downCount,
-                post.gasConsumption,
-                post.encodingType,
-                post.timestamp,
-                post.upDownUsers.values(),
-                true
-            );
+            outData = convertMetadata(post);
         }
     }
 
     function getCommunityId(uint256 _postId) external view override returns(address) {
         return communityIdByPostId[_postId];
+    }
+
+    function isUpDownUser(uint256 _postId, address _user) public view returns(bool) {
+        return posts[_postId].upDownUsers.contains(_user);
     }
 
     function setPostUpDown(uint256 _postId, bool _isUp, bool _isDown, address _sender) private {
@@ -224,7 +215,16 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         curPost.upDownUsers.add(_sender);
     }
 
-    function isUpDownUser(uint256 _postId, address _user) public view returns(bool) {
-        return posts[_postId].upDownUsers.contains(_user);
+    function convertMetadata(Metadata storage inData) private view returns(DataTypes.PostMetadata memory outData) {
+        outData.creator = inData.creator;
+        outData.repostFromCommunity = inData.repostFromCommunity;
+        outData.isEncrypted = inData.isEncrypted;
+        outData.timestamp = inData.timestamp;
+        outData.upCount = inData.upCount;
+        outData.downCount = inData.downCount;
+        outData.ipfsHash = inData.ipfsHash;
+        outData.encodingType = inData.encodingType;
+        outData.category = inData.category;
+        outData.tags = inData.tags;
     }
 }

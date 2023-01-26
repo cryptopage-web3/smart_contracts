@@ -22,7 +22,7 @@ interface IPostData {
     function readPost(
         DataTypes.MinSimpleVars calldata vars
     ) external view returns(
-        bytes memory _data
+        DataTypes.PostMetadata memory outData
     );
 
     function getCommunityId(uint256 _postId) external view returns(address);

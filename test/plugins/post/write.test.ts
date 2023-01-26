@@ -76,18 +76,24 @@ describe("Test Write post basic functionality", function () {
         //0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000400000000000000000000000009467a509da43cb50eb332187602534991be1fea40000000000000000000000000000000000000000000000000000000000000001
         //0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000009467a509da43cb50eb332187602534991be1fea4
         data = defaultAbiCoder.decode(
-            // [ "uint256", "uint256", "uint256", "address", "bytes" ],
-            [ "uint256", "uint256", "uint256", "address" ],
+            // [ "uint256", "uint256", "uint256", "address", "uint256", "uint256", "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]", "bool" ],
+            [ "uint256", "uint256", "uint256", "address", "uint256", "uint256", "address", "uint256", "address[]" ],
             readInfo
         );
 
+        console.log("data = ", data);
+
         // let postInfo = defaultAbiCoder.decode(
         //     // [ "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]" ],
-        //     [ "string", "string", "string[]", "address", "address" ],
-        //     data[4]
+        //     // [ "uint256", "uint256", "string", "string", "string[]", "address", "address" ],
+        //     [ "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]", "bool" ],
+        //     data[6]
         // );
+        // console.log("postInfo = ", postInfo);
 
-        console.log("postInfo = ", data);
+
+        //00000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc
+        //00000000000000000000000009467a509da43cb50eb332187602534991be1fea4
 
     });
 
