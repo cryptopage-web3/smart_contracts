@@ -10,14 +10,14 @@ library DataTypes {
     struct PostMetadata {
         address creator;
         address repostFromCommunity;
-        string ipfsHash;
-        string category;
-        string[] tags;
-        uint64 upCount;
-        uint64 downCount;
+        uint256 upCount;
+        uint256 downCount;
         uint256 encodingType;
         uint256 timestamp;
         bool isEncrypted;
+        string ipfsHash;
+        string category;
+        string[] tags;
     }
 
     enum UserRatesType {

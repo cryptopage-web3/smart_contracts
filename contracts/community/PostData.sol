@@ -218,12 +218,12 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     function convertMetadata(Metadata storage inData) private view returns(DataTypes.PostMetadata memory outData) {
         outData.creator = inData.creator;
         outData.repostFromCommunity = inData.repostFromCommunity;
-        outData.isEncrypted = inData.isEncrypted;
-        outData.timestamp = inData.timestamp;
         outData.upCount = inData.upCount;
         outData.downCount = inData.downCount;
-        outData.ipfsHash = inData.ipfsHash;
         outData.encodingType = inData.encodingType;
+        outData.timestamp = inData.timestamp;
+        outData.isEncrypted = inData.isEncrypted;
+        outData.ipfsHash = inData.ipfsHash;
         outData.category = inData.category;
         outData.tags = inData.tags;
     }
