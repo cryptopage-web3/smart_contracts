@@ -18,16 +18,11 @@ import "../../rules/community/interfaces/IPostPlacingRules.sol";
 import "../../libraries/DataTypes.sol";
 
 
-contract Read is IReadPlugin, Context {
+contract Read is Context {
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_READ_POST;
 
     IRegistry public registry;
-
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Write: caller is not the executor");
-        _;
-    }
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
@@ -38,27 +33,22 @@ contract Read is IReadPlugin, Context {
     }
 
     function read(
-        uint256 _version,
-        address _sender,
-        bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory) {
-        checkData(_version, _sender);
+        uint256 _postId
+    ) external view returns(address communityId, uint256 commentCount, DataTypes.PostMetadata memory postData) {
+        address sender = _msgSender();
+        checkData(sender);
 
-        (uint256 postId) = abi.decode(_inData,(uint256));
-        address communityId = IPostData(registry.postData()).getCommunityId(postId);
-        uint256 commentCount = ICommentData(registry.commentData()).getCommentCount(postId);
+        communityId = IPostData(registry.postData()).getCommunityId(_postId);
+        commentCount = ICommentData(registry.commentData()).getCommentCount(_postId);
 
-        checkRule(RulesList.POST_READING_RULES, communityId, _sender);
+        checkRule(RulesList.POST_READING_RULES, communityId, sender);
 
         DataTypes.MinSimpleVars memory vars;
         vars.pluginName = PLUGIN_NAME;
         vars.version = PLUGIN_VERSION;
-        vars.data = _inData;
+        vars.data = abi.encode(_postId);
 
-        DataTypes.PostMetadata memory postData = IPostData(registry.postData()).readPost(vars);
-        bytes memory outData = abi.encode(commentCount, communityId, postData);
-
-        return outData;
+        postData = IPostData(registry.postData()).readPost(vars);
     }
 
     function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
@@ -72,8 +62,7 @@ contract Read is IReadPlugin, Context {
         );
     }
 
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Write: wrong _version");
+    function checkData(address _sender) private view {
         require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Write: plugin is not trusted");
         require(_sender != address(0) , "Write: _sender is zero");
     }

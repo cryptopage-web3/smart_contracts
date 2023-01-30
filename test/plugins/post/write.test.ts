@@ -41,6 +41,9 @@ describe("Test Write post basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_JOIN(), version, data);
 
         let beforeBalance = await nft.balanceOf(third.address);
+        expect(beforeBalance).to.equal(
+            BigNumber.from(0)
+        );
 
         let postNftAddress = await postData.nft();
         let regNftAddress = await registry.nft();
@@ -48,9 +51,12 @@ describe("Test Write post basic functionality", function () {
             regNftAddress
         );
 
+        let postHash = "#1 hash for post";
+        let tags = ["1", "2"];
+
         data = defaultAbiCoder.encode(
             [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
-            [communityAddress, third.address, "#1 hash for post", 0, ["1", "2"], false, true]
+            [communityAddress, third.address, postHash, 0, tags, false, true]
         );
         id = ethers.utils.formatBytes32String("11");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
@@ -61,39 +67,17 @@ describe("Test Write post basic functionality", function () {
         );
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-
         let postId = postIds[0].toNumber();
-        console.log("postId = ", postId);
 
-        data = defaultAbiCoder.encode(
-            [ "uint256" ],
-            [ postId ]
-        );
+        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_POST(), version);
+        let pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
+        let plugin = await pluginFactory.attach(pluginAddress);
 
-        let readInfo = await executor.connect(third).read(pluginList.COMMUNITY_READ_POST(), version, data);
-        console.log("readInfo = ", readInfo);
+        let readInfo = await plugin.connect(third).read(postId);
 
-        //0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000400000000000000000000000009467a509da43cb50eb332187602534991be1fea40000000000000000000000000000000000000000000000000000000000000001
-        //0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000009467a509da43cb50eb332187602534991be1fea4
-        data = defaultAbiCoder.decode(
-            // [ "uint256", "uint256", "uint256", "address", "uint256", "uint256", "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]", "bool" ],
-            [ "uint256", "uint256", "uint256", "address", "uint256", "uint256", "address", "uint256", "address[]" ],
-            readInfo
-        );
-
-        console.log("data = ", data);
-
-        // let postInfo = defaultAbiCoder.decode(
-        //     // [ "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]" ],
-        //     // [ "uint256", "uint256", "string", "string", "string[]", "address", "address" ],
-        //     [ "string", "string", "string[]", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "address[]", "bool" ],
-        //     data[6]
-        // );
-        // console.log("postInfo = ", postInfo);
-
-
-        //00000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc
-        //00000000000000000000000009467a509da43cb50eb332187602534991be1fea4
+        expect(communityAddress).to.equal(readInfo.communityId);
+        expect(postHash).to.equal(readInfo.postData.ipfsHash);
+        expect(tags[0]).to.equal(readInfo.postData.tags[0]);
 
     });
 

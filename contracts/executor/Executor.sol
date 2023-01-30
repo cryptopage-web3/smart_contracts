@@ -37,7 +37,7 @@ contract Executor is OwnableUpgradeable, IExecutor {
         registry = IRegistry(_registry);
     }
 
-    function run(bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data) external {
+    function run(bytes32 _id, bytes32 _pluginName, uint256 _version, bytes calldata _data) external override {
         (bool enable, address pluginContract) = registry.getPlugin(_pluginName, _version);
         checkPlugin(enable, pluginContract);
         require(!executedId[_id], "Executor: wrong id");
@@ -56,20 +56,6 @@ contract Executor is OwnableUpgradeable, IExecutor {
         require(success, "Executor: plugin didn't run");
 
         emit Run(tx.origin, _msgSender(), _id, _pluginName, _version, _data);
-    }
-
-    function read(bytes32 _pluginName, uint256 _version, bytes calldata _inData) external view returns(bytes memory) {
-        (bool enable, address pluginContract) = registry.getPlugin(_pluginName, _version);
-        checkPlugin(enable, pluginContract);
-
-        return pluginContract.functionStaticCall(
-            abi.encodeWithSelector(
-                IReadPlugin.read.selector,
-                _version,
-                _msgSender(),
-                _inData
-            )
-        );
     }
 
     function checkPlugin(bool _enable, address _pluginContract) private pure {
