@@ -186,7 +186,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         (uint256 _postId) = abi.decode(vars.data,(uint256));
         Metadata storage post = posts[_postId];
         if(post.isView) {
-            outData = convertMetadata(post);
+            outData = convertMetadata(post, _postId);
         }
     }
 
@@ -215,16 +215,17 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         curPost.upDownUsers.add(_sender);
     }
 
-    function convertMetadata(Metadata storage inData) private view returns(DataTypes.PostMetadata memory outData) {
-        outData.creator = inData.creator;
-        outData.repostFromCommunity = inData.repostFromCommunity;
-        outData.upCount = inData.upCount;
-        outData.downCount = inData.downCount;
-        outData.encodingType = inData.encodingType;
-        outData.timestamp = inData.timestamp;
-        outData.isEncrypted = inData.isEncrypted;
-        outData.ipfsHash = inData.ipfsHash;
-        outData.category = inData.category;
-        outData.tags = inData.tags;
+    function convertMetadata(Metadata storage _inData, uint256 _postId) private view returns(DataTypes.PostMetadata memory outData) {
+        outData.creator = _inData.creator;
+        outData.repostFromCommunity = _inData.repostFromCommunity;
+        outData.upCount = _inData.upCount;
+        outData.downCount = _inData.downCount;
+        outData.encodingType = _inData.encodingType;
+        outData.timestamp = _inData.timestamp;
+        outData.isEncrypted = _inData.isEncrypted;
+        outData.ipfsHash = _inData.ipfsHash;
+        outData.category = _inData.category;
+        outData.tags = _inData.tags;
+        outData.isGasCompensation = gasCompensation[_postId];
     }
 }

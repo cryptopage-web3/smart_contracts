@@ -9,11 +9,11 @@ import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/ICommentData.sol";
 import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
+import "../../tokens/nft/interfaces/INFT.sol";
 
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
-import "../interfaces/IReadPlugin.sol";
 import "../../rules/community/interfaces/IPostPlacingRules.sol";
 import "../../libraries/DataTypes.sol";
 
@@ -34,12 +34,13 @@ contract Read is Context {
 
     function read(
         uint256 _postId
-    ) external view returns(address communityId, uint256 commentCount, DataTypes.PostMetadata memory postData) {
+    ) external view returns(address communityId, address owner, uint256 commentCount, DataTypes.PostMetadata memory postData) {
         address sender = _msgSender();
         checkData(sender);
 
         communityId = IPostData(registry.postData()).getCommunityId(_postId);
         commentCount = ICommentData(registry.commentData()).getCommentCount(_postId);
+        owner = INFT(registry.nft()).ownerOf(_postId);
 
         checkRule(RulesList.POST_READING_RULES, communityId, sender);
 

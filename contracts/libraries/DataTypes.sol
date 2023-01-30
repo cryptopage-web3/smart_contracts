@@ -15,9 +15,21 @@ library DataTypes {
         uint256 encodingType;
         uint256 timestamp;
         bool isEncrypted;
+        bool isGasCompensation;
         string ipfsHash;
         string category;
         string[] tags;
+    }
+
+    struct CommentMetadata {
+        address creator;
+        address owner;
+        string ipfsHash;
+        uint256 timestamp;
+        bool up;
+        bool down;
+        bool isEncrypted;
+        bool isGasCompensation;
     }
 
     enum UserRatesType {

@@ -21,6 +21,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         uint256 timestamp;
         bool up;
         bool down;
+        bool isEncrypted;
         bool isView;
     }
 
@@ -29,7 +30,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     //postId -> commentId -> Metadata
     mapping(uint256 => mapping(uint256 => Metadata)) private comments;
 
-    //postId -> commentId -> Metadata
+    //postId -> commentId -> bool
     mapping(uint256 => mapping(uint256 => bool)) private gasCompensation;
 
     //postId -> comment counter
@@ -68,8 +69,8 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     function writeComment(
         DataTypes.GeneralVars calldata vars
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_COMMENT, vars.pluginName, vars.version) returns(uint256) {
-        ( , uint256 _postId, address _owner, string memory _ipfsHash, bool _up, bool _down, bool _isView) =
-        abi.decode(vars.data,(address, uint256, address, string, bool, bool, bool));
+        ( , uint256 _postId, address _owner, string memory _ipfsHash, bool _up, bool _down, bool _isEncrypted, bool _isView) =
+        abi.decode(vars.data,(address, uint256, address, string, bool, bool, bool, bool));
         require(_postId > 0, "CommentData: wrong postId");
 
         uint256 count = commentCount[_postId]++;
@@ -81,6 +82,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         comment.timestamp = block.timestamp;
         comment.up = _up;
         comment.down = _down;
+        comment.isEncrypted = _isEncrypted;
         comment.isView = _isView;
         emit WriteComment(vars.executedId, _postId, count);
 
@@ -154,22 +156,13 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     function readComment(
         DataTypes.MinSimpleVars calldata vars
     ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_COMMENT, vars.pluginName, vars.version) returns(
-        bytes memory _data
+        DataTypes.CommentMetadata memory outData
     ) {
         (uint256 _postId, uint256 _commentId) = abi.decode(vars.data,(uint256,uint256));
 
         Metadata storage comment = comments[_postId][_commentId];
         if (comment.isView) {
-            _data = abi.encode(
-                comment.ipfsHash,
-                comment.creator,
-                comment.owner,
-                comment.gasConsumption,
-                comment.timestamp,
-                comment.up,
-                comment.down,
-                true
-            );
+            outData = convertMetadata(comment, _postId, _commentId);
         }
     }
 
@@ -181,5 +174,16 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         Metadata memory comment = comments[_postId][_commentId];
         _up = comment.up;
         _down = comment.down;
+    }
+
+    function convertMetadata(Metadata storage _inData, uint256 _postId, uint256 _commentId) private view returns(DataTypes.CommentMetadata memory outData) {
+        outData.creator = _inData.creator;
+        outData.owner = _inData.owner;
+        outData.ipfsHash = _inData.ipfsHash;
+        outData.timestamp = _inData.timestamp;
+        outData.up = _inData.up;
+        outData.down = _inData.down;
+        outData.isEncrypted = _inData.isEncrypted;
+        outData.isGasCompensation = gasCompensation[_postId][_commentId];
     }
 }
