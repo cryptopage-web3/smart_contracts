@@ -47,6 +47,7 @@ contract Read is Context {
         vars.data = abi.encode(_postId, _commentId);
 
         outData = ICommentData(registry.commentData()).readComment(vars);
+        outData.communityId = communityId;
     }
 
     function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {

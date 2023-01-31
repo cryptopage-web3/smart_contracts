@@ -73,7 +73,8 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         abi.decode(vars.data,(address, uint256, address, string, bool, bool, bool, bool));
         require(_postId > 0, "CommentData: wrong postId");
 
-        uint256 count = commentCount[_postId]++;
+        commentCount[_postId]++;
+        uint256 count = commentCount[_postId];
 
         Metadata storage comment = comments[_postId][count];
         comment.creator = vars.user;

@@ -28,7 +28,8 @@ contract PostCommentingRules is IPostCommentingRules, Context {
 
     modifier onlyPlugin() {
         require(
-            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_COMMENT, RULES_VERSION) == _msgSender(),
+            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_COMMENT, RULES_VERSION) == _msgSender()
+            || registry.getPluginContract(PluginsList.COMMUNITY_READ_COMMENT, RULES_VERSION) == _msgSender(),
             "PostCommentingRules: caller is not the plugin");
         _;
     }

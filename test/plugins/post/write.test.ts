@@ -33,7 +33,7 @@ describe("Test Write post basic functionality", function () {
 
     })
 
-    it("Should write post", async function () {
+    it("Should write/read post", async function () {
         let communityAddress = createdCommunity.address;
 
         let id = ethers.utils.formatBytes32String("10");

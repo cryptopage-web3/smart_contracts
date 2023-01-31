@@ -135,6 +135,9 @@ async function setupCommonPlugins(_registryContract, user) {
 
     await setupPlugin(_registryContract, "contracts/plugins/post/Write.sol:Write", pluginList.COMMUNITY_WRITE_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Read.sol:Read", pluginList.COMMUNITY_READ_POST());
+
+    await setupPlugin(_registryContract, "contracts/plugins/comment/Write.sol:Write", pluginList.COMMUNITY_WRITE_COMMENT());
+    await setupPlugin(_registryContract, "contracts/plugins/comment/Read.sol:Read", pluginList.COMMUNITY_READ_COMMENT());
 }
 
 async function setupPlugin(_registryContract, pathName, pluginName) {
