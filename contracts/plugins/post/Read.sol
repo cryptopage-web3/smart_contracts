@@ -34,14 +34,11 @@ contract Read is Context {
 
     function read(
         uint256 _postId
-    ) external view returns(address communityId, address owner, uint256 commentCount, DataTypes.PostMetadata memory postData) {
+    ) external view returns(DataTypes.PostInfo memory outData) {
         address sender = _msgSender();
         checkData(sender);
 
-        communityId = IPostData(registry.postData()).getCommunityId(_postId);
-        commentCount = ICommentData(registry.commentData()).getCommentCount(_postId);
-        owner = INFT(registry.nft()).ownerOf(_postId);
-
+        address communityId = IPostData(registry.postData()).getCommunityId(_postId);
         checkRule(RulesList.POST_READING_RULES, communityId, sender);
 
         DataTypes.MinSimpleVars memory vars;
@@ -49,7 +46,10 @@ contract Read is Context {
         vars.version = PLUGIN_VERSION;
         vars.data = abi.encode(_postId);
 
-        postData = IPostData(registry.postData()).readPost(vars);
+        outData = IPostData(registry.postData()).readPost(vars);
+        outData.communityId = communityId;
+        outData.currentOwner = INFT(registry.nft()).ownerOf(_postId);
+        outData.commentCount = ICommentData(registry.commentData()).getCommentCount(_postId);
     }
 
     function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {

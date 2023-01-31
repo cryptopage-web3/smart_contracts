@@ -7,13 +7,17 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 
 library DataTypes {
 
-    struct PostMetadata {
+    struct PostInfo {
         address creator;
+        address currentOwner;
+        address communityId;
         address repostFromCommunity;
         uint256 upCount;
         uint256 downCount;
+        uint256 commentCount;
         uint256 encodingType;
         uint256 timestamp;
+        uint256 gasConsumption;
         bool isEncrypted;
         bool isGasCompensation;
         string ipfsHash;
@@ -21,15 +25,17 @@ library DataTypes {
         string[] tags;
     }
 
-    struct CommentMetadata {
+    struct CommentInfo {
         address creator;
         address owner;
-        string ipfsHash;
+        address communityId;
         uint256 timestamp;
+        uint256 gasConsumption;
         bool up;
         bool down;
         bool isEncrypted;
         bool isGasCompensation;
+        string ipfsHash;
     }
 
     enum UserRatesType {

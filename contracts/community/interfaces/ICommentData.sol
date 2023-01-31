@@ -38,7 +38,7 @@ interface ICommentData {
     function readComment(
         DataTypes.MinSimpleVars calldata vars
     ) external view returns(
-        DataTypes.CommentMetadata memory outData
+        DataTypes.CommentInfo memory outData
     );
 
     function getCommentCount(uint256 _postId) external view returns(uint256);

@@ -34,7 +34,7 @@ contract Read is Context {
     function read(
         uint256 _postId,
         uint256 _commentId
-    ) external view returns(DataTypes.CommentMetadata memory commentData) {
+    ) external view returns(DataTypes.CommentInfo memory outData) {
         address sender = _msgSender();
         checkData(sender);
 
@@ -46,7 +46,7 @@ contract Read is Context {
         vars.version = PLUGIN_VERSION;
         vars.data = abi.encode(_postId, _commentId);
 
-        commentData = ICommentData(registry.commentData()).readComment(vars);
+        outData = ICommentData(registry.commentData()).readComment(vars);
     }
 
     function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {

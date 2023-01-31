@@ -156,7 +156,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
     function readComment(
         DataTypes.MinSimpleVars calldata vars
     ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_COMMENT, vars.pluginName, vars.version) returns(
-        DataTypes.CommentMetadata memory outData
+        DataTypes.CommentInfo memory outData
     ) {
         (uint256 _postId, uint256 _commentId) = abi.decode(vars.data,(uint256,uint256));
 
@@ -176,11 +176,12 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         _down = comment.down;
     }
 
-    function convertMetadata(Metadata storage _inData, uint256 _postId, uint256 _commentId) private view returns(DataTypes.CommentMetadata memory outData) {
+    function convertMetadata(Metadata storage _inData, uint256 _postId, uint256 _commentId) private view returns(DataTypes.CommentInfo memory outData) {
         outData.creator = _inData.creator;
         outData.owner = _inData.owner;
         outData.ipfsHash = _inData.ipfsHash;
         outData.timestamp = _inData.timestamp;
+        outData.gasConsumption = _inData.gasConsumption;
         outData.up = _inData.up;
         outData.down = _inData.down;
         outData.isEncrypted = _inData.isEncrypted;

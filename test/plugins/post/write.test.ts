@@ -76,9 +76,9 @@ describe("Test Write post basic functionality", function () {
         let readInfo = await plugin.connect(third).read(postId);
 
         expect(communityAddress).to.equal(readInfo.communityId);
-        expect(third.address).to.equal(readInfo.owner);
-        expect(postHash).to.equal(readInfo.postData.ipfsHash);
-        expect(tags[0]).to.equal(readInfo.postData.tags[0]);
+        expect(third.address).to.equal(readInfo.currentOwner);
+        expect(postHash).to.equal(readInfo.ipfsHash);
+        expect(tags[0]).to.equal(readInfo.tags[0]);
 
     });
 

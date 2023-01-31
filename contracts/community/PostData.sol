@@ -181,7 +181,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     function readPost(
         DataTypes.MinSimpleVars calldata vars
     ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_POST, vars.pluginName, vars.version) returns(
-        DataTypes.PostMetadata memory outData
+        DataTypes.PostInfo memory outData
     ) {
         (uint256 _postId) = abi.decode(vars.data,(uint256));
         Metadata storage post = posts[_postId];
@@ -215,7 +215,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         curPost.upDownUsers.add(_sender);
     }
 
-    function convertMetadata(Metadata storage _inData, uint256 _postId) private view returns(DataTypes.PostMetadata memory outData) {
+    function convertMetadata(Metadata storage _inData, uint256 _postId) private view returns(DataTypes.PostInfo memory outData) {
         outData.creator = _inData.creator;
         outData.repostFromCommunity = _inData.repostFromCommunity;
         outData.upCount = _inData.upCount;
@@ -227,5 +227,6 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         outData.category = _inData.category;
         outData.tags = _inData.tags;
         outData.isGasCompensation = gasCompensation[_postId];
+        outData.gasConsumption = _inData.gasConsumption;
     }
 }
