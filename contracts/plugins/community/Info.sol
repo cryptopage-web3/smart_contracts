@@ -17,16 +17,11 @@ import "../interfaces/IReadPlugin.sol";
 import "../../rules/community/interfaces/IPostPlacingRules.sol";
 
 
-contract Info is IReadPlugin, Context {
+contract Info is Context {
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_INFO;
 
     IRegistry public registry;
-
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Info: caller is not the executor");
-        _;
-    }
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
@@ -37,32 +32,32 @@ contract Info is IReadPlugin, Context {
     }
 
     function read(
-        uint256 _version,
-        address _sender,
-        bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory _outData) {
-        checkData(_version, _sender);
-        (address _communityId) =
-        abi.decode(_inData,(address));
+        address _communityId
+    ) external view returns(DataTypes.CommunityInfo memory outData) {
+        checkPlugin(_communityId);
 
-        string memory name = ICommunityBlank(_communityId).name();
-        address creator = ICommunityBlank(_communityId).creator();
-        address owner = Ownable(_communityId).owner();
-        uint256 creatingTime = ICommunityBlank(_communityId).creatingTime();
+        outData.creator = ICommunityBlank(_communityId).creator();
+        outData.owner = Ownable(_communityId).owner();
+        outData.name = ICommunityBlank(_communityId).name();
+        outData.creatingTime = ICommunityBlank(_communityId).creatingTime();
+        outData.postIds = ICommunityData(registry.communityData()).getPostIds(_communityId);
 
-        uint256[] memory postIds = ICommunityData(registry.communityData()).getPostIds(_communityId);
         (
             address[] memory normalUsers,
             address[] memory bannedUsers,
             address[] memory moderators
         ) = IAccount(registry.account()).getCommunityUsers(_communityId);
-
-        _outData = abi.encode(name, creator, owner, creatingTime, normalUsers, bannedUsers, moderators, postIds);
+        outData.normalUsers = normalUsers;
+        outData.bannedUsers = bannedUsers;
+        outData.moderators = moderators;
     }
 
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Info: wrong _version");
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Info: plugin is not trusted");
-        require(_sender != address(0) , "Info: _sender is zero");
+    function checkPlugin(address _communityId) private view {
+        (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+        require(enable, "Info: wrong enable plugin");
+        require(pluginContract != address(0), "Info: wrong plugin contract");
+
+        bool isLinked = ICommunityBlank(_communityId).isLinkedPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+        require(isLinked, "Info: plugin is not linked for the community");
     }
 }

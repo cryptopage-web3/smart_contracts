@@ -122,6 +122,7 @@ contract CommunityBlank is
     function setInitialPlugins() private {
         linkedPlugins[PluginsList.COMMUNITY_JOIN][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_QUIT][INITIAL_PLUGINS_VERSION] = true;
+        linkedPlugins[PluginsList.COMMUNITY_INFO][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_READ_POST][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_WRITE_POST][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_READ_COMMENT][INITIAL_PLUGINS_VERSION] = true;

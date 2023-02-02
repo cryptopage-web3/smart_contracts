@@ -38,6 +38,17 @@ library DataTypes {
         string ipfsHash;
     }
 
+    struct CommunityInfo {
+        string name;
+        address creator;
+        address owner;
+        uint256 creatingTime;
+        uint256[] postIds;
+        address[] normalUsers;
+        address[] bannedUsers;
+        address[] moderators;
+    }
+
     enum UserRatesType {
         RESERVE, FOR_POST, FOR_COMMENT, FOR_UP, FOR_DOWN,
         FOR_DEAL_GUARANTOR, FOR_DEAL_SELLER, FOR_DEAL_BUYER

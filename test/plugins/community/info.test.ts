@@ -11,7 +11,7 @@ const { getContract, getSigners, provider } = ethers;
 const { AddressZero, HashZero } = ethers.constants;
 const { parseUnits, randomBytes } = ethers.utils;
 
-describe("Test Write comment basic functionality", function () {
+describe("Test Info community basic functionality", function () {
 
     let owner: SignerWithAddress,
         creator: SignerWithAddress,
@@ -33,14 +33,14 @@ describe("Test Write comment basic functionality", function () {
 
     })
 
-    it("Should write/read comment", async function () {
+    it("Should info community", async function () {
         let communityAddress = createdCommunity.address;
 
-        let id = ethers.utils.formatBytes32String("20");
+        let id = ethers.utils.formatBytes32String("30");
         let data = defaultAbiCoder.encode([ "address" ], [communityAddress]);
         await executor.connect(third).run(id, pluginList.COMMUNITY_JOIN(), version, data);
 
-        id = ethers.utils.formatBytes32String("21");
+        id = ethers.utils.formatBytes32String("31");
         await executor.connect(creator).run(id, pluginList.COMMUNITY_JOIN(), version, data);
 
         let postHash = "#1 hash for post";
@@ -51,7 +51,7 @@ describe("Test Write comment basic functionality", function () {
             [communityAddress, third.address, postHash, 0, tags, false, true]
         );
 
-        id = ethers.utils.formatBytes32String("22");
+        id = ethers.utils.formatBytes32String("32");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
@@ -62,7 +62,7 @@ describe("Test Write comment basic functionality", function () {
             [ "address", "uint256", "address", "string", "bool", "bool", "bool", "bool" ],
             [communityAddress, postId, third.address, commentHash1, true, false, false, true]
         );
-        id = ethers.utils.formatBytes32String("23");
+        id = ethers.utils.formatBytes32String("33");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_COMMENT(), version, data);
 
         let commentHash2 = "#2 hash for comment";
@@ -70,37 +70,20 @@ describe("Test Write comment basic functionality", function () {
             [ "address", "uint256", "address", "string", "bool", "bool", "bool", "bool" ],
             [communityAddress, postId, creator.address, commentHash2, false, true, false, true]
         );
-        id = ethers.utils.formatBytes32String("24");
+        id = ethers.utils.formatBytes32String("34");
         await executor.connect(creator).run(id, pluginList.COMMUNITY_WRITE_COMMENT(), version, data);
 
-        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_COMMENT(), version);
-        let pluginFactory = await ethers.getContractFactory("contracts/plugins/comment/Read.sol:Read");
+        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_INFO(), version);
+        let pluginFactory = await ethers.getContractFactory("contracts/plugins/community/Info.sol:Info");
         let plugin = await pluginFactory.attach(pluginAddress);
 
-        let commentInfo = await plugin.connect(third).read(postId, 1);
-        expect(communityAddress).to.equal(commentInfo.communityId);
-        expect(third.address).to.equal(commentInfo.owner);
-        expect(commentHash1).to.equal(commentInfo.ipfsHash);
+        let communityInfo = await plugin.connect(third).read(communityAddress);
 
-        commentInfo = await plugin.connect(third).read(postId, 2);
-        expect(communityAddress).to.equal(commentInfo.communityId);
-        expect(creator.address).to.equal(commentInfo.owner);
-        expect(commentHash2).to.equal(commentInfo.ipfsHash);
+        expect(communityInfo.postIds[0]).to.equal(postId);
+        expect(communityInfo.normalUsers[0]).to.equal(third.address);
+        expect(communityInfo.normalUsers[1]).to.equal(creator.address);
+        expect(communityInfo.name).to.equal('First community');
 
-        pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_POST(), version);
-        pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
-        plugin = await pluginFactory.attach(pluginAddress);
-
-        let postInfo = await plugin.connect(third).read(postId);
-        expect(postInfo.upCount).to.equal(
-            BigNumber.from(1)
-        );
-        expect(postInfo.downCount).to.equal(
-            BigNumber.from(1)
-        );
-        expect(postInfo.commentCount).to.equal(
-            BigNumber.from(2)
-        );
     });
 
 

@@ -8,6 +8,7 @@ import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/ICommentData.sol";
 import "../../community/interfaces/ICommunityData.sol";
+import "../../community/interfaces/ICommunityBlank.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/nft/interfaces/INFT.sol";
 
@@ -36,9 +37,9 @@ contract Read is Context {
         uint256 _postId
     ) external view returns(DataTypes.PostInfo memory outData) {
         address sender = _msgSender();
-        checkData(sender);
-
         address communityId = IPostData(registry.postData()).getCommunityId(_postId);
+
+        checkPlugin(communityId);
         checkRule(RulesList.POST_READING_RULES, communityId, sender);
 
         DataTypes.MinSimpleVars memory vars;
@@ -63,8 +64,12 @@ contract Read is Context {
         );
     }
 
-    function checkData(address _sender) private view {
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Write: plugin is not trusted");
-        require(_sender != address(0) , "Write: _sender is zero");
+    function checkPlugin(address _communityId) private view {
+        (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+        require(enable, "Info: wrong enable plugin");
+        require(pluginContract != address(0), "Info: wrong plugin contract");
+
+        bool isLinked = ICommunityBlank(_communityId).isLinkedPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+        require(isLinked, "Info: plugin is not linked for the community");
     }
 }
