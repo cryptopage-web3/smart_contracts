@@ -54,7 +54,7 @@ contract CommunityBlank is
         address _creator,
         bool _isInitial
     ) external initializer {
-        _transferOwnership(creator);
+        _transferOwnership(_creator);
         name = _name;
         registry = IRegistry(_registry);
         creator = _creator;

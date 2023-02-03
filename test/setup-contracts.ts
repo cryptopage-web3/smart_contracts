@@ -100,7 +100,7 @@ export default async function setupContracts() {
     let id = ethers.utils.formatBytes32String("1");
     let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);
 
-    await executor.run(id, pluginList.COMMUNITY_CREATE(), version, data);
+    await executor.connect(owner).run(id, pluginList.COMMUNITY_CREATE(), version, data);
 
     let afterCount = await communityData.communitiesCount();
     let index = afterCount.sub(BigNumber.from(1));
@@ -133,6 +133,7 @@ async function setupCommonPlugins(_registryContract, user) {
     await setupPlugin(_registryContract, "contracts/plugins/community/Join.sol:Join", pluginList.COMMUNITY_JOIN());
     await setupPlugin(_registryContract, "contracts/plugins/community/Quit.sol:Quit", pluginList.COMMUNITY_QUIT());
     await setupPlugin(_registryContract, "contracts/plugins/community/Info.sol:Info", pluginList.COMMUNITY_INFO());
+    await setupPlugin(_registryContract, "contracts/plugins/community/EditModerators.sol:EditModerators", pluginList.COMMUNITY_EDIT_MODERATORS());
 
     await setupPlugin(_registryContract, "contracts/plugins/post/Write.sol:Write", pluginList.COMMUNITY_WRITE_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Read.sol:Read", pluginList.COMMUNITY_READ_POST());
@@ -191,6 +192,9 @@ async function setupCommonRules(_registryContract, _ruleContract) {
 
     await setupRule(_registryContract, _ruleContract,
         "contracts/rules/community/PostTransferringRules.sol:PostTransferringRules", ruleList.POST_TRANSFERRING_RULES());
+
+    await setupRule(_registryContract, _ruleContract,
+        "contracts/rules/community/CommunityEditModeratorsRules.sol:CommunityEditModeratorsRules", ruleList.COMMUNITY_EDIT_MODERATOR_RULES());
 }
 
 async function setupRule(_registryContract, _rule, pathName, _ruleName) {
