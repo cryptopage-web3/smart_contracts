@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../account/interfaces/IAccount.sol";
+import "../../tokens/nft/interfaces/INFT.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -43,19 +45,26 @@ contract ModerationRules is IModerationRules, Context {
         soulBound = ISoulBound(soulBoundContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
-        if (isActiveRule(_communityId, RulesList.NO_MODERATION)) {
-            // there will be some logic here
+    function validate(address _communityId, address _moderator, uint256 _postId) external view override onlyPlugin returns(bool) {
+        if (isActiveRule(_communityId, RulesList.NO_MODERATOR)) {
+            return true;
+        }
+        if (isActiveRule(_communityId, RulesList.MODERATION_USING_OWNER)) {
+            address currentOwner = INFT(registry.nft()).ownerOf(_postId);
+            require(currentOwner == _moderator, "ModerationRules: wrong owner for post");
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.MODERATION_USING_VOTING)) {
+            require(_postId > 0, "ModerationRules: wrong postId");
             // here is the logic for voting
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.MODERATION_USING_MODERATORS)) {
-            require(_user != address(0), "ModerationRules: user address is zero");
-            // some logic for this user
+            require(IAccount(registry.account()).isModerator(_communityId, _moderator), "ModerationRules: wrong moderator");
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     function isActiveRule(address _communityId, bytes32 _ruleName) private view returns(bool) {

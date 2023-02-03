@@ -54,7 +54,7 @@ contract Burn is IExecutePlugin, Context{
             PLUGIN_VERSION
         );
         require(
-            IModerationRules(groupRules).validate(_communityId, _sender),
+            IModerationRules(groupRules).validate(_communityId, _sender, _postId),
             "Burn: wrong validate"
         );
 

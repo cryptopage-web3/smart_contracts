@@ -55,9 +55,10 @@ library  RulesList {
 
     // Community Moderation Rules
     bytes32 public constant MODERATION_RULES = keccak256(abi.encode("PAGE.MODERATION_RULES"));
-    bytes32 public constant NO_MODERATION = keccak256(abi.encode("NO_MODERATION"));
+    bytes32 public constant NO_MODERATOR = keccak256(abi.encode("NO_MODERATOR"));
     bytes32 public constant MODERATION_USING_VOTING = keccak256(abi.encode("MODERATION_USING_VOTING"));
     bytes32 public constant MODERATION_USING_MODERATORS = keccak256(abi.encode("MODERATION_USING_MODERATORS"));
+    bytes32 public constant MODERATION_USING_OWNER = keccak256(abi.encode("MODERATION_USING_OWNER"));
 
     // User Verification Rules
     bytes32 public constant USER_VERIFICATION_RULES = keccak256(abi.encode("PAGE.USER_VERIFICATION_RULES"));
