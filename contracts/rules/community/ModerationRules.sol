@@ -29,7 +29,8 @@ contract ModerationRules is IModerationRules, Context {
 
     modifier onlyPlugin() {
         require(
-            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender(),
+            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender()
+            || registry.getPluginContract(PluginsList.COMMUNITY_BURN_POST, RULES_VERSION) == _msgSender(),
             "ModerationRules: caller is not the plugin");
         _;
     }
@@ -47,7 +48,7 @@ contract ModerationRules is IModerationRules, Context {
 
     function validate(address _communityId, address _moderator, uint256 _postId) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.NO_MODERATOR)) {
-            return true;
+            return false;
         }
         if (isActiveRule(_communityId, RulesList.MODERATION_USING_OWNER)) {
             address currentOwner = INFT(registry.nft()).ownerOf(_postId);

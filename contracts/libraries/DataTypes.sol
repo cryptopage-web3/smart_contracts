@@ -18,6 +18,7 @@ library DataTypes {
         uint256 encodingType;
         uint256 timestamp;
         uint256 gasConsumption;
+        bool isView;
         bool isEncrypted;
         bool isGasCompensation;
         string ipfsHash;

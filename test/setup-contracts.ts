@@ -116,7 +116,7 @@ export default async function setupContracts() {
     return {
         owner, creator, third,
         version, ruleList, pluginList,
-        registry, executor, bank,
+        registry, rule, executor, bank,
         token, nft, soulBound,
         communityData, postData, commentData, account,
         createdCommunity
@@ -137,9 +137,11 @@ async function setupCommonPlugins(_registryContract, user) {
 
     await setupPlugin(_registryContract, "contracts/plugins/post/Write.sol:Write", pluginList.COMMUNITY_WRITE_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Read.sol:Read", pluginList.COMMUNITY_READ_POST());
+    await setupPlugin(_registryContract, "contracts/plugins/post/Burn.sol:Burn", pluginList.COMMUNITY_BURN_POST());
 
     await setupPlugin(_registryContract, "contracts/plugins/comment/Write.sol:Write", pluginList.COMMUNITY_WRITE_COMMENT());
     await setupPlugin(_registryContract, "contracts/plugins/comment/Read.sol:Read", pluginList.COMMUNITY_READ_COMMENT());
+    await setupPlugin(_registryContract, "contracts/plugins/comment/Burn.sol:Burn", pluginList.COMMUNITY_BURN_COMMENT());
 }
 
 async function setupPlugin(_registryContract, pathName, pluginName) {
@@ -150,17 +152,11 @@ async function setupPlugin(_registryContract, pathName, pluginName) {
 }
 
 async function setupCommonRules(_registryContract, _ruleContract) {
-    let editModeratorRulesName = keccak256(defaultAbiCoder.encode(["string"],
-        ["PAGE.COMMUNITY_EDIT_MODERATOR_RULES"])
-    );
     let postAcceptingRulesName = keccak256(defaultAbiCoder.encode(["string"],
         ["PAGE.ACCEPTING_POST_RULES"])
     );
     let changeVisibilityRulesName = keccak256(defaultAbiCoder.encode(["string"],
         ["PAGE.CHANGE_VISIBILITY_CONTENT_RULES"])
-    );
-    let moderationRulesName = keccak256(defaultAbiCoder.encode(["string"],
-        ["PAGE.MODERATION_RULES"])
     );
     let gasCompensationRulesName = keccak256(defaultAbiCoder.encode(["string"],
         ["PAGE.GAS_COMPENSATION_RULES"])
@@ -192,6 +188,9 @@ async function setupCommonRules(_registryContract, _ruleContract) {
 
     await setupRule(_registryContract, _ruleContract,
         "contracts/rules/community/PostTransferringRules.sol:PostTransferringRules", ruleList.POST_TRANSFERRING_RULES());
+
+    await setupRule(_registryContract, _ruleContract,
+        "contracts/rules/community/ModerationRules.sol:ModerationRules", ruleList.MODERATION_RULES());
 
     await setupRule(_registryContract, _ruleContract,
         "contracts/rules/community/CommunityEditModeratorsRules.sol:CommunityEditModeratorsRules", ruleList.COMMUNITY_EDIT_MODERATOR_RULES());

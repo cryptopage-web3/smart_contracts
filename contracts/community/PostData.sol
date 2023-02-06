@@ -222,6 +222,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         outData.downCount = _inData.downCount;
         outData.encodingType = _inData.encodingType;
         outData.timestamp = _inData.timestamp;
+        outData.isView = true;
         outData.isEncrypted = _inData.isEncrypted;
         outData.ipfsHash = _inData.ipfsHash;
         outData.category = _inData.category;

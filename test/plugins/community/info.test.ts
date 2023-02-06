@@ -17,7 +17,7 @@ describe("Test Info community basic functionality", function () {
         creator: SignerWithAddress,
         third: SignerWithAddress;
     let version, ruleList, pluginList;
-    let registry, executor, bank, communityData, postData, commentData;
+    let registry, rule, executor, bank, communityData, postData, commentData;
     let createdCommunity, account;
     let token, nft, soulBound;
 
@@ -25,7 +25,7 @@ describe("Test Info community basic functionality", function () {
         ({
             owner, creator, third,
             version, ruleList, pluginList,
-            registry, executor,bank,
+            registry, rule, executor,bank,
             token, nft, soulBound,
             communityData, postData, commentData, account,
             createdCommunity

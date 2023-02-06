@@ -125,8 +125,10 @@ contract CommunityBlank is
         linkedPlugins[PluginsList.COMMUNITY_INFO][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_READ_POST][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_WRITE_POST][INITIAL_PLUGINS_VERSION] = true;
+        linkedPlugins[PluginsList.COMMUNITY_BURN_POST][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_READ_COMMENT][INITIAL_PLUGINS_VERSION] = true;
         linkedPlugins[PluginsList.COMMUNITY_WRITE_COMMENT][INITIAL_PLUGINS_VERSION] = true;
+        linkedPlugins[PluginsList.COMMUNITY_BURN_COMMENT][INITIAL_PLUGINS_VERSION] = true;
     }
 
     function setStatusBatch(bytes32[] calldata _pluginNames, uint256[] calldata _versions, bool _status) private {
