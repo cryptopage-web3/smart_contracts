@@ -185,6 +185,7 @@ contract CommentData is Initializable, ContextUpgradeable, ICommentData {
         outData.gasConsumption = _inData.gasConsumption;
         outData.up = _inData.up;
         outData.down = _inData.down;
+        outData.isView = true;
         outData.isEncrypted = _inData.isEncrypted;
         outData.isGasCompensation = gasCompensation[_postId][_commentId];
     }

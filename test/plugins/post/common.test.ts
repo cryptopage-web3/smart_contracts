@@ -11,7 +11,7 @@ const { getContract, getSigners, provider } = ethers;
 const { AddressZero, HashZero } = ethers.constants;
 const { parseUnits, randomBytes } = ethers.utils;
 
-describe("Test Write post basic functionality", function () {
+describe("Test Post basic functionality", function () {
 
     let owner: SignerWithAddress,
         creator: SignerWithAddress,

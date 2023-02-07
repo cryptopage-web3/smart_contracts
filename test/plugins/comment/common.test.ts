@@ -11,7 +11,7 @@ const { getContract, getSigners, provider } = ethers;
 const { AddressZero, HashZero } = ethers.constants;
 const { parseUnits, randomBytes } = ethers.utils;
 
-describe("Test Write comment basic functionality", function () {
+describe("Test Comment basic functionality", function () {
 
     let owner: SignerWithAddress,
         creator: SignerWithAddress,
@@ -103,5 +103,68 @@ describe("Test Write comment basic functionality", function () {
         );
     });
 
+    it("Should burn comment", async function () {
+        let communityAddress = createdCommunity.address;
+
+        let postHash = "#2 hash for post";
+        let tags = ["1", "2"];
+
+        let data = defaultAbiCoder.encode(
+            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, third.address, postHash, 0, tags, false, true]
+        );
+
+        let id = ethers.utils.formatBytes32String("26");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
+
+        let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
+        let postId = postIds[1].toNumber();
+
+        let commentHash1 = "#3 hash for comment";
+        data = defaultAbiCoder.encode(
+            [ "address", "uint256", "address", "string", "bool", "bool", "bool", "bool" ],
+            [communityAddress, postId, third.address, commentHash1, true, false, false, true]
+        );
+        id = ethers.utils.formatBytes32String("27");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_COMMENT(), version, data);
+
+        let commentHash2 = "#4 hash for comment";
+        data = defaultAbiCoder.encode(
+            [ "address", "uint256", "address", "string", "bool", "bool", "bool", "bool" ],
+            [communityAddress, postId, creator.address, commentHash2, false, true, false, true]
+        );
+        id = ethers.utils.formatBytes32String("28");
+        await executor.connect(creator).run(id, pluginList.COMMUNITY_WRITE_COMMENT(), version, data);
+
+        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_COMMENT(), version);
+        let pluginFactory = await ethers.getContractFactory("contracts/plugins/comment/Read.sol:Read");
+        let plugin = await pluginFactory.attach(pluginAddress);
+
+        let commentId = 1;
+
+        let commentInfo = await plugin.connect(third).read(postId, commentId);
+        expect(true).to.equal(commentInfo.isView);
+
+        data = defaultAbiCoder.encode(
+            [ "address", "address", "bool" ],
+            [communityAddress, creator.address, true]
+        );
+        id = ethers.utils.formatBytes32String("29");
+        await executor.connect(creator).run(id, pluginList.COMMUNITY_EDIT_MODERATORS(), version, data);
+
+        await rule.connect(owner).enableRule(ruleList.MODERATION_RULES(), version, ruleList.MODERATION_USING_MODERATORS());
+        await createdCommunity.connect(owner).linkRule(ruleList.MODERATION_RULES(), version, ruleList.MODERATION_USING_MODERATORS());
+
+        data = defaultAbiCoder.encode(
+            [ "uint256", "uint256" ],
+            [postId, commentId ]
+        );
+        id = ethers.utils.formatBytes32String("30");
+        await executor.connect(creator).run(id, pluginList.COMMUNITY_BURN_COMMENT(), version, data);
+
+        commentInfo = await plugin.connect(third).read(postId, commentId);
+        expect(false).to.equal(commentInfo.isView);
+
+    });
 
 });

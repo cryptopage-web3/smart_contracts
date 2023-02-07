@@ -49,14 +49,7 @@ contract Burn is IExecutePlugin, Context{
 
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.MODERATION_RULES,
-            PLUGIN_VERSION
-        );
-        require(
-            IModerationRules(groupRules).validate(_communityId, _sender, _postId),
-            "Burn: wrong validate"
-        );
+        checkRule(RulesList.MODERATION_RULES, _communityId, _sender, _postId);
 
         DataTypes.GeneralVars memory vars;
         vars.executedId = _executedId;
@@ -76,5 +69,16 @@ contract Burn is IExecutePlugin, Context{
         require(_version == PLUGIN_VERSION, "Write: wrong _version");
         require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Write: plugin is not trusted");
         require(_sender != address(0) , "Write: _sender is zero");
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IModerationRules(rulesContract).validate(_communityId, _sender, _postId),
+            "Burn: wrong rules validate"
+        );
     }
 }

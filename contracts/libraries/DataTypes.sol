@@ -34,6 +34,7 @@ library DataTypes {
         uint256 gasConsumption;
         bool up;
         bool down;
+        bool isView;
         bool isEncrypted;
         bool isGasCompensation;
         string ipfsHash;

@@ -30,7 +30,8 @@ contract ModerationRules is IModerationRules, Context {
     modifier onlyPlugin() {
         require(
             registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender()
-            || registry.getPluginContract(PluginsList.COMMUNITY_BURN_POST, RULES_VERSION) == _msgSender(),
+            || registry.getPluginContract(PluginsList.COMMUNITY_BURN_POST, RULES_VERSION) == _msgSender()
+            || registry.getPluginContract(PluginsList.COMMUNITY_BURN_COMMENT, RULES_VERSION) == _msgSender(),
             "ModerationRules: caller is not the plugin");
         _;
     }
