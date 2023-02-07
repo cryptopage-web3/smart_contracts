@@ -54,7 +54,7 @@ contract ChangeVisibility is IExecutePlugin, Context{
             PLUGIN_VERSION
         );
         require(
-            IChangeVisibilityContentRules(groupRules).validate(_communityId, _sender),
+            IChangeVisibilityContentRules(groupRules).validate(_communityId, _sender, _postId),
             "ChangeVisibility: wrong validate"
         );
 

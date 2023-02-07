@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../account/interfaces/IAccount.sol";
+import "../../tokens/nft/interfaces/INFT.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -45,21 +47,21 @@ contract ChangeVisibilityContentRules is IChangeVisibilityContentRules, Context 
         soulBound = ISoulBound(soulBoundContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+    function validate(address _communityId, address _user, uint256 _postId) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.NO_CHANGE_VISIBILITY)) {
-            // there will be some logic here
+            return false;
         }
         if (isActiveRule(_communityId, RulesList.CHANGE_VISIBILITY_USING_VOTING)) {
-            // check payment balance of user
-            // receiving payment
+            // check voting
         }
         if (isActiveRule(_communityId, RulesList.CHANGE_VISIBILITY_ONLY_MODERATORS)) {
-            require(_user != address(0), "ChangeVisibilityContentRules: user address is zero");
-            // checking that the user is a member of the community
+            require(IAccount(registry.account()).isModerator(_communityId, _user), "ChangeVisibilityContentRules: wrong moderator");
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.CHANGE_VISIBILITY_ONLY_OWNER)) {
-            require(_user != address(0), "ChangeVisibilityContentRules: user address is zero");
-            // checking that the user is a community founder
+            address currentOwner = INFT(registry.nft()).ownerOf(_postId);
+            require(currentOwner == _user, "ChangeVisibilityContentRules: wrong owner for post");
+            return true;
         }
 
         return true;

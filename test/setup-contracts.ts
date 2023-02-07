@@ -138,6 +138,7 @@ async function setupCommonPlugins(_registryContract, user) {
     await setupPlugin(_registryContract, "contracts/plugins/post/Write.sol:Write", pluginList.COMMUNITY_WRITE_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Read.sol:Read", pluginList.COMMUNITY_READ_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Burn.sol:Burn", pluginList.COMMUNITY_BURN_POST());
+    // await setupPlugin(_registryContract, "contracts/plugins/post/ChangeVisibility.sol:ChangeVisibility", pluginList.COMMUNITY_CHANGE_VISIBILITY_POST());
 
     await setupPlugin(_registryContract, "contracts/plugins/comment/Write.sol:Write", pluginList.COMMUNITY_WRITE_COMMENT());
     await setupPlugin(_registryContract, "contracts/plugins/comment/Read.sol:Read", pluginList.COMMUNITY_READ_COMMENT());
