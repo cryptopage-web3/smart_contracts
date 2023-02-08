@@ -43,20 +43,13 @@ contract ChangeVisibility is IExecutePlugin, Context{
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         checkData(_version, _sender);
-        (uint256 _postId, ) =
-        abi.decode(_data,(uint256, bool));
+        (uint256 _postId, , ) =
+        abi.decode(_data,(uint256, uint256, bool));
         address _communityId = IPostData(registry.postData()).getCommunityId(_postId);
 
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "ChangeVisibility: wrong _sender");
 
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.CHANGE_VISIBILITY_CONTENT_RULES,
-            PLUGIN_VERSION
-        );
-        require(
-            IChangeVisibilityContentRules(groupRules).validate(_communityId, _sender, _postId),
-            "ChangeVisibility: wrong validate"
-        );
+        checkRule(RulesList.CHANGE_VISIBILITY_CONTENT_RULES, _communityId, _sender, _postId);
 
         DataTypes.SimpleVars memory vars;
         vars.executedId = _executedId;
@@ -75,5 +68,16 @@ contract ChangeVisibility is IExecutePlugin, Context{
         require(_version == PLUGIN_VERSION, "ChangeVisibility: wrong _version");
         require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"ChangeVisibility: plugin is not trusted");
         require(_sender != address(0) , "ChangeVisibility: _sender is zero");
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IChangeVisibilityContentRules(rulesContract).validate(_communityId, _sender, _postId),
+            "ChangeVisibility: wrong rules validate"
+        );
     }
 }

@@ -159,10 +159,65 @@ describe("Test Comment basic functionality", function () {
             [ "uint256", "uint256" ],
             [postId, commentId ]
         );
-        id = ethers.utils.formatBytes32String("30");
+        id = ethers.utils.formatBytes32String("291");
         await executor.connect(creator).run(id, pluginList.COMMUNITY_BURN_COMMENT(), version, data);
 
         commentInfo = await plugin.connect(third).read(postId, commentId);
+        expect(false).to.equal(commentInfo.isView);
+
+    });
+
+    it("Should change visibility comment", async function () {
+        let communityAddress = createdCommunity.address;
+
+        let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
+        let postId = postIds[0].toNumber();
+
+        let commentHash = "#3 hash for comment";
+        let data = defaultAbiCoder.encode(
+            [ "address", "uint256", "address", "string", "bool", "bool", "bool", "bool" ],
+            [communityAddress, postId, third.address, commentHash, false, false, false, true]
+        );
+        let id = ethers.utils.formatBytes32String("292");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_COMMENT(), version, data);
+
+        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_COMMENT(), version);
+        let pluginFactory = await ethers.getContractFactory("contracts/plugins/comment/Read.sol:Read");
+        let plugin = await pluginFactory.attach(pluginAddress);
+
+        let commentId = 3;
+
+        let commentInfo = await plugin.connect(third).read(postId, commentId);
+        expect(true).to.equal(commentInfo.isView);
+
+        let pathName = "contracts/plugins/comment/ChangeVisibility.sol:ChangeVisibility";
+        let pluginName = pluginList.COMMUNITY_CHANGE_VISIBILITY_COMMENT();
+        pluginFactory = await ethers.getContractFactory(pathName);
+        let pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+
+        await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_CHANGE_VISIBILITY_COMMENT(), version);
+
+        pathName = "contracts/rules/community/ChangeVisibilityContentRules.sol:ChangeVisibilityContentRules";
+        let ruleName = keccak256(defaultAbiCoder.encode(["string"], ["PAGE.CHANGE_VISIBILITY_CONTENT_RULES"]));
+        let rulesFactory =  await ethers.getContractFactory(pathName);
+        let rulesContract = await rulesFactory.deploy(registry.address);
+        await rule.setRuleContract(ruleName, version, rulesContract.address);
+
+        await rule.connect(owner).enableRule(ruleList.CHANGE_VISIBILITY_CONTENT_RULES(), version, ruleList.CHANGE_VISIBILITY_ONLY_OWNER());
+        await createdCommunity.connect(owner).linkRule(ruleList.CHANGE_VISIBILITY_CONTENT_RULES(), version, ruleList.CHANGE_VISIBILITY_ONLY_OWNER());
+
+
+        data = defaultAbiCoder.encode(
+            [ "uint256", "uint256", "bool" ],
+            [postId, commentId, false ]
+        );
+        id = ethers.utils.formatBytes32String("293");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_CHANGE_VISIBILITY_COMMENT(), version, data);
+
+        commentInfo = await plugin.connect(third).read(postId, commentId);
+        //console.log("commentInfo = ", commentInfo);
         expect(false).to.equal(commentInfo.isView);
 
     });
