@@ -194,4 +194,49 @@ describe("Test Post basic functionality", function () {
         expect(false).to.equal(readInfo.isView);
 
     });
+
+    it("Should gas compensation post", async function () {
+        let communityAddress = createdCommunity.address;
+
+        let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
+        expect(3).to.equal(postIds.length);
+        let postId = postIds[1].toNumber(); //"8000000000002"
+
+        let pathName = "contracts/plugins/post/GasCompensation.sol:GasCompensation";
+        let pluginName = pluginList.COMMUNITY_POST_GAS_COMPENSATION();
+        let pluginFactory = await ethers.getContractFactory(pathName);
+        let pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+        await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version);
+
+        pathName = "contracts/rules/community/GasCompensationRules.sol:GasCompensationRules";
+        let ruleName = keccak256(defaultAbiCoder.encode(["string"], ["PAGE.GAS_COMPENSATION_RULES"]));
+        let rulesFactory =  await ethers.getContractFactory(pathName);
+        let rulesContract = await rulesFactory.deploy(registry.address);
+        await rule.setRuleContract(ruleName, version, rulesContract.address);
+
+        await rule.connect(owner).enableRule(ruleList.GAS_COMPENSATION_RULES(), version, ruleList.GAS_COMPENSATION_FOR_OWNER());
+        await createdCommunity.connect(owner).linkRule(ruleList.GAS_COMPENSATION_RULES(), version, ruleList.GAS_COMPENSATION_FOR_OWNER());
+
+        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_POST(), version);
+        pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
+        let readPlugin = await pluginFactory.attach(pluginAddress);
+
+        let readInfo = await readPlugin.connect(third).read(postId);
+        expect(false).to.equal(readInfo.isGasCompensation);
+
+        let data = defaultAbiCoder.encode(
+            [ "uint256[]" ],
+            [ [postId] ]
+        );
+        let id = ethers.utils.formatBytes32String("18");
+
+        await executor.connect(third).run(id, pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version, data);
+        //
+        // readInfo = await readPlugin.connect(third).read(postId);
+        // expect(false).to.equal(readInfo.isView);
+
+    });
 });
