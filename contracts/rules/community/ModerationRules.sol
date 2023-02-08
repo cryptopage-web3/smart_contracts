@@ -57,8 +57,7 @@ contract ModerationRules is IModerationRules, Context {
             return true;
         }
         if (isActiveRule(_communityId, RulesList.MODERATION_USING_VOTING)) {
-            require(_postId > 0, "ModerationRules: wrong postId");
-            // here is the logic for voting
+            require(registry.isVotingContract(_moderator), "ModerationRules: wrong voting contract");
             return true;
         }
         if (isActiveRule(_communityId, RulesList.MODERATION_USING_MODERATORS)) {

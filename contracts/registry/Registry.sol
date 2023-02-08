@@ -38,6 +38,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
 
     // pluginName -> version -> Plugin
     mapping(bytes32 => mapping(uint256 => Plugin)) private plugins;
+    mapping(address => bool) private votingContracts;
 
     event SetPlugin(address sender, bytes32 pluginName, uint256 version, address pluginContract);
     event ChangePluginStatus(address sender, bytes32 pluginName, uint256 version, bool newStatus);
@@ -54,6 +55,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event SetSoulBound(address origin, address sender, address oldValue, address newValue);
     event SetRule(address origin, address sender, address oldValue, address newValue);
     event SetNFT(address origin, address sender, address oldValue, address newValue);
+    event SetVotingContract(address origin, address sender, address contractAddress, bool enable);
 
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
@@ -162,6 +164,13 @@ contract Registry is OwnableUpgradeable, IRegistry {
         nft = _contract;
     }
 
+    function setVotingContract(address _contract, bool _status) external override onlyOwner {
+        require(_contract != address(0), "Registry: address can't be zero");
+        require(votingContracts[_contract] != _status, "Registry: wrong status");
+        votingContracts[_contract] = _status;
+        emit SetVotingContract(tx.origin, _msgSender(), _contract, _status);
+    }
+
     function changePluginStatus(
         bytes32 _pluginName,
         uint256 _version
@@ -196,5 +205,11 @@ contract Registry is OwnableUpgradeable, IRegistry {
     ) external view override returns (bool enable)  {
         Plugin storage plugin = plugins[_pluginName][_version];
         enable = plugin.enable;
+    }
+
+    function isVotingContract(
+        address _contract
+    ) external view override returns (bool)  {
+        return votingContracts[_contract];
     }
 }

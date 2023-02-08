@@ -58,6 +58,8 @@ interface IRegistry {
 
     function setNFT(address _contract) external;
 
+    function setVotingContract(address _contract, bool _status) external;
+
     function setPlugin(
         bytes32 _pluginName,
         uint256 _version,
@@ -83,4 +85,8 @@ interface IRegistry {
         bytes32 _pluginName,
         uint256 _version
     ) external view returns (bool enable);
+
+    function isVotingContract(
+        address _contract
+    ) external view returns (bool);
 }

@@ -52,7 +52,8 @@ contract ChangeVisibilityContentRules is IChangeVisibilityContentRules, Context 
             return false;
         }
         if (isActiveRule(_communityId, RulesList.CHANGE_VISIBILITY_USING_VOTING)) {
-            // check voting
+            require(registry.isVotingContract(_user), "ChangeVisibilityContentRules: wrong voting contract");
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.CHANGE_VISIBILITY_ONLY_MODERATORS)) {
             require(IAccount(registry.account()).isModerator(_communityId, _user), "ChangeVisibilityContentRules: wrong moderator");
