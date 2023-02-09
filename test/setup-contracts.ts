@@ -20,7 +20,7 @@ export default async function setupContracts() {
     let registry, executor;
     let contractBlank;
 
-    let bank, token, nft, soulBound, rule;
+    let bank, oracle, token, nft, soulBound, rule;
     let dao = AddressZero;
     let treasury;
     let communityData, postData, commentData;
@@ -80,6 +80,11 @@ export default async function setupContracts() {
     bank = await bankFactory.deploy();
     await bank.initialize(registry.address);
     await registry.setBank(bank.address);
+
+    const oracleFactory = await ethers.getContractFactory("contracts/bank/Oracle.sol:Oracle");
+    oracle = await oracleFactory.deploy();
+    await oracle.initialize(registry.address);
+    await registry.setOracle(oracle.address);
 
     const soulBoundFactory = await ethers.getContractFactory("contracts/tokens/soulbound/SoulBound.sol:SoulBound");
     soulBound = await soulBoundFactory.deploy();

@@ -36,6 +36,8 @@ contract Oracle is IOracle, OwnableUpgradeable {
         registry = IRegistry(_registry);
         pageTwapInterval = 15 minutes;
         txGasPrice = tx.gasprice;
+        stablePrice = 1;
+        isStablePrice = true;
     }
 
     function version() external pure override returns (string memory) {

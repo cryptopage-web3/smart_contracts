@@ -249,14 +249,12 @@ describe("Test Post basic functionality", function () {
         let id = ethers.utils.formatBytes32String("18");
 
         let tx = await executor.connect(third).run(id, pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version, data);
-        console.log(tx);
 
         readInfo = await readPlugin.connect(third).read(postId1);
-        console.log("readInfo = ", readInfo);
         expect(true).to.equal(readInfo.isView);
 
         balanceOf = await balancePlugin.connect(third).read(third.address);
-        console.log("balanceOf = ", balanceOf)
+        expect(balanceOf > 0).to.be.true;
 
     });
 });
