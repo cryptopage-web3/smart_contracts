@@ -200,7 +200,8 @@ describe("Test Post basic functionality", function () {
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
         expect(3).to.equal(postIds.length);
-        let postId = postIds[1].toNumber(); //"8000000000002"
+        let postId0 = postIds[0].toNumber(); //"8000000000001"
+        let postId1 = postIds[1].toNumber(); //"8000000000002"
 
         let pathName = "contracts/plugins/post/GasCompensation.sol:GasCompensation";
         let pluginName = pluginList.COMMUNITY_POST_GAS_COMPENSATION();
@@ -210,6 +211,15 @@ describe("Test Post basic functionality", function () {
 
         await registry.setPlugin(pluginName, version, pluginContract.address);
         await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version);
+
+        pathName = "contracts/plugins/bank/BalanceOf.sol:BalanceOf";
+        pluginName = pluginList.BANK_BALANCE_OF();
+        pluginFactory = await ethers.getContractFactory(pathName);
+        pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+        await createdCommunity.connect(owner).linkPlugin(pluginList.BANK_BALANCE_OF(), version);
 
         pathName = "contracts/rules/community/GasCompensationRules.sol:GasCompensationRules";
         let ruleName = keccak256(defaultAbiCoder.encode(["string"], ["PAGE.GAS_COMPENSATION_RULES"]));
@@ -224,19 +234,29 @@ describe("Test Post basic functionality", function () {
         pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
         let readPlugin = await pluginFactory.attach(pluginAddress);
 
-        let readInfo = await readPlugin.connect(third).read(postId);
+        let readInfo = await readPlugin.connect(third).read(postId1);
         expect(false).to.equal(readInfo.isGasCompensation);
+
+        pluginAddress = await registry.getPluginContract(pluginList.BANK_BALANCE_OF(), version);
+        pluginFactory = await ethers.getContractFactory("contracts/plugins/bank/BalanceOf.sol:BalanceOf");
+        let balancePlugin = await pluginFactory.attach(pluginAddress);
+        let balanceOf = await balancePlugin.connect(third).read(third.address);
 
         let data = defaultAbiCoder.encode(
             [ "uint256[]" ],
-            [ [postId] ]
+            [ [postId1] ]
         );
         let id = ethers.utils.formatBytes32String("18");
 
-        await executor.connect(third).run(id, pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version, data);
-        //
-        // readInfo = await readPlugin.connect(third).read(postId);
-        // expect(false).to.equal(readInfo.isView);
+        let tx = await executor.connect(third).run(id, pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version, data);
+        console.log(tx);
+
+        readInfo = await readPlugin.connect(third).read(postId1);
+        console.log("readInfo = ", readInfo);
+        expect(true).to.equal(readInfo.isView);
+
+        balanceOf = await balancePlugin.connect(third).read(third.address);
+        console.log("balanceOf = ", balanceOf)
 
     });
 });

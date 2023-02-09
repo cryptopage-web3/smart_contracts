@@ -16,6 +16,7 @@ import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IGasCompensationRules.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../libraries/DataTypes.sol";
+import "../../tokens/nft/interfaces/INFT.sol";
 
 
 contract GasCompensation is IExecutePlugin, Context{
@@ -65,7 +66,7 @@ contract GasCompensation is IExecutePlugin, Context{
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
             (uint256 gas, address creator) = IPostData(registry.postData()).setGasCompensation(postVars);
 
-            address owner = address(0);
+            address owner = INFT(registry.nft()).ownerOf(postId);
             address[] memory users = checkRule(RulesList.GAS_COMPENSATION_RULES, communityId, creator, owner);
             uint256[] memory gasAmount = new uint256[](2);
             uint256 step = 1;
