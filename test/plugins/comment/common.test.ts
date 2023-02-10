@@ -222,4 +222,68 @@ describe("Test Comment basic functionality", function () {
 
     });
 
+    it("Should gas compensation comment", async function () {
+        let communityAddress = createdCommunity.address;
+
+        let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
+        let postId = postIds[0].toNumber();
+
+        let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_COMMENT(), version);
+        let pluginFactory = await ethers.getContractFactory("contracts/plugins/comment/Read.sol:Read");
+        let readPlugin = await pluginFactory.attach(pluginAddress);
+
+        let commentId = 2;
+
+        let commentInfo = await readPlugin.connect(third).read(postId, commentId);
+        expect(false).to.equal(commentInfo.isGasCompensation);
+
+        let pathName = "contracts/plugins/comment/GasCompensation.sol:GasCompensation";
+        let pluginName = pluginList.COMMUNITY_COMMENT_GAS_COMPENSATION();
+        pluginFactory = await ethers.getContractFactory(pathName);
+        let pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+        await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_COMMENT_GAS_COMPENSATION(), version);
+
+        pathName = "contracts/plugins/bank/BalanceOf.sol:BalanceOf";
+        pluginName = pluginList.BANK_BALANCE_OF();
+        pluginFactory = await ethers.getContractFactory(pathName);
+        pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+        await createdCommunity.connect(owner).linkPlugin(pluginList.BANK_BALANCE_OF(), version);
+
+        pathName = "contracts/rules/community/GasCompensationRules.sol:GasCompensationRules";
+        let ruleName = keccak256(defaultAbiCoder.encode(["string"], ["PAGE.GAS_COMPENSATION_RULES"]));
+        let rulesFactory =  await ethers.getContractFactory(pathName);
+        let rulesContract = await rulesFactory.deploy(registry.address);
+        await rule.setRuleContract(ruleName, version, rulesContract.address);
+
+        await rule.connect(owner).enableRule(ruleList.GAS_COMPENSATION_RULES(), version, ruleList.GAS_COMPENSATION_FOR_OWNER());
+        await createdCommunity.connect(owner).linkRule(ruleList.GAS_COMPENSATION_RULES(), version, ruleList.GAS_COMPENSATION_FOR_OWNER());
+
+        pluginAddress = await registry.getPluginContract(pluginList.BANK_BALANCE_OF(), version);
+        pluginFactory = await ethers.getContractFactory("contracts/plugins/bank/BalanceOf.sol:BalanceOf");
+        let balancePlugin = await pluginFactory.attach(pluginAddress);
+        let balanceOf = await balancePlugin.connect(third).read(third.address);
+        expect(balanceOf == 0).to.be.true;
+
+        let data = defaultAbiCoder.encode(
+            [ "uint256", "uint256[]" ],
+            [ postId, [commentId] ]
+        );
+        let id = ethers.utils.formatBytes32String("294");
+
+        let tx = await executor.connect(third).run(id, pluginList.COMMUNITY_COMMENT_GAS_COMPENSATION(), version, data);
+
+        commentInfo = await readPlugin.connect(third).read(postId, commentId);
+        expect(true).to.equal(commentInfo.isGasCompensation);
+
+        balanceOf = await balancePlugin.connect(third).read(third.address);
+        console.log("balanceOf = ", balanceOf);
+
+    });
+
 });

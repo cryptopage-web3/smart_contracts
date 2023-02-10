@@ -38,6 +38,19 @@ contract Bank is IBank, ContextUpgradeable {
         _;
     }
 
+    modifier onlyGasCompensationPlugins(bytes32 _checkedPluginName, uint256 _version) {
+        require(PluginsList.COMMUNITY_POST_GAS_COMPENSATION == _checkedPluginName
+        || PluginsList.COMMUNITY_COMMENT_GAS_COMPENSATION == _checkedPluginName,
+            "Bank: wrong plugin name"
+        );
+        require(
+            registry.getPluginContract(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, _version) == _msgSender()
+            || registry.getPluginContract(PluginsList.COMMUNITY_COMMENT_GAS_COMPENSATION, _version) == _msgSender(),
+            "Bank: caller is not the plugin"
+        );
+        _;
+    }
+
     function initialize(address _registry) external initializer {
         registry = IRegistry(_registry);
         token = IToken(registry.token());
@@ -80,7 +93,7 @@ contract Bank is IBank, ContextUpgradeable {
 
     function gasCompensation(
         DataTypes.GasCompensationBank calldata vars
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_POST_GAS_COMPENSATION, vars.pluginName, vars.version) returns(bool) {
+    ) external override onlyGasCompensationPlugins(vars.pluginName, vars.version) returns(bool) {
         uint256 amount = convertGasToTokenAmount(vars.gas);
         require(amount > 0, "PageBank: wrong amount");
         require(token.mint(address(this), amount), "PageBank: wrong mint of tokens");

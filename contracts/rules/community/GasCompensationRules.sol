@@ -67,7 +67,7 @@ contract GasCompensationRules is IGasCompensationRules, Context {
         }
         if (isActiveRule(_communityId, RulesList.GAS_COMPENSATION_FOR_AUTHOR_AND_OWNER)) {
             users[0] = _author;
-            users[0] = _owner;
+            users[1] = _owner;
         }
         return users;
     }
