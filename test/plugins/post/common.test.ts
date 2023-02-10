@@ -198,10 +198,20 @@ describe("Test Post basic functionality", function () {
     it("Should gas compensation post", async function () {
         let communityAddress = createdCommunity.address;
 
+        let postHash = "#4 hash for post";
+        let tags = ["7", "8"];
+
+        let data = defaultAbiCoder.encode(
+            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, third.address, postHash, 0, tags, false, true]
+        );
+        let id = ethers.utils.formatBytes32String("18");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
+
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        expect(3).to.equal(postIds.length);
-        let postId0 = postIds[0].toNumber(); //"8000000000001"
+        expect(4).to.equal(postIds.length);
         let postId1 = postIds[1].toNumber(); //"8000000000002"
+        let postId3 = postIds[3].toNumber(); //"8000000000003"
 
         let pathName = "contracts/plugins/post/GasCompensation.sol:GasCompensation";
         let pluginName = pluginList.COMMUNITY_POST_GAS_COMPENSATION();
@@ -242,11 +252,11 @@ describe("Test Post basic functionality", function () {
         let balancePlugin = await pluginFactory.attach(pluginAddress);
         let balanceOf = await balancePlugin.connect(third).read(third.address);
 
-        let data = defaultAbiCoder.encode(
+        data = defaultAbiCoder.encode(
             [ "uint256[]" ],
-            [ [postId1] ]
+            [ [postId3,postId1] ]
         );
-        let id = ethers.utils.formatBytes32String("18");
+        id = ethers.utils.formatBytes32String("19");
 
         let tx = await executor.connect(third).run(id, pluginList.COMMUNITY_POST_GAS_COMPENSATION(), version, data);
 

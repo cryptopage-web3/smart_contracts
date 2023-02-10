@@ -270,9 +270,11 @@ describe("Test Comment basic functionality", function () {
         let balanceOf = await balancePlugin.connect(third).read(third.address);
         expect(balanceOf == 0).to.be.true;
 
+        let commentId0 = 1;
+
         let data = defaultAbiCoder.encode(
             [ "uint256", "uint256[]" ],
-            [ postId, [commentId] ]
+            [ postId, [commentId0,commentId] ]
         );
         let id = ethers.utils.formatBytes32String("294");
 
@@ -282,8 +284,7 @@ describe("Test Comment basic functionality", function () {
         expect(true).to.equal(commentInfo.isGasCompensation);
 
         balanceOf = await balancePlugin.connect(third).read(third.address);
-        console.log("balanceOf = ", balanceOf);
-
+        expect(balanceOf > 0).to.be.true;
     });
 
 });
