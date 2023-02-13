@@ -40,7 +40,7 @@ contract Read is Context {
         address communityId = IPostData(registry.postData()).getCommunityId(_postId);
 
         checkPlugin(communityId);
-        checkRule(RulesList.POST_COMMENTING_RULES, communityId, sender);
+        checkRule(RulesList.POST_COMMENTING_RULES, communityId, sender, _postId);
 
         DataTypes.MinSimpleVars memory vars;
         vars.pluginName = PLUGIN_NAME;
@@ -51,13 +51,13 @@ contract Read is Context {
         outData.communityId = communityId;
     }
 
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
         address rulesContract = IRule(registry.rule()).getRuleContract(
             _groupRulesName,
             PLUGIN_VERSION
         );
         require(
-            IPostCommentingRules(rulesContract).validate(_communityId, _sender),
+            IPostCommentingRules(rulesContract).validate(_communityId, _sender, _postId),
             "Write: wrong rules validate"
         );
     }

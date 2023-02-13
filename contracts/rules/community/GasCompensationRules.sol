@@ -50,6 +50,7 @@ contract GasCompensationRules is IGasCompensationRules, Context {
         address _owner
     ) external view override onlyPlugins returns(address[] memory) {
         address[] memory users = new address[](2);
+
         if (isActiveRule(_communityId, RulesList.NO_GAS_COMPENSATION)) {
             return users;
         }

@@ -50,16 +50,13 @@ contract CommunityEditModeratorsRules is ICommunityEditModeratorsRules, Context 
         }
         if (isActiveRule(_communityId, RulesList.EDIT_AFTER_VOTED)) {
             require(registry.isVotingContract(_user), "CommunityEditModeratorsRules: wrong voting contract");
-            return true;
         }
         if (isActiveRule(_communityId, RulesList.EDIT_ONLY_SUPER_ADMIN)) {
             require(_user == registry.superAdmin(), "CommunityEditModeratorsRules: user is not super admin");
-            return true;
         }
         if (isActiveRule(_communityId, RulesList.EDIT_BY_CREATOR)) {
             address currentOwner = Ownable(_communityId).owner();
             require(currentOwner == _user, "CommunityEditModeratorsRules: wrong owner for post");
-            return true;
         }
 
         return true;

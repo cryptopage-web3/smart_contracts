@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../account/interfaces/IAccount.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -46,7 +47,7 @@ contract CommunityJoiningRules is ICommunityJoiningRules, Context {
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.OPEN_TO_ALL)) {
-            // there will be some logic here
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.SOULBOUND_TOKENS_USING)) {
             require(
@@ -55,10 +56,14 @@ contract CommunityJoiningRules is ICommunityJoiningRules, Context {
             );
         }
         if (isActiveRule(_communityId, RulesList.WHEN_JOINING_PAYMENT)) {
-            // check payment balance of user
+            if (!IAccount(registry.account()).isCommunityUser(_communityId, _user)) {
+                //Receiving payment from the user
+            }
         }
         if (isActiveRule(_communityId, RulesList.PERIODIC_PAYMENT)) {
-            // check periodic payment balance of user
+            if (IAccount(registry.account()).isCommunityUser(_communityId, _user)) {
+                //Receiving payment from the user
+            }
         }
 
         return true;

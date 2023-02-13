@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../account/interfaces/IAccount.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -45,20 +46,19 @@ contract PostCommentingRules is IPostCommentingRules, Context {
         soulBound = ISoulBound(soulBoundContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+    function validate(address _communityId, address _user, uint256 _postId) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.COMMENTING_MANY_TIMES)) {
-            require(_user != address(0), "PostCommentingRules: user address is zero");
-            // there will be some logic here
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.COMMENTING_ONE_TIME)) {
-            // check previous comments from this user
+            uint256[] memory commentIds = IAccount(registry.account()).getCommentIdsByUserAndPost(_communityId, _user, _postId);
+            require(commentIds.length == 0, "PostCommentingRules: user already has comments");
         }
         if (isActiveRule(_communityId, RulesList.COMMENTING_WITH_SOULBOUND_TOKENS)) {
             require(
                 soulBound.balanceOf(_user, soulBoundAllowId) > 0,
                 "PostCommentingRules: you do not have enough SoulBound tokens"
             );
-            // some logic for this user
         }
 
         return true;
