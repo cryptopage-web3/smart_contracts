@@ -3,6 +3,7 @@
 pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
@@ -45,18 +46,20 @@ contract CommunityEditModeratorsRules is ICommunityEditModeratorsRules, Context 
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.NO_EDIT_MODERATOR)) {
-            // there will be some logic here
+            return false;
         }
         if (isActiveRule(_communityId, RulesList.EDIT_AFTER_VOTED)) {
-            // here is the logic for voting
+            require(registry.isVotingContract(_user), "CommunityEditModeratorsRules: wrong voting contract");
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.EDIT_ONLY_SUPER_ADMIN)) {
-            require(_user != address(0), "CommunityEditModeratorsRules: user address is zero");
-            // some logic for this user
+            require(_user == registry.superAdmin(), "CommunityEditModeratorsRules: user is not super admin");
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.EDIT_BY_CREATOR)) {
-            require(_user != address(0), "CommunityEditModeratorsRules: user address is zero");
-            // some logic for this user
+            address currentOwner = Ownable(_communityId).owner();
+            require(currentOwner == _user, "CommunityEditModeratorsRules: wrong owner for post");
+            return true;
         }
 
         return true;

@@ -28,6 +28,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     address public account;
     address public soulBound;
     address public nft;
+    address public superAdmin;
 
     bytes32 public constant EMPTY_NAME = bytes32(0);
 
@@ -55,6 +56,7 @@ contract Registry is OwnableUpgradeable, IRegistry {
     event SetSoulBound(address origin, address sender, address oldValue, address newValue);
     event SetRule(address origin, address sender, address oldValue, address newValue);
     event SetNFT(address origin, address sender, address oldValue, address newValue);
+    event SetSuperAdmin(address origin, address sender, address oldValue, address newValue);
     event SetVotingContract(address origin, address sender, address contractAddress, bool enable);
 
     /// @notice Constructs the contract.
@@ -162,6 +164,11 @@ contract Registry is OwnableUpgradeable, IRegistry {
         require(_contract != address(0), "Registry: address can't be zero");
         emit SetNFT(tx.origin, _msgSender(), nft, _contract);
         nft = _contract;
+    }
+
+    function setSuperAdmin(address _user) external override onlyOwner {
+        emit SetSuperAdmin(tx.origin, _msgSender(), superAdmin, _user);
+        superAdmin = _user;
     }
 
     function setVotingContract(address _contract, bool _status) external override onlyOwner {

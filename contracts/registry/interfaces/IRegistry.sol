@@ -34,6 +34,8 @@ interface IRegistry {
 
     function nft() external view returns (address);
 
+    function superAdmin() external view returns (address);
+
     function setBank(address _contract) external;
 
     function setToken(address _contract) external;
@@ -57,6 +59,8 @@ interface IRegistry {
     function setRule(address _contract) external;
 
     function setNFT(address _contract) external;
+
+    function setSuperAdmin(address _user) external;
 
     function setVotingContract(address _contract, bool _status) external;
 
