@@ -13,7 +13,6 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IReadPlugin.sol";
-import "../../rules/community/interfaces/IPostPlacingRules.sol";
 import "../../libraries/DataTypes.sol";
 
 

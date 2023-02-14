@@ -15,7 +15,7 @@ import "../../tokens/nft/interfaces/INFT.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
-import "../../rules/community/interfaces/IPostPlacingRules.sol";
+import "../../rules/community/interfaces/IPostReadingRules.sol";
 import "../../libraries/DataTypes.sol";
 
 
@@ -59,7 +59,7 @@ contract Read is Context {
             PLUGIN_VERSION
         );
         require(
-            IPostPlacingRules(rulesContract).validate(_communityId, _sender),
+            IPostReadingRules(rulesContract).validate(_communityId, _sender),
             "Write: wrong rules validate"
         );
     }

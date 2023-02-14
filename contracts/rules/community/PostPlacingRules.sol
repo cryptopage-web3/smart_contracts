@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../account/interfaces/IAccount.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -46,18 +47,17 @@ contract PostPlacingRules is IPostPlacingRules, Context {
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.FREE_FOR_EVERYONE)) {
-            require(_user != address(0), "PostPlacingRules: user address is zero");
-            // there will be some logic here
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.PAYMENT_FROM_EVERYONE)) {
             // check payment balance of user
             // receiving payment
         }
         if (isActiveRule(_communityId, RulesList.COMMUNITY_MEMBERS_ONLY)) {
-            // checking that the user is a member of the community
+            require(IAccount(registry.account()).isCommunityUser(_communityId, _user), "PostPlacingRules: wrong user");
         }
         if (isActiveRule(_communityId, RulesList.COMMUNITY_FOUNDERS_ONLY)) {
-            // checking that the user is a community founder
+            require(ICommunityBlank(_communityId).creator() == _user, "PostPlacingRules: wrong founder");
         }
 
         return true;
