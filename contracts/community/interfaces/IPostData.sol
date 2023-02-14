@@ -45,4 +45,9 @@ interface IPostData {
         uint256 price,
         address creator
     );
+
+    function isEncrypted(uint256 _postId) external view returns(bool);
+
+    function isCreator(uint256 _postId, address _user) external view returns(bool);
+
 }

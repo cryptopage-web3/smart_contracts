@@ -198,6 +198,15 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         return posts[_postId].upDownUsers.contains(_user);
     }
 
+    function isEncrypted(uint256 _postId) external view override returns(bool) {
+        return posts[_postId].isEncrypted;
+    }
+
+    function isCreator(uint256 _postId, address _user) external view override returns(bool) {
+        require(_user != address(0), "PostData: wrong user");
+        return posts[_postId].creator == _user;
+    }
+
     function setPostUpDown(uint256 _postId, bool _isUp, bool _isDown, address _sender) private {
         if (!_isUp && !_isDown) {
             return;

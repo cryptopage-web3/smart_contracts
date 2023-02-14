@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../community/interfaces/IPostData.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -44,16 +45,15 @@ contract PostTransferringRules is IPostTransferringRules, Context {
         soulBound = ISoulBound(soulBoundContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+    function validate(address _communityId, address _user, uint256 _postId) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.TRANSFERRING_DENIED)) {
-            // there will be some logic here
+            return false;
         }
         if (isActiveRule(_communityId, RulesList.TRANSFERRING_WITH_VOTING)) {
-            // here is the logic for transferring tokens to community
+            require(registry.isVotingContract(_user), "PostTransferringRules: wrong voting contract");
         }
         if (isActiveRule(_communityId, RulesList.TRANSFERRING_ONLY_AUTHOR)) {
-            require(_user != address(0), "PostTransferringRules: user address is zero");
-            // some logic for this user
+            require(IPostData(registry.postData()).isCreator(_postId, _user), "PostTransferringRules: wrong author");
         }
 
         return true;

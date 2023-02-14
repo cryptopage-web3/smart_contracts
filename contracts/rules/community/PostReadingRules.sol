@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
+import "../../community/interfaces/IPostData.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
 import "./RulesList.sol";
@@ -44,13 +45,13 @@ contract PostReadingRules is IPostReadingRules, Context {
         soulBound = ISoulBound(soulBoundContract);
     }
 
-    function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+    function validate(address _communityId, address _user, uint256 _postId) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.READING_FOR_EVERYONE)) {
             require(_user != address(0), "PostReadingRules: user address is zero");
-            // there will be some logic here
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.READING_ENCRYPTED)) {
-            // status check that messages are encrypted
+            require(IPostData(registry.postData()).isEncrypted(_postId), "PostReadingRules: wrong encrypting status");
         }
 
         return true;

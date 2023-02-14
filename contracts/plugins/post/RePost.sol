@@ -14,6 +14,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IBaseRules.sol";
+import "../../rules/community/interfaces/IBaseRulesWithPostId.sol";
 import "../../libraries/DataTypes.sol";
 
 
@@ -72,8 +73,9 @@ contract RePost is IExecutePlugin, Context{
 
         require(IAccount(registry.account()).isCommunityUser(_userCommunityId, _sender), "RePost: wrong _sender");
 
-        checkRule(RulesList.USER_VERIFICATION_RULES, _userCommunityId, _sender);
-        checkRule(RulesList.POST_PLACING_RULES, _userCommunityId, _sender);
+        checkRuleWithPostId(RulesList.POST_TRANSFERRING_RULES, _userCommunityId, _sender, _postId);
+        checkBaseRule(RulesList.USER_VERIFICATION_RULES, _userCommunityId, _sender);
+        checkBaseRule(RulesList.POST_PLACING_RULES, _userCommunityId, _sender);
 
         uint256 postId = IPostData(registry.postData()).writePost(postVars);
         require(postId > 0, "RePost: wrong create post");
@@ -100,14 +102,25 @@ contract RePost is IExecutePlugin, Context{
         return true;
     }
 
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+    function checkBaseRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
         address rulesContract = IRule(registry.rule()).getRuleContract(
             _groupRulesName,
             PLUGIN_VERSION
         );
         require(
             IBaseRules(rulesContract).validate(_communityId, _sender),
-            "RePost: wrong rules validate"
+            "RePost: wrong base rules validate"
+        );
+    }
+
+    function checkRuleWithPostId(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IBaseRulesWithPostId(rulesContract).validate(_communityId, _sender, _postId),
+            "RePost: wrong rules with postId validate"
         );
     }
 

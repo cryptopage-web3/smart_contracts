@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import "./IBaseRules.sol";
+import "./IBaseRulesWithPostId.sol";
 
 
-interface IPostReadingRules is IBaseRules {
+interface IPostReadingRules is IBaseRulesWithPostId {
 
 }
