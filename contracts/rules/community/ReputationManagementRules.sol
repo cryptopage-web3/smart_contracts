@@ -42,7 +42,7 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.REPUTATION_NOT_USED)) {
-            return false;
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.REPUTATION_CAN_CHANGE)) {
             return true;

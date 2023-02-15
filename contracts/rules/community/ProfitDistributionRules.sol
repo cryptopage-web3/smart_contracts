@@ -47,7 +47,7 @@ contract ProfitDistributionRules is IProfitDistributionRules, Context {
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
         if (isActiveRule(_communityId, RulesList.DISTRIBUTION_FOR_EVERYONE)) {
-            // there will be some logic here
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.DISTRIBUTION_USING_SOULBOUND_TOKENS)) {
             require(
@@ -56,11 +56,11 @@ contract ProfitDistributionRules is IProfitDistributionRules, Context {
             );
         }
         if (isActiveRule(_communityId, RulesList.DISTRIBUTION_USING_VOTING)) {
-            // Sending profit to a special wallet
+            require(registry.isVotingContract(_user), "ProfitDistributionRules: wrong voting contract");
+            return true;
         }
         if (isActiveRule(_communityId, RulesList.DISTRIBUTION_FOR_FOUNDERS)) {
-            // Logic for finding founders
-            //and sending profits
+            require(ICommunityBlank(_communityId).creator() == _user, "ProfitDistributionRules: wrong founder");
         }
 
         return true;
