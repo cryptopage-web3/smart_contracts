@@ -15,6 +15,7 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IBaseRules.sol";
+import "../../rules/community/interfaces/IBaseRulesWithPostId.sol";
 import "../../libraries/DataTypes.sol";
 
 
@@ -51,8 +52,8 @@ contract Write is IExecutePlugin, Context{
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
-        checkRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);
-        checkRule(RulesList.POST_COMMENTING_RULES, _communityId, _sender);
+        checkBaseRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);
+        checkRuleWithPostId(RulesList.POST_COMMENTING_RULES, _communityId, _sender, _postId);
 
         DataTypes.GeneralVars memory vars;
         vars.executedId = _executedId;
@@ -87,14 +88,25 @@ contract Write is IExecutePlugin, Context{
         return true;
     }
 
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+    function checkBaseRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
         address rulesContract = IRule(registry.rule()).getRuleContract(
             _groupRulesName,
             PLUGIN_VERSION
         );
         require(
             IBaseRules(rulesContract).validate(_communityId, _sender),
-            "Write: wrong rules validate"
+            "RePost: wrong base rules validate"
+        );
+    }
+
+    function checkRuleWithPostId(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IBaseRulesWithPostId(rulesContract).validate(_communityId, _sender, _postId),
+            "RePost: wrong rules with postId validate"
         );
     }
 

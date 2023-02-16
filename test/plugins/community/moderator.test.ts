@@ -44,8 +44,8 @@ describe("Test Info community basic functionality", function () {
         let tags = ["1", "2"];
 
         data = defaultAbiCoder.encode(
-            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
-            [communityAddress, third.address, postHash, 0, tags, false, true]
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
         );
 
         id = ethers.utils.formatBytes32String("32");

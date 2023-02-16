@@ -55,8 +55,8 @@ describe("Test Post basic functionality", function () {
         let tags = ["1", "2"];
 
         data = defaultAbiCoder.encode(
-            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
-            [communityAddress, third.address, postHash, 0, tags, false, true]
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
         );
         id = ethers.utils.formatBytes32String("11");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
@@ -104,8 +104,8 @@ describe("Test Post basic functionality", function () {
         let tags = ["3", "4"];
 
         data = defaultAbiCoder.encode(
-            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
-            [communityAddress, third.address, postHash, 0, tags, false, true]
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
         );
         id = ethers.utils.formatBytes32String("13");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
@@ -150,8 +150,8 @@ describe("Test Post basic functionality", function () {
         let tags = ["5", "6"];
 
         let data = defaultAbiCoder.encode(
-            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
-            [communityAddress, third.address, postHash, 0, tags, false, true]
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
         );
         let id = ethers.utils.formatBytes32String("16");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
@@ -202,8 +202,8 @@ describe("Test Post basic functionality", function () {
         let tags = ["7", "8"];
 
         let data = defaultAbiCoder.encode(
-            [ "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
-            [communityAddress, third.address, postHash, 0, tags, false, true]
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [communityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
         );
         let id = ethers.utils.formatBytes32String("18");
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
