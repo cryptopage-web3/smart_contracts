@@ -38,7 +38,7 @@ contract NFT is
     string public baseTokenURI;
 
     modifier onlyPostData() {
-        require(registry.postData() == _msgSender(), "NFT: caller is not the postData");
+        require(registry.postData() == _msgSender(), "Crypto.Page NFT: caller is not the postData");
         _;
     }
 
@@ -71,7 +71,7 @@ contract NFT is
 
     function burn(uint256 tokenId) external override onlyPostData {
         address owner = ERC721Upgradeable.ownerOf(tokenId);
-        require(owner == _msgSender(), "NFT: not owner");
+        require(owner == _msgSender(), "Crypto.Page NFT: not owner");
         _burn(tokenId);
     }
 
@@ -107,8 +107,21 @@ contract NFT is
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId)) : "";
     }
 
+    function tokensOfOwner(address user) external override view returns (uint256[] memory) {
+        uint256 tokenCount = balanceOf(user);
+        if (tokenCount == 0) {
+            return new uint256[](0);
+        } else {
+            uint256[] memory output = new uint256[](tokenCount);
+            for (uint256 index = 0; index < tokenCount; index++) {
+                output[index] = tokenOfOwnerByIndex(user, index);
+            }
+            return output;
+        }
+    }
+
     function _requireMinted(uint256 tokenId) internal override view virtual {
-        require(_exists(tokenId), "ERC721: invalid token ID");
+        require(_exists(tokenId), "Crypto.Page NFT: invalid token ID");
     }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC721EnumerableUpgradeable, IERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
@@ -120,6 +133,9 @@ contract NFT is
         address to,
         uint256 tokenId
     ) internal virtual override {
+//        if (from != address(0) && to != address(0)) {
+//
+//        }
         super._beforeTokenTransfer(from, to, tokenId);
     }
 }

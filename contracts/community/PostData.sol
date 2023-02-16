@@ -59,6 +59,18 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         _;
     }
 
+    modifier onlyWritePostPlugin(bytes32 _checkedPluginName, uint256 _version) {
+        require(
+            PluginsList.COMMUNITY_WRITE_POST == _checkedPluginName
+            || PluginsList.COMMUNITY_REPOST == _checkedPluginName,
+                "PostData: wrong plugin name");
+        require(
+            registry.getPluginContract(_checkedPluginName, _version) == _msgSender(),
+                "PostData: caller is not the plugin"
+        );
+        _;
+    }
+
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
     //constructor() initializer {}
@@ -81,19 +93,21 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
     ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(uint256) {
         (
         address _communityId,
+        address _repostFromCommunity,
         address _owner,
         string memory _ipfsHash,
         uint256 _encodingType,
         string[] memory _tags,
         bool _isEncrypted,
         bool _isView
-        ) = abi.decode(vars.data,(address, address, string, uint256, string[], bool, bool));
+        ) = abi.decode(vars.data,(address, address, address, string, uint256, string[], bool, bool));
 
         uint256 postId = nft.mint(_owner);
         require(postId > 0, "PostData: wrong postId");
         communityIdByPostId[postId] = _communityId;
 
         Metadata storage post = posts[postId];
+        post.repostFromCommunity = _repostFromCommunity;
         post.creator = vars.user;
         post.ipfsHash = _ipfsHash;
         post.timestamp = block.timestamp;

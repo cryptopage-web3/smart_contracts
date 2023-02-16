@@ -68,7 +68,7 @@ contract RePost is IExecutePlugin, Context{
         DataTypes.PostInfo memory outData = IPostData(registry.postData()).readPost(vars);
 
         postVars.data = abi.encode(
-            _userCommunityId, _sender, outData.ipfsHash, outData.encodingType, outData.tags, outData.isEncrypted, true
+            _userCommunityId, outData.repostFromCommunity, _sender, outData.ipfsHash, outData.encodingType, outData.tags, outData.isEncrypted, true
         );
 
         require(IAccount(registry.account()).isCommunityUser(_userCommunityId, _sender), "RePost: wrong _sender");
@@ -77,10 +77,10 @@ contract RePost is IExecutePlugin, Context{
         checkBaseRule(RulesList.USER_VERIFICATION_RULES, _userCommunityId, _sender);
         checkBaseRule(RulesList.POST_PLACING_RULES, _userCommunityId, _sender);
 
-        uint256 postId = IPostData(registry.postData()).writePost(postVars);
-        require(postId > 0, "RePost: wrong create post");
+        uint256 newPostId = IPostData(registry.postData()).writePost(postVars);
+        require(newPostId > 0, "RePost: wrong create post");
 
-        bytes memory newData = abi.encode(_userCommunityId, postId);
+        bytes memory newData = abi.encode(_userCommunityId, newPostId);
         postVars.data = newData;
 
         require(IAccount(registry.account()).addCreatedPostIdForUser(postVars),
@@ -92,7 +92,7 @@ contract RePost is IExecutePlugin, Context{
         );
 
         uint256 gasConsumption = beforeGas - gasleft();
-        bytes memory gasData = abi.encode(postId, gasConsumption);
+        bytes memory gasData = abi.encode(newPostId, gasConsumption);
         gasVars.data = gasData;
         require(
             IPostData(registry.postData()).setGasConsumption(gasVars),

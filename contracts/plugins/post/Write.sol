@@ -58,8 +58,10 @@ contract Write is IExecutePlugin, Context{
         gasVars.data = _data;
 
         checkData(_version, _sender);
-        (address _communityId , , , , , , ) =
-        abi.decode(_data,(address, address, string, uint256, string[], bool, bool));
+        (address _communityId , address _repostFromCommunity, , , , , , ) =
+        abi.decode(_data,(address, address, address, string, uint256, string[], bool, bool));
+
+        require(_repostFromCommunity == address(0), "Write: wrong _repostFromCommunity");
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         checkRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);

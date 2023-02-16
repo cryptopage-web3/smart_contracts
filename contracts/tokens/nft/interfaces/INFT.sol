@@ -13,6 +13,8 @@ interface INFT is IERC721EnumerableUpgradeable {
 
     function burn(uint256 tokenId) external;
 
+    function tokensOfOwner(address user) external view returns (uint256[] memory);
+
     function tokenURI(uint256 tokenId) external view returns (string memory);
 
 }
