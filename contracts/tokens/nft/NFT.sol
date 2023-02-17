@@ -2,40 +2,33 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./interfaces/INFT.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/ICommunityData.sol";
-
 import "./libraries/Counter32bytes.sol";
-import "../../libraries/Sets.sol";
 
 /// @title Contract of Page.NFT
 /// @author Crypto.Page Team
 /// @notice
 /// @dev
 contract NFT is
-    AccessControlUpgradeable,
+    OwnableUpgradeable,
     ERC721EnumerableUpgradeable,
     INFT
 {
-    bytes32 public constant TOKEN_URL_MANAGER_ROLE = keccak256("TOKEN_URL_MANAGER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant TRANSFER_MANAGER_ROLE = keccak256("TRANSFER_MANAGER_ROLE");
 
     using Counter32bytes for Counter32bytes.Counter;
-    using Sets for Sets.StringSet;
 
     IRegistry public registry;
-
     Counter32bytes.Counter public idCounter;
-
     string public baseTokenURI;
+    mapping(uint256 => address) private _tokenReceiveApprovals;
+
+    event ReceiveApproval(address owner, address to, uint256 tokenId);
 
     modifier onlyPostData() {
         require(registry.postData() == _msgSender(), "Crypto.Page NFT: caller is not the postData");
@@ -47,6 +40,7 @@ contract NFT is
         uint8 _blockchainId,
         string memory _baseTokenURI
     ) external initializer {
+        __Ownable_init();
         __ERC721_init("Crypto.Page NFT", "PAGE.NFT");
         registry = IRegistry(_registry);
         baseTokenURI = _baseTokenURI;
@@ -57,7 +51,7 @@ contract NFT is
         return "1";
     }
 
-    function setBaseTokenURI(string memory _baseTokenURI) external override onlyRole(TOKEN_URL_MANAGER_ROLE) {
+    function setBaseTokenURI(string memory _baseTokenURI) external override onlyOwner {
         baseTokenURI = _baseTokenURI;
     }
 
@@ -75,29 +69,16 @@ contract NFT is
         _burn(tokenId);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override(ERC721Upgradeable, IERC721Upgradeable) onlyRole(TRANSFER_MANAGER_ROLE) {
-        super.transferFrom(from, to, tokenId);
-    }
+    function setReceiveApproved(address to, uint256 tokenId) external override {
+        address owner = super.ownerOf(tokenId);
+        require(to != owner, "Crypto.Page NFT: receive approval to current owner");
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override(ERC721Upgradeable, IERC721Upgradeable) onlyRole(TRANSFER_MANAGER_ROLE) {
-        super.safeTransferFrom(from, to, tokenId);
-    }
-
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override(ERC721Upgradeable, IERC721Upgradeable) onlyRole(TRANSFER_MANAGER_ROLE) {
-        super.safeTransferFrom(from, to, tokenId, _data);
+        require(
+            _msgSender() == owner || super.isApprovedForAll(owner, _msgSender()),
+            "Crypto.Page NFT: receive approve caller is not token owner nor approved for all"
+        );
+        _tokenReceiveApprovals[tokenId] = to;
+        emit ReceiveApproval(owner, to, tokenId);
     }
 
     function tokenURI(uint256 tokenId) public view virtual override(ERC721Upgradeable, INFT) returns (string memory) {
@@ -105,6 +86,11 @@ contract NFT is
 
         string memory baseURI = baseTokenURI;
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId)) : "";
+    }
+
+    function getReceiveApproved(uint256 tokenId) public view override returns (address) {
+        super._requireMinted(tokenId);
+        return _tokenReceiveApprovals[tokenId];
     }
 
     function tokensOfOwner(address user) external override view returns (uint256[] memory) {
@@ -124,7 +110,7 @@ contract NFT is
         require(_exists(tokenId), "Crypto.Page NFT: invalid token ID");
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721EnumerableUpgradeable, IERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721EnumerableUpgradeable, IERC165Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -133,9 +119,10 @@ contract NFT is
         address to,
         uint256 tokenId
     ) internal virtual override {
-//        if (from != address(0) && to != address(0)) {
-//
-//        }
+        if (from != address(0) && to != address(0)) {
+            require(getReceiveApproved(tokenId) == to, "Crypto.Page NFT: wrong receive approved");
+            _tokenReceiveApprovals[tokenId] = address(0);
+        }
         super._beforeTokenTransfer(from, to, tokenId);
     }
 }
