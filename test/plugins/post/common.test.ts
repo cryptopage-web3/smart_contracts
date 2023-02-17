@@ -267,4 +267,47 @@ describe("Test Post basic functionality", function () {
         expect(balanceOf > 0).to.be.true;
 
     });
+
+    it("Should repost", async function () {
+        let firstCommunityAddress = createdCommunity.address;
+        let communityJoinPluginName = keccak256(defaultAbiCoder.encode(["string"],
+            ["COMMUNITY_JOIN"])
+        );
+
+        let communities = await communityData.getCommunities(0, 1);
+        let secondCommunityAddress = communities[1];
+
+        let id = ethers.utils.formatBytes32String("191");
+        let data = defaultAbiCoder.encode([ "address" ], [secondCommunityAddress]);
+        await executor.connect(third).run(id, communityJoinPluginName, version, data);
+
+
+        let postHash = "#1 hash for new post";
+        let tags = ["00", "01"];
+
+        data = defaultAbiCoder.encode(
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [secondCommunityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
+        );
+        id = ethers.utils.formatBytes32String("192");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
+
+        let postIds1 = await account.getPostIdsByUserAndCommunity(firstCommunityAddress, third.address);
+        expect(4).to.equal(postIds1.length);
+
+        let postIds2 = await account.getPostIdsByUserAndCommunity(secondCommunityAddress, third.address);
+        expect(1).to.equal(postIds2.length);
+
+        data = defaultAbiCoder.encode(
+            [ "address", "uint" ],
+            [secondCommunityAddress, postIds1[0].toNumber()]
+        );
+        id = ethers.utils.formatBytes32String("193");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_REPOST(), version, data);
+
+        postIds2 = await account.getPostIdsByUserAndCommunity(secondCommunityAddress, third.address);
+        expect(2).to.equal(postIds2.length);
+
+    });
+
 });

@@ -29,7 +29,8 @@ contract PostPlacingRules is IPostPlacingRules, Context {
 
     modifier onlyPlugin() {
         require(
-            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender(),
+            registry.getPluginContract(PluginsList.COMMUNITY_WRITE_POST, RULES_VERSION) == _msgSender()
+            || registry.getPluginContract(PluginsList.COMMUNITY_REPOST, RULES_VERSION) == _msgSender(),
             "PostPlacingRules: caller is not the plugin");
         _;
     }

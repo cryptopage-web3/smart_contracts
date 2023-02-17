@@ -38,6 +38,18 @@ contract CommunityData is Initializable, ContextUpgradeable, ICommunityData {
         _;
     }
 
+    modifier onlyRWPostPlugin(bytes32 _checkedPluginName, uint256 _version) {
+        require(
+            PluginsList.COMMUNITY_WRITE_POST == _checkedPluginName
+            || PluginsList.COMMUNITY_REPOST == _checkedPluginName,
+            "Account: wrong writing post plugin");
+        require(
+            registry.getPluginContract(_checkedPluginName, _version) == _msgSender(),
+            "Account: caller is not the plugin"
+        );
+        _;
+    }
+
     /// @notice Constructs the contract.
     /// @dev The contract is automatically marked as initialized when deployed so that nobody can highjack the implementation contract.
     //constructor() initializer {}
@@ -62,7 +74,7 @@ contract CommunityData is Initializable, ContextUpgradeable, ICommunityData {
 
     function addCreatedPostIdForCommunity(
         DataTypes.GeneralVars calldata vars
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(bool) {
+    ) external override onlyRWPostPlugin(vars.pluginName, vars.version) returns(bool) {
         (address _communityId, uint256 _postId) = abi.decode(vars.data,(address, uint256));
 
         require(_communityId != address(0) , "CommunityData: address is zero");

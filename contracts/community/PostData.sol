@@ -59,11 +59,12 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
         _;
     }
 
-    modifier onlyWritePostPlugin(bytes32 _checkedPluginName, uint256 _version) {
+    modifier onlyRWPostPlugin(bytes32 _checkedPluginName, uint256 _version) {
         require(
             PluginsList.COMMUNITY_WRITE_POST == _checkedPluginName
+            || PluginsList.COMMUNITY_READ_POST == _checkedPluginName
             || PluginsList.COMMUNITY_REPOST == _checkedPluginName,
-                "PostData: wrong plugin name");
+                "PostData: wrong writing post plugin");
         require(
             registry.getPluginContract(_checkedPluginName, _version) == _msgSender(),
                 "PostData: caller is not the plugin"
@@ -90,7 +91,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
 
     function writePost(
         DataTypes.GeneralVars calldata vars
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(uint256) {
+    ) external override onlyRWPostPlugin(vars.pluginName, vars.version) returns(uint256) {
         (
         address _communityId,
         address _repostFromCommunity,
@@ -171,7 +172,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
 
     function setGasConsumption(
         DataTypes.MinSimpleVars calldata vars
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(bool) {
+    ) external override onlyRWPostPlugin(vars.pluginName, vars.version) returns(bool) {
         (uint256 _postId, uint256 _gas) = abi.decode(vars.data,(uint256,uint256));
 
         Metadata storage post = posts[_postId];
@@ -194,7 +195,7 @@ contract PostData is Initializable, ContextUpgradeable, IPostData {
 
     function readPost(
         DataTypes.MinSimpleVars calldata vars
-    ) external view override onlyTrustedPlugin(PluginsList.COMMUNITY_READ_POST, vars.pluginName, vars.version) returns(
+    ) external view override onlyRWPostPlugin(vars.pluginName, vars.version) returns(
         DataTypes.PostInfo memory outData
     ) {
         (uint256 _postId) = abi.decode(vars.data,(uint256));

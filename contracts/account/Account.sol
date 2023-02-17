@@ -73,6 +73,18 @@ contract Account is
         _;
     }
 
+    modifier onlyRWPostPlugin(bytes32 _checkedPluginName, uint256 _version) {
+        require(
+            PluginsList.COMMUNITY_WRITE_POST == _checkedPluginName
+            || PluginsList.COMMUNITY_REPOST == _checkedPluginName,
+            "Account: wrong writing post plugin");
+        require(
+            registry.getPluginContract(_checkedPluginName, _version) == _msgSender(),
+            "Account: caller is not the plugin"
+        );
+        _;
+    }
+
     function initialize(address _registry)
         external
         initializer
@@ -131,7 +143,7 @@ contract Account is
 
     function addCreatedPostIdForUser(
         DataTypes.GeneralVars calldata vars
-    ) external override onlyTrustedPlugin(PluginsList.COMMUNITY_WRITE_POST, vars.pluginName, vars.version) returns(bool) {
+    ) external override onlyRWPostPlugin(vars.pluginName, vars.version) returns(bool) {
         (address _communityId, uint256 _postId) = abi.decode(vars.data,(address, uint256));
 
         require(isCommunityUser(_communityId, vars.user), "Account: wrong community user");

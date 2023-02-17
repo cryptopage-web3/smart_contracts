@@ -26,6 +26,7 @@ export default async function setupContracts() {
     let communityData, postData, commentData;
 
     let firstCommunityName = "First community";
+    let secondCommunityName = "Second community";
 
     [owner, creator, third] = await getSigners();
 
@@ -104,11 +105,14 @@ export default async function setupContracts() {
 
     let id = ethers.utils.formatBytes32String("1");
     let data = defaultAbiCoder.encode([ "string", "bool" ], [firstCommunityName, true ]);
+    await executor.connect(owner).run(id, pluginList.COMMUNITY_CREATE(), version, data);
 
+    id = ethers.utils.formatBytes32String("101");
+    data = defaultAbiCoder.encode([ "string", "bool" ], [secondCommunityName, true ]);
     await executor.connect(owner).run(id, pluginList.COMMUNITY_CREATE(), version, data);
 
     let afterCount = await communityData.communitiesCount();
-    let index = afterCount.sub(BigNumber.from(1));
+    let index = afterCount.sub(BigNumber.from(2));
     let createdCommunityAddress = await communityData.getCommunities(index, index);
 
     let communityBlank = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
@@ -143,6 +147,7 @@ async function setupCommonPlugins(_registryContract, user) {
     await setupPlugin(_registryContract, "contracts/plugins/post/Write.sol:Write", pluginList.COMMUNITY_WRITE_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Read.sol:Read", pluginList.COMMUNITY_READ_POST());
     await setupPlugin(_registryContract, "contracts/plugins/post/Burn.sol:Burn", pluginList.COMMUNITY_BURN_POST());
+    await setupPlugin(_registryContract, "contracts/plugins/post/RePost.sol:RePost", pluginList.COMMUNITY_REPOST());
     // await setupPlugin(_registryContract, "contracts/plugins/post/ChangeVisibility.sol:ChangeVisibility", pluginList.COMMUNITY_CHANGE_VISIBILITY_POST());
 
     await setupPlugin(_registryContract, "contracts/plugins/comment/Write.sol:Write", pluginList.COMMUNITY_WRITE_COMMENT());

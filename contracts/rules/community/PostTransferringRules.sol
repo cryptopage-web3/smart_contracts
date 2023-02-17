@@ -29,7 +29,7 @@ contract PostTransferringRules is IPostTransferringRules, Context {
 
     modifier onlyPlugin() {
         require(
-            registry.getPluginContract(PluginsList.COMMUNITY_TRANSFER_POST, RULES_VERSION) == _msgSender(),
+            registry.getPluginContract(PluginsList.COMMUNITY_REPOST, RULES_VERSION) == _msgSender(),
             "PostTransferringRules: caller is not the plugin");
         _;
     }
