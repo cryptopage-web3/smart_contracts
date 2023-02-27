@@ -44,7 +44,7 @@ describe("Test Create basic functionality", function () {
 
         const executorFactory = await ethers.getContractFactory("contracts/executor/Executor.sol:Executor");
         executor = await executorFactory.deploy();
-        await executor.initialize(registry.address);
+        await executor.initialize(registry.address, creator.address);
         await registry.setExecutor(executor.address);
 
         const communityDataFactory = await ethers.getContractFactory("contracts/community/CommunityData.sol:CommunityData");

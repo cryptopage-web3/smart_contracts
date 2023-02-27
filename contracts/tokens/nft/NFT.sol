@@ -7,8 +7,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 
 import "./interfaces/INFT.sol";
 import "../../registry/interfaces/IRegistry.sol";
-import "../../account/interfaces/IAccount.sol";
-import "../../community/interfaces/ICommunityData.sol";
 import "./libraries/Counter32bytes.sol";
 
 /// @title Contract of Page.NFT

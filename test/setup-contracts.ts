@@ -69,7 +69,7 @@ export default async function setupContracts() {
 
     const executorFactory = await ethers.getContractFactory("contracts/executor/Executor.sol:Executor");
     executor = await executorFactory.deploy();
-    await executor.initialize(registry.address);
+    await executor.initialize(registry.address, creator.address);
     await registry.setExecutor(executor.address);
 
     const tokenFactory = await ethers.getContractFactory("contracts/tokens/token/Token.sol:Token");
