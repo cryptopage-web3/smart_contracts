@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "../plugins/PluginsList.sol";
@@ -18,7 +18,7 @@ import "../libraries/DataTypes.sol";
 /// @dev
 contract Account is
     Initializable,
-    AccessControlUpgradeable,
+    ContextUpgradeable,
     IAccount
 {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
@@ -30,13 +30,6 @@ contract Account is
         EnumerableSetUpgradeable.AddressSet users;
         EnumerableSetUpgradeable.AddressSet moderators;
         EnumerableSetUpgradeable.AddressSet bannedUsers;
-    }
-
-    struct RedeemedCount {
-        uint256[3] messageCount;
-        uint256[3] postCount;
-        uint256[2] upCount;
-        uint256[2] downCount;
     }
 
     // communityId -> users

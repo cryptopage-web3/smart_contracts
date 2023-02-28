@@ -5,6 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../registry/interfaces/IRegistry.sol";
+import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/ICommunityBlank.sol";
 import "../../plugins/PluginsList.sol";
 import "../interfaces/IRule.sol";
@@ -41,14 +42,16 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
     }
 
     function validate(address _communityId, address _user) external view override onlyPlugin returns(bool) {
+        require(!IAccount(registry.account()).isBannedUser(_communityId, _user), "ReputationManagementRules: banned user");
+
         if (isActiveRule(_communityId, RulesList.REPUTATION_NOT_USED)) {
-            return true;
+            return false;
         }
         if (isActiveRule(_communityId, RulesList.REPUTATION_CAN_CHANGE)) {
             return true;
         }
 
-        return true;
+        return false;
     }
 
     function isActiveRule(address _communityId, bytes32 _ruleName) private view returns(bool) {
