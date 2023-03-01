@@ -59,20 +59,9 @@ interface IAccount {
         uint256[] memory _createdPostIds
     );
 
-    function getAllPostIdsByUser(address _user) external view returns(uint256[] memory);
-
     function getCommentIdsByUserAndPost(
         address _communityId,
         address _user,
         uint256 _postId
     ) external view returns(uint256[] memory _commentIds);
-
-    function getUserRate(
-        address _user,
-        address _communityId
-    ) external view returns(DataTypes.UserRateCount memory _counts);
-
-    function getAllCommunitiesUserRate(
-        address _user
-    ) external view returns(DataTypes.UserRateCount memory _counts);
 }

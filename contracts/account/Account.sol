@@ -211,75 +211,11 @@ contract Account is
         _createdPostIds = createdPostIdsByUser[_communityId][_user].values();
     }
 
-    function getAllPostIdsByUser(address _user) public override view returns(
-        uint256[] memory
-    ) {
-        DataTypes.UserRateCount memory rate = getAllCommunitiesUserRate(_user);
-        address[] memory communities = getCommunitiesByUser(_user);
-
-        uint256 count = rate.postCount;
-        uint256[] memory postIds = new uint256[](count);
-
-        if (count > 0) {
-            for(uint256 i=0; i < communities.length; i++) {
-                ( , uint256[] memory createdPostIds) = getPostIdsByUserAndCommunity(communities[i], _user);
-                for(uint256 j=0; j < createdPostIds.length; j++) {
-                    count--;
-                    postIds[count] = createdPostIds[j];
-                }
-            }
-        }
-
-        return postIds;
-    }
-
     function getCommentIdsByUserAndPost(
         address _communityId,
         address _user,
         uint256 _postId
     ) public override view returns(uint256[] memory _commentIds) {
         _commentIds = createdCommentIdsByUser[_communityId][_user][_postId].values();
-    }
-
-    function getUserRate(
-        address _user,
-        address _communityId
-    ) public override view returns(DataTypes.UserRateCount memory _counts) {
-        (uint256[] memory withCommentPostIds, uint256[] memory createdPostIds) = getPostIdsByUserAndCommunity(_communityId, _user);
-        _counts.postCount += createdPostIds.length;
-        for(uint256 j=0; j < withCommentPostIds.length; j++) {
-            uint256 postId = withCommentPostIds[j];
-            uint256[] memory commentIds = getCommentIdsByUserAndPost(_communityId, _user, postId);
-            _counts.commentCount += commentIds.length;
-            for(uint256 k=0; k < commentIds.length; k++) {
-                uint256 commentId = commentIds[k];
-                (bool isUp, bool isDown) = ICommentData(registry.commentData()).getUpDownForComment(
-                    postId,
-                    commentId
-                );
-                if (isUp) {
-                    _counts.upCount++;
-                }
-                if (isDown) {
-                    _counts.downCount++;
-                }
-            }
-        }
-
-    }
-
-    function getAllCommunitiesUserRate(
-        address _user
-    ) public override view returns(DataTypes.UserRateCount memory _counts) {
-        address[] memory communities = communitiesByUser[_user].values();
-
-        for(uint256 i=0; i < communities.length; i++) {
-            address communityId = communities[i];
-            DataTypes.UserRateCount memory communityCounts = getUserRate(_user, communityId);
-            _counts.postCount += communityCounts.postCount;
-            _counts.commentCount += communityCounts.commentCount;
-            _counts.upCount += communityCounts.upCount;
-            _counts.downCount += communityCounts.downCount;
-        }
     }
 }

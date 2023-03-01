@@ -141,7 +141,7 @@ async function setupCommonPlugins(_registryContract, user) {
 
     await setupPlugin(_registryContract, "contracts/plugins/community/Join.sol:Join", pluginList.COMMUNITY_JOIN());
     await setupPlugin(_registryContract, "contracts/plugins/community/Quit.sol:Quit", pluginList.COMMUNITY_QUIT());
-    await setupPlugin(_registryContract, "contracts/plugins/community/Info.sol:Info", pluginList.COMMUNITY_INFO());
+    await setupPlugin(_registryContract, "contracts/plugins/community/InfoByCommunity.sol:Info", pluginList.COMMUNITY_INFO());
     await setupPlugin(_registryContract, "contracts/plugins/community/EditModerators.sol:EditModerators", pluginList.COMMUNITY_EDIT_MODERATORS());
 
     await setupPlugin(_registryContract, "contracts/plugins/post/Write.sol:Write", pluginList.COMMUNITY_WRITE_POST());

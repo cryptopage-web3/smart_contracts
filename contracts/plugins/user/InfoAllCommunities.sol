@@ -6,7 +6,8 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/IPostData.sol";
-import "../../community/interfaces/ICommunityData.sol";
+import "../../community/interfaces/IPostData.sol";
+import "../../community/interfaces/ICommentData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
 import "../../rules/interfaces/IRule.sol";
@@ -14,9 +15,13 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IReadPlugin.sol";
 import "../../libraries/DataTypes.sol";
+import "./libraries/UserLib.sol";
 
 
-contract Info is IReadPlugin, Context {
+contract InfoAllCommunities is IReadPlugin, Context {
+
+    using UserLib for address;
+
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_USER_INFO;
 
@@ -47,11 +52,18 @@ contract Info is IReadPlugin, Context {
 
         address[] memory communities = IAccount(registry.account()).getCommunitiesByUser(_user);
 
-        DataTypes.UserRateCount memory rate = IAccount(registry.account()).getAllCommunitiesUserRate(_user);
+        DataTypes.UserRateCount memory counts;
 
-        uint256[] memory postIds = IAccount(registry.account()).getAllPostIdsByUser(_user);
+        for(uint256 i=0; i < communities.length; i++) {
+            address communityId = communities[i];
+            DataTypes.UserRateCount memory communityCounts = _user.getUserRate(communityId, registry);
+            counts.postCount += communityCounts.postCount;
+            counts.commentCount += communityCounts.commentCount;
+            counts.upCount += communityCounts.upCount;
+            counts.downCount += communityCounts.downCount;
+        }
 
-        _outData = abi.encode(communities, rate.postCount, rate.commentCount, rate.upCount, rate.downCount, postIds);
+        _outData = abi.encode(communities, counts.postCount, counts.commentCount, counts.upCount, counts.downCount);
     }
 
     function checkData(uint256 _version, address _sender) private view {
