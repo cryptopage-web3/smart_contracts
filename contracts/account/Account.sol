@@ -41,6 +41,9 @@ contract Account is
     // communityId -> user -> postIds
     mapping(address => mapping(address => EnumerableSetUpgradeable.UintSet)) private createdPostIdsByUser;
 
+    // communityId -> user -> postIds
+    mapping(address => mapping(address => EnumerableSetUpgradeable.UintSet)) private writedCommentPostIdsByUser;
+
     // communityId -> user -> postId -> commentIds
     mapping(address => mapping(address => mapping(uint256 => EnumerableSetUpgradeable.UintSet))) private createdCommentIdsByUser;
 
@@ -153,6 +156,9 @@ contract Account is
         require(isCommunityUser(_communityId, vars.user), "Account: wrong community user");
         require(ICommunityData(registry.communityData()).isLegalPostId(_communityId, _postId), "Account: wrong postId");
         emit AddCreatedCommentIdForUser(vars.executedId, _communityId, vars.user, _postId, _commentId);
+        if(!writedCommentPostIdsByUser[_communityId][vars.user].contains(_postId)) {
+            writedCommentPostIdsByUser[_communityId][vars.user].add(_postId);
+        }
 
         return createdCommentIdsByUser[_communityId][vars.user][_postId].add(_commentId);
     }
@@ -198,9 +204,11 @@ contract Account is
     }
 
     function getPostIdsByUserAndCommunity(address _communityId, address _user) public override view returns(
-        uint256[] memory _postIds
+        uint256[] memory _withCommentPostIds,
+        uint256[] memory _createdPostIds
     ) {
-        _postIds = createdPostIdsByUser[_communityId][_user].values();
+        _withCommentPostIds = writedCommentPostIdsByUser[_communityId][_user].values();
+        _createdPostIds = createdPostIdsByUser[_communityId][_user].values();
     }
 
     function getAllPostIdsByUser(address _user) public override view returns(
@@ -214,10 +222,10 @@ contract Account is
 
         if (count > 0) {
             for(uint256 i=0; i < communities.length; i++) {
-                uint256[] memory tempIds = getPostIdsByUserAndCommunity(communities[i], _user);
-                for(uint256 j=0; j < tempIds.length; j++) {
+                ( , uint256[] memory createdPostIds) = getPostIdsByUserAndCommunity(communities[i], _user);
+                for(uint256 j=0; j < createdPostIds.length; j++) {
                     count--;
-                    postIds[count] = tempIds[j];
+                    postIds[count] = createdPostIds[j];
                 }
             }
         }
@@ -237,10 +245,10 @@ contract Account is
         address _user,
         address _communityId
     ) public override view returns(DataTypes.UserRateCount memory _counts) {
-        uint256[] memory postIds = getPostIdsByUserAndCommunity(_communityId, _user);
-        _counts.postCount += postIds.length;
-        for(uint256 j=0; j < postIds.length; j++) {
-            uint256 postId = postIds[j];
+        (uint256[] memory withCommentPostIds, uint256[] memory createdPostIds) = getPostIdsByUserAndCommunity(_communityId, _user);
+        _counts.postCount += createdPostIds.length;
+        for(uint256 j=0; j < withCommentPostIds.length; j++) {
+            uint256 postId = withCommentPostIds[j];
             uint256[] memory commentIds = getCommentIdsByUserAndPost(_communityId, _user, postId);
             _counts.commentCount += commentIds.length;
             for(uint256 k=0; k < commentIds.length; k++) {
@@ -257,6 +265,7 @@ contract Account is
                 }
             }
         }
+
     }
 
     function getAllCommunitiesUserRate(

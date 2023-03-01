@@ -55,7 +55,8 @@ describe("Test Account basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        console.log("postIds = ", postIds);
+        let postId = postIds[1][0].toNumber();
 
         let commentHash1 = "#1 hash for comment";
         data = defaultAbiCoder.encode(
@@ -91,9 +92,9 @@ describe("Test Account basic functionality", function () {
         pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
         plugin = await pluginFactory.attach(pluginAddress);
 
-        let userRate = await account.getUserRate(third.address, communityAddress);
+        let userRate = await account.getAllCommunitiesUserRate(third.address);
         console.log("third.address rate = ", userRate);
-        userRate = await account.getUserRate(creator.address, communityAddress);
+        userRate = await account.getAllCommunitiesUserRate(creator.address);
         console.log("creator.address rate = ", userRate);
 
     });
