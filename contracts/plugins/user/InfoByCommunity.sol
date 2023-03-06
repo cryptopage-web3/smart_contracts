@@ -12,12 +12,11 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
-import "../interfaces/IReadPlugin.sol";
 import "../../libraries/DataTypes.sol";
 import "./libraries/UserLib.sol";
 
 
-contract InfoByCommunity is IReadPlugin, Context {
+contract InfoByCommunity is Context {
 
     using UserLib for IRegistry;
 
@@ -25,11 +24,6 @@ contract InfoByCommunity is IReadPlugin, Context {
     bytes32 public PLUGIN_NAME = PluginsList.USER_INFO_ONE_COMMUNITY;
 
     IRegistry public registry;
-
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Info: caller is not the executor");
-        _;
-    }
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
@@ -40,23 +34,17 @@ contract InfoByCommunity is IReadPlugin, Context {
     }
 
     function read(
-        uint256 _version,
-        address _sender,
-        bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory _outData) {
-        checkData(_version, _sender);
-
-        (address _user, address _communityId) =
-        abi.decode(_inData,(address, address));
-
-        DataTypes.UserRateCount memory rate = registry.getUserRate(_user, _communityId);
-
-        _outData = abi.encode(rate.postCount, rate.commentCount, rate.upCount, rate.downCount);
+        address _user,
+        address _communityId
+    ) external view returns(DataTypes.UserRateCount memory) {
+        checkData(_user);
+        return registry.getUserRate(_user, _communityId);
     }
 
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Info: wrong _version");
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Info: plugin is not trusted");
-        require(_sender != address(0) , "Info: _sender is zero");
+    function checkData(address _user) private view {
+        (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+        require(pluginContract == address(this), "InfoByCommunity: wrong contract");
+        require(enable,"InfoByCommunity: plugin is not active");
+        require(_user != address(0) , "InfoByCommunity: _user is zero");
     }
 }

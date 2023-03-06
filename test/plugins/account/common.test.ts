@@ -33,7 +33,7 @@ describe("Test Account basic functionality", function () {
 
     })
 
-    it("Should write/read account info", async function () {
+    it("Should write/read account info by community", async function () {
         let communityAddress = createdCommunity.address;
 
         let id = ethers.utils.formatBytes32String("30");
@@ -55,7 +55,6 @@ describe("Test Account basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        console.log("postIds = ", postIds);
         let postId = postIds[1][0].toNumber();
 
         let commentHash1 = "#1 hash for comment";
@@ -92,19 +91,59 @@ describe("Test Account basic functionality", function () {
         pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
         plugin = await pluginFactory.attach(pluginAddress);
 
-        let pathName = "contracts/plugins/comment/ChangeVisibility.sol:ChangeVisibility";
-        let pluginName = pluginList.COMMUNITY_CHANGE_VISIBILITY_COMMENT();
+        let pathName = "contracts/plugins/user/InfoByCommunity.sol:InfoByCommunity";
+        let pluginName = pluginList.USER_INFO_ONE_COMMUNITY();
         pluginFactory = await ethers.getContractFactory(pathName);
         let pluginContract = await pluginFactory.deploy(registry.address);
         await pluginContract.deployed();
         await registry.setPlugin(pluginName, version, pluginContract.address);
 
 
-        // let userRate = await account.getAllCommunitiesUserRate(third.address);
-        // console.log("third.address rate = ", userRate);
-        // userRate = await account.getAllCommunitiesUserRate(creator.address);
-        // console.log("creator.address rate = ", userRate);
+        let userRate = await pluginContract.read(third.address, communityAddress);
+        expect(userRate.postCount.toNumber()).to.equal(1);
+        expect(userRate.commentCount.toNumber()).to.equal(1);
+        expect(userRate.upCount.toNumber()).to.equal(1);
+        expect(userRate.downCount.toNumber()).to.equal(0);
 
+        userRate = await pluginContract.read(creator.address, communityAddress);
+        expect(userRate.postCount.toNumber()).to.equal(0);
+        expect(userRate.commentCount.toNumber()).to.equal(1);
+        expect(userRate.upCount.toNumber()).to.equal(0);
+        expect(userRate.downCount.toNumber()).to.equal(1);
+
+        let communities = await communityData.getCommunities(0, 1);
+        let secondCommunityAddress = communities[1];
+        let communityJoinPluginName = keccak256(defaultAbiCoder.encode(["string"],
+            ["COMMUNITY_JOIN"])
+        );
+
+        id = ethers.utils.formatBytes32String("35");
+        data = defaultAbiCoder.encode([ "address" ], [secondCommunityAddress]);
+        await executor.connect(third).run(id, communityJoinPluginName, version, data);
+
+
+        postHash = "#3 hash for new post";
+        tags = ["00", "01"];
+
+        data = defaultAbiCoder.encode(
+            [ "address", "address", "address", "string", "uint256", "string[]", "bool", "bool" ],
+            [secondCommunityAddress, AddressZero, third.address, postHash, 0, tags, false, true]
+        );
+        id = ethers.utils.formatBytes32String("36");
+        await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
+
+        pathName = "contracts/plugins/user/InfoAllCommunities.sol:InfoAllCommunities";
+        pluginName = pluginList.USER_INFO_ALL_COMMUNITIES();
+        pluginFactory = await ethers.getContractFactory(pathName);
+        pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+
+        userRate = await pluginContract.read(third.address);
+        expect(userRate.postCount.toNumber()).to.equal(2);
+        expect(userRate.commentCount.toNumber()).to.equal(1);
+        expect(userRate.upCount.toNumber()).to.equal(1);
+        expect(userRate.downCount.toNumber()).to.equal(0);
     });
 
 });

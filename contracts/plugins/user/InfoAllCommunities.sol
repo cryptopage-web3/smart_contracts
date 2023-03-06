@@ -13,12 +13,11 @@ import "../../registry/interfaces/IRegistry.sol";
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
-import "../interfaces/IReadPlugin.sol";
 import "../../libraries/DataTypes.sol";
 import "./libraries/UserLib.sol";
 
 
-contract InfoAllCommunities is IReadPlugin, Context {
+contract InfoAllCommunities is Context {
 
     using UserLib for IRegistry;
 
@@ -26,11 +25,6 @@ contract InfoAllCommunities is IReadPlugin, Context {
     bytes32 public PLUGIN_NAME = PluginsList.USER_INFO_ALL_COMMUNITIES;
 
     IRegistry public registry;
-
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Info: caller is not the executor");
-        _;
-    }
 
     constructor(address _registry) {
         registry = IRegistry(_registry);
@@ -41,14 +35,9 @@ contract InfoAllCommunities is IReadPlugin, Context {
     }
 
     function read(
-        uint256 _version,
-        address _sender,
-        bytes calldata _inData
-    ) external override onlyExecutor view returns(bytes memory _outData) {
-        checkData(_version, _sender);
-
-        (address _user) =
-        abi.decode(_inData,(address));
+        address _user
+    ) external view returns(DataTypes.UserRateCount memory) {
+        checkData(_user);
 
         address[] memory communities = IAccount(registry.account()).getCommunitiesByUser(_user);
 
@@ -63,12 +52,13 @@ contract InfoAllCommunities is IReadPlugin, Context {
             counts.downCount += communityCounts.downCount;
         }
 
-        _outData = abi.encode(communities, counts.postCount, counts.commentCount, counts.upCount, counts.downCount);
+        return counts;
     }
 
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Info: wrong _version");
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Info: plugin is not trusted");
-        require(_sender != address(0) , "Info: _sender is zero");
+    function checkData(address _user) private view {
+        (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+        require(pluginContract == address(this), "InfoAllCommunities: wrong contract");
+        require(enable,"InfoAllCommunities: plugin is not active");
+        require(_user != address(0) , "InfoAllCommunities: _user is zero");
     }
 }
