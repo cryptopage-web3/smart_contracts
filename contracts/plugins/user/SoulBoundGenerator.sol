@@ -15,10 +15,12 @@ import "../interfaces/IExecutePlugin.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../libraries/DataTypes.sol";
 import "../../libraries/MakeId.sol";
+import "./libraries/UserLib.sol";
 
 
 contract SoulBoundGenerator is IExecutePlugin, Context{
 
+    using UserLib for IRegistry;
     using MakeId for address;
 
     uint256 private constant PLUGIN_VERSION = 1;
@@ -58,7 +60,7 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
             PLUGIN_VERSION
         );
         if(IReputationManagementRules(groupRules).validate(_communityId, _user)) {
-            DataTypes.UserRateCount memory rate = IAccount(registry.account()).getUserRate(_user, _communityId);
+            DataTypes.UserRateCount memory rate = registry.getUserRate(_user, _communityId);
 
             makeMint(_executedId, _user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
             makeMint(_executedId, _user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
@@ -80,7 +82,7 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
         uint256 existTokensCount = soulBound.balanceOf(_user, tokenId);
         uint256 diff = _rateAmount - existTokensCount;
         if (diff > 0) {
-            DataTypes.SoulBoundMintBurn memory vars;
+            DataTypes.SoulBoundMint memory vars;
             vars.executedId = _executedId;
             vars.user = _user;
             vars.pluginName = PLUGIN_NAME;

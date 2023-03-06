@@ -92,10 +92,18 @@ describe("Test Account basic functionality", function () {
         pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
         plugin = await pluginFactory.attach(pluginAddress);
 
-        let userRate = await account.getAllCommunitiesUserRate(third.address);
-        console.log("third.address rate = ", userRate);
-        userRate = await account.getAllCommunitiesUserRate(creator.address);
-        console.log("creator.address rate = ", userRate);
+        let pathName = "contracts/plugins/comment/ChangeVisibility.sol:ChangeVisibility";
+        let pluginName = pluginList.COMMUNITY_CHANGE_VISIBILITY_COMMENT();
+        pluginFactory = await ethers.getContractFactory(pathName);
+        let pluginContract = await pluginFactory.deploy(registry.address);
+        await pluginContract.deployed();
+        await registry.setPlugin(pluginName, version, pluginContract.address);
+
+
+        // let userRate = await account.getAllCommunitiesUserRate(third.address);
+        // console.log("third.address rate = ", userRate);
+        // userRate = await account.getAllCommunitiesUserRate(creator.address);
+        // console.log("creator.address rate = ", userRate);
 
     });
 

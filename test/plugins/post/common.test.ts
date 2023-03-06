@@ -67,7 +67,7 @@ describe("Test Post basic functionality", function () {
         );
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_POST(), version);
         let pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
@@ -116,7 +116,7 @@ describe("Test Post basic functionality", function () {
         );
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         data = defaultAbiCoder.encode(
             [ "address", "address", "bool" ],
@@ -157,7 +157,7 @@ describe("Test Post basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[2].toNumber();
+        let postId = postIds[1][2].toNumber();
 
         let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_POST(), version);
         let pluginFactory = await ethers.getContractFactory("contracts/plugins/post/Read.sol:Read");
@@ -209,9 +209,9 @@ describe("Test Post basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        expect(4).to.equal(postIds.length);
-        let postId1 = postIds[1].toNumber(); //"8000000000002"
-        let postId3 = postIds[3].toNumber(); //"8000000000003"
+        expect(4).to.equal(postIds[1].length);
+        let postId1 = postIds[1][1].toNumber(); //"8000000000002"
+        let postId3 = postIds[1][3].toNumber(); //"8000000000003"
 
         let pathName = "contracts/plugins/post/GasCompensation.sol:GasCompensation";
         let pluginName = pluginList.COMMUNITY_POST_GAS_COMPENSATION();
@@ -293,20 +293,20 @@ describe("Test Post basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds1 = await account.getPostIdsByUserAndCommunity(firstCommunityAddress, third.address);
-        expect(4).to.equal(postIds1.length);
+        expect(4).to.equal(postIds1[1].length);
 
         let postIds2 = await account.getPostIdsByUserAndCommunity(secondCommunityAddress, third.address);
-        expect(1).to.equal(postIds2.length);
+        expect(1).to.equal(postIds2[1].length);
 
         data = defaultAbiCoder.encode(
             [ "address", "uint" ],
-            [secondCommunityAddress, postIds1[0].toNumber()]
+            [secondCommunityAddress, postIds1[1][0].toNumber()]
         );
         id = ethers.utils.formatBytes32String("193");
         await executor.connect(third).run(id, pluginList.COMMUNITY_REPOST(), version, data);
 
         postIds2 = await account.getPostIdsByUserAndCommunity(secondCommunityAddress, third.address);
-        expect(2).to.equal(postIds2.length);
+        expect(2).to.equal(postIds2[1].length);
 
     });
 

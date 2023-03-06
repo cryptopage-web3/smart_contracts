@@ -77,7 +77,7 @@ library DataTypes {
         bytes data;
     }
 
-    struct SoulBoundMintBurn {
+    struct SoulBoundMint {
         bytes32 executedId;
         bytes32 pluginName;
         uint256 version;
@@ -86,7 +86,7 @@ library DataTypes {
         uint256 amount;
     }
 
-    struct SoulBoundBatchMintBurn {
+    struct SoulBoundBatchMint {
         bytes32 executedId;
         bytes32 pluginName;
         uint256 version;

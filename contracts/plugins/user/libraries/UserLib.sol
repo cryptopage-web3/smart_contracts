@@ -10,9 +10,9 @@ import "../../../libraries/DataTypes.sol";
 library UserLib {
 
     function getUserRate(
+        IRegistry registry,
         address _user,
-        address _communityId,
-        IRegistry registry
+        address _communityId
     ) internal view returns(DataTypes.UserRateCount memory _counts) {
         (uint256[] memory withCommentPostIds, uint256[] memory createdPostIds) =
         IAccount(registry.account()).getPostIdsByUserAndCommunity(_communityId, _user);

@@ -55,7 +55,7 @@ describe("Test Comment basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         let commentHash1 = "#1 hash for comment";
         data = defaultAbiCoder.encode(
@@ -118,7 +118,7 @@ describe("Test Comment basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[1].toNumber();
+        let postId = postIds[1][1].toNumber();
 
         let commentHash1 = "#3 hash for comment";
         data = defaultAbiCoder.encode(
@@ -171,7 +171,7 @@ describe("Test Comment basic functionality", function () {
         let communityAddress = createdCommunity.address;
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         let commentHash = "#3 hash for comment";
         let data = defaultAbiCoder.encode(
@@ -226,7 +226,7 @@ describe("Test Comment basic functionality", function () {
         let communityAddress = createdCommunity.address;
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_READ_COMMENT(), version);
         let pluginFactory = await ethers.getContractFactory("contracts/plugins/comment/Read.sol:Read");

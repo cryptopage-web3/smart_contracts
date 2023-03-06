@@ -12,18 +12,10 @@ interface ISoulBound is IERC1155Upgradeable {
     function version() external pure returns (string memory);
 
     function mint(
-        DataTypes.SoulBoundMintBurn calldata vars
-    ) external;
-
-    function burn(
-        DataTypes.SoulBoundMintBurn calldata vars
+        DataTypes.SoulBoundMint calldata vars
     ) external;
 
     function mintBatch(
-        DataTypes.SoulBoundBatchMintBurn calldata vars
-    ) external;
-
-    function burnBatch(
-        DataTypes.SoulBoundBatchMintBurn calldata vars
+        DataTypes.SoulBoundBatchMint calldata vars
     ) external;
 }

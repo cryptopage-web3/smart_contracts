@@ -55,7 +55,7 @@ describe("Test Info community basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         let commentHash1 = "#1 hash for comment";
         data = defaultAbiCoder.encode(
@@ -79,7 +79,7 @@ describe("Test Info community basic functionality", function () {
 
         let communityInfo = await plugin.connect(third).read(communityAddress);
 
-        expect(communityInfo.postIds[0]).to.equal(postId);
+        expect(communityInfo.postIds[1][0]).to.equal(postId);
         expect(communityInfo.normalUsers[0]).to.equal(third.address);
         expect(communityInfo.normalUsers[1]).to.equal(creator.address);
         expect(communityInfo.name).to.equal('First community');

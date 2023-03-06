@@ -12,7 +12,8 @@ library PluginsList {
     bytes32 public constant COMMUNITY_QUIT = keccak256(abi.encode("COMMUNITY_QUIT"));
     bytes32 public constant COMMUNITY_INFO = keccak256(abi.encode("COMMUNITY_INFO"));
 
-    bytes32 public constant COMMUNITY_USER_INFO = keccak256(abi.encode("COMMUNITY_USER_INFO"));
+    bytes32 public constant USER_INFO_ONE_COMMUNITY = keccak256(abi.encode("USER_INFO_ONE_COMMUNITY"));
+    bytes32 public constant USER_INFO_ALL_COMMUNITIES = keccak256(abi.encode("USER_INFO_ALL_COMMUNITIES"));
 
     bytes32 public constant COMMUNITY_WRITE_POST = keccak256(abi.encode("COMMUNITY_WRITE_POST"));
     bytes32 public constant COMMUNITY_READ_POST = keccak256(abi.encode("COMMUNITY_READ_POST"));
@@ -34,7 +35,6 @@ library PluginsList {
     bytes32 public constant BANK_BALANCE_OF = keccak256(abi.encode("BANK_BALANCE_OF"));
 
     bytes32 public constant SOULBOUND_GENERATE = keccak256(abi.encode("SOULBOUND_GENERATE"));
-    bytes32 public constant SOULBOUND_BURN = keccak256(abi.encode("SOULBOUND_BURN"));
 
     function version() external pure returns (string memory) {
         return "1";

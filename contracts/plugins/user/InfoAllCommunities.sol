@@ -20,10 +20,10 @@ import "./libraries/UserLib.sol";
 
 contract InfoAllCommunities is IReadPlugin, Context {
 
-    using UserLib for address;
+    using UserLib for IRegistry;
 
     uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_USER_INFO;
+    bytes32 public PLUGIN_NAME = PluginsList.USER_INFO_ALL_COMMUNITIES;
 
     IRegistry public registry;
 
@@ -56,7 +56,7 @@ contract InfoAllCommunities is IReadPlugin, Context {
 
         for(uint256 i=0; i < communities.length; i++) {
             address communityId = communities[i];
-            DataTypes.UserRateCount memory communityCounts = _user.getUserRate(communityId, registry);
+            DataTypes.UserRateCount memory communityCounts = registry.getUserRate(_user, communityId);
             counts.postCount += communityCounts.postCount;
             counts.commentCount += communityCounts.commentCount;
             counts.upCount += communityCounts.upCount;

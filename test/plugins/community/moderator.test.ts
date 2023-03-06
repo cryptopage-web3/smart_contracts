@@ -52,7 +52,7 @@ describe("Test Info community basic functionality", function () {
         await executor.connect(third).run(id, pluginList.COMMUNITY_WRITE_POST(), version, data);
 
         let postIds = await account.getPostIdsByUserAndCommunity(communityAddress, third.address);
-        let postId = postIds[0].toNumber();
+        let postId = postIds[1][0].toNumber();
 
         await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_EDIT_MODERATORS(), version);
 

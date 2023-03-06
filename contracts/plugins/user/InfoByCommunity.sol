@@ -19,10 +19,10 @@ import "./libraries/UserLib.sol";
 
 contract InfoByCommunity is IReadPlugin, Context {
 
-    using UserLib for address;
+    using UserLib for IRegistry;
 
     uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_USER_INFO;
+    bytes32 public PLUGIN_NAME = PluginsList.USER_INFO_ONE_COMMUNITY;
 
     IRegistry public registry;
 
@@ -49,7 +49,7 @@ contract InfoByCommunity is IReadPlugin, Context {
         (address _user, address _communityId) =
         abi.decode(_inData,(address, address));
 
-        DataTypes.UserRateCount memory rate = _user.getUserRate(_communityId, registry);
+        DataTypes.UserRateCount memory rate = registry.getUserRate(_user, _communityId);
 
         _outData = abi.encode(rate.postCount, rate.commentCount, rate.upCount, rate.downCount);
     }

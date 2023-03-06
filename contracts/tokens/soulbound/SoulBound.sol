@@ -50,7 +50,7 @@ contract SoulBound is
     }
 
     function mint(
-        DataTypes.SoulBoundMintBurn calldata vars
+        DataTypes.SoulBoundMint calldata vars
     ) external override virtual onlyTrustedPlugin(PluginsList.SOULBOUND_GENERATE, vars.pluginName, vars.version) {
         require(vars.id > 0, "SoulBound: id cannot be zero");
         bytes memory data = new bytes(0);
@@ -58,27 +58,12 @@ contract SoulBound is
         _mint(vars.user, vars.id, vars.amount, data);
     }
 
-    function burn(
-        DataTypes.SoulBoundMintBurn calldata vars
-    ) external override virtual onlyTrustedPlugin(PluginsList.SOULBOUND_BURN, vars.pluginName, vars.version) {
-        require(vars.id > 0, "SoulBound: id cannot be zero");
-        emit Burn(vars.executedId, vars.user, vars.id, vars.amount);
-        _burn(vars.user, vars.id, vars.amount);
-    }
-
     function mintBatch(
-        DataTypes.SoulBoundBatchMintBurn calldata vars
+        DataTypes.SoulBoundBatchMint calldata vars
     ) external override virtual onlyTrustedPlugin(PluginsList.SOULBOUND_GENERATE, vars.pluginName, vars.version) {
         bytes memory data = new bytes(0);
         emit MintBatch(vars.executedId, vars.user, vars.ids, vars.amounts);
         _mintBatch(vars.user, vars.ids, vars.amounts, data);
-    }
-
-    function burnBatch(
-        DataTypes.SoulBoundBatchMintBurn calldata vars
-    ) external override virtual onlyTrustedPlugin(PluginsList.SOULBOUND_BURN, vars.pluginName, vars.version) {
-        emit BurnBatch(vars.executedId, vars.user, vars.ids, vars.amounts);
-        _burnBatch(vars.user, vars.ids, vars.amounts);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(
