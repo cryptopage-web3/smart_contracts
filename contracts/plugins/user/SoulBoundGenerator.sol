@@ -55,20 +55,27 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
 
         require(IAccount(registry.account()).isCommunityUser(_communityId, _user), "SoulBoundGenerator: wrong _user");
 
-        address groupRules = IRule(registry.rule()).getRuleContract(
-            RulesList.REPUTATION_MANAGEMENT_RULES,
-            PLUGIN_VERSION
-        );
-        if(IReputationManagementRules(groupRules).validate(_communityId, _user)) {
-            DataTypes.UserRateCount memory rate = registry.getUserRate(_user, _communityId);
+        checkRule(RulesList.REPUTATION_MANAGEMENT_RULES, _communityId, _user);
 
-            makeMint(_executedId, _user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
-            makeMint(_executedId, _user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
-            makeMint(_executedId, _user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
-            makeMint(_executedId, _user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
-        }
+        DataTypes.UserRateCount memory rate = registry.getUserRate(_user, _communityId);
+
+        makeMint(_executedId, _user, _communityId, rate.postCount, uint256(DataTypes.UserRatesType.FOR_POST));
+        makeMint(_executedId, _user, _communityId, rate.commentCount, uint256(DataTypes.UserRatesType.FOR_COMMENT));
+        makeMint(_executedId, _user, _communityId, rate.upCount, uint256(DataTypes.UserRatesType.FOR_UP));
+        makeMint(_executedId, _user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
 
         return true;
+    }
+
+    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
+        address rulesContract = IRule(registry.rule()).getRuleContract(
+            _groupRulesName,
+            PLUGIN_VERSION
+        );
+        require(
+            IBaseRules(rulesContract).validate(_communityId, _sender),
+            "Write: wrong rules validate"
+        );
     }
 
     function checkData(uint256 _version, address _sender) private view {

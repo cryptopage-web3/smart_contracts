@@ -8,7 +8,6 @@ import "../../utils/CloneFactory.sol";
 import "../../community/CommunityBlank.sol";
 import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
-import "../../registry/interfaces/IRegistry.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
 import "../../libraries/DataTypes.sol";
@@ -67,9 +66,7 @@ contract Create is IExecutePlugin, Ownable, CloneFactory {
     }
 
     function createCommunity(string memory _name, address _creator, bool _isInitial) private returns(address) {
-        CommunityBlank cb = blank == address(0) ?
-        new CommunityBlank() :
-        CommunityBlank(createClone(blank));
+        CommunityBlank cb = blank == address(0) ? new CommunityBlank() : CommunityBlank(createClone(blank));
         cb.initialize(_name, address(registry), _creator, _isInitial);
         return address(cb);
     }

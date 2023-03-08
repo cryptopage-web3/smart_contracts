@@ -26,7 +26,6 @@ contract ReputationManagementRules is IReputationManagementRules, Context {
 
     modifier onlyPlugin() {
         require(
-        // COMMUNITY_TRANSFER_POST is temporary
             registry.getPluginContract(PluginsList.SOULBOUND_GENERATE, RULES_VERSION) == _msgSender(),
             "ReputationManagementRules: caller is not the plugin");
         _;

@@ -153,6 +153,8 @@ async function setupCommonPlugins(_registryContract, user) {
     await setupPlugin(_registryContract, "contracts/plugins/comment/Write.sol:Write", pluginList.COMMUNITY_WRITE_COMMENT());
     await setupPlugin(_registryContract, "contracts/plugins/comment/Read.sol:Read", pluginList.COMMUNITY_READ_COMMENT());
     await setupPlugin(_registryContract, "contracts/plugins/comment/Burn.sol:Burn", pluginList.COMMUNITY_BURN_COMMENT());
+
+    await setupPlugin(_registryContract, "contracts/plugins/user/SoulBoundGenerator.sol:SoulBoundGenerator", pluginList.SOULBOUND_GENERATE());
 }
 
 async function setupPlugin(_registryContract, pathName, pluginName) {
@@ -178,9 +180,6 @@ async function setupCommonRules(_registryContract, _ruleContract) {
     let profitRulesName = keccak256(defaultAbiCoder.encode(["string"],
         ["PAGE.PROFIT_DISTRIBUTION_RULES"])
     );
-    let reputationRulesName = keccak256(defaultAbiCoder.encode(["string"],
-        ["PAGE.REPUTATION_MANAGEMENT_RULES"])
-    );
 
     await setupRule(_registryContract, _ruleContract,
         "contracts/rules/community/CommunityJoiningRules.sol:CommunityJoiningRules", ruleList.COMMUNITY_JOINING_RULES());
@@ -198,6 +197,9 @@ async function setupCommonRules(_registryContract, _ruleContract) {
         "contracts/rules/community/PostReadingRules.sol:PostReadingRules", ruleList.POST_READING_RULES());
 
     await setupRule(_registryContract, _ruleContract,
+        "contracts/rules/community/ReputationManagementRules.sol:ReputationManagementRules", ruleList.REPUTATION_MANAGEMENT_RULES());
+
+    await setupRule(_registryContract, _ruleContract,
         "contracts/rules/community/PostTransferringRules.sol:PostTransferringRules", ruleList.POST_TRANSFERRING_RULES());
 
     await setupRule(_registryContract, _ruleContract,
@@ -205,6 +207,7 @@ async function setupCommonRules(_registryContract, _ruleContract) {
 
     await setupRule(_registryContract, _ruleContract,
         "contracts/rules/community/CommunityEditModeratorsRules.sol:CommunityEditModeratorsRules", ruleList.COMMUNITY_EDIT_MODERATOR_RULES());
+
 }
 
 async function setupRule(_registryContract, _rule, pathName, _ruleName) {
