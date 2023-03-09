@@ -9,6 +9,7 @@ import "./interfaces/ISoulBound.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../../plugins/PluginsList.sol";
 import "../../libraries/DataTypes.sol";
+import "../../libraries/MakeTokenId.sol";
 
 
 /// @title Contract of Page.SoulBound
@@ -21,6 +22,8 @@ contract SoulBound is
     ERC1155Upgradeable,
     ISoulBound
 {
+
+    using MakeTokenId for address;
 
     IRegistry public registry;
 
@@ -71,6 +74,13 @@ contract SoulBound is
         ERC1155Upgradeable
     ) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function getTokenIdByCommunityAndRate(
+        address communityId,
+        uint256 rateId
+    ) public view override returns (uint256) {
+        return communityId.getSoulBoundTokenId(rateId);
     }
 
     function _beforeTokenTransfer(

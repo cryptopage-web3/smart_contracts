@@ -14,7 +14,7 @@ import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../../libraries/DataTypes.sol";
-import "./libraries/UserLib.sol";
+import "../../libraries/UserLib.sol";
 
 
 contract InfoAllCommunities is Context {

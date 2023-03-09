@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.15;
 
-import "../../../registry/interfaces/IRegistry.sol";
-import "../../../account/interfaces/IAccount.sol";
-import "../../../community/interfaces/ICommentData.sol";
-import "../../../libraries/DataTypes.sol";
+import "../registry/interfaces/IRegistry.sol";
+import "../account/interfaces/IAccount.sol";
+import "../community/interfaces/ICommentData.sol";
+import "./DataTypes.sol";
 
 library UserLib {
 

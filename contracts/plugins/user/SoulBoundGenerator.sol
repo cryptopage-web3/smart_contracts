@@ -15,7 +15,7 @@ import "../interfaces/IExecutePlugin.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../libraries/DataTypes.sol";
 import "../../libraries/MakeTokenId.sol";
-import "./libraries/UserLib.sol";
+import "../../libraries/UserLib.sol";
 
 
 contract SoulBoundGenerator is IExecutePlugin, Context{

@@ -116,8 +116,19 @@ describe("Test SoulBoundGenerator basic functionality", function () {
         );
         id = ethers.utils.formatBytes32String("37");
 
-        let beforeBalance = await
+        let sbPostId = await soulBound.getTokenIdByCommunityAndRate(communityAddress, 1);
+        let sbCommentId = await soulBound.getTokenIdByCommunityAndRate(communityAddress, 2);
+        let beforePostBalance = await soulBound.balanceOf(third.address, BigNumber.from(sbPostId));
+        expect(beforePostBalance.toNumber()).to.equal(0);
+        let beforeCommentBalance = await soulBound.balanceOf(third.address, BigNumber.from(sbCommentId));
+        expect(beforeCommentBalance.toNumber()).to.equal(0);
+
         await executor.connect(third).run(id, pluginList.SOULBOUND_GENERATE(), version, data);
+
+        let afterPostBalance = await soulBound.balanceOf(third.address, BigNumber.from(sbPostId));
+        expect(afterPostBalance.toNumber()).to.equal(1);
+        let afterCommentBalance = await soulBound.balanceOf(third.address, BigNumber.from(sbCommentId));
+        expect(afterCommentBalance.toNumber()).to.equal(1);
 
     });
 

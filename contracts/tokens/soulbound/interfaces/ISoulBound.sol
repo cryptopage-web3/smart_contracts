@@ -18,4 +18,9 @@ interface ISoulBound is IERC1155Upgradeable {
     function mintBatch(
         DataTypes.SoulBoundBatchMint calldata vars
     ) external;
+
+    function getTokenIdByCommunityAndRate(
+        address communityId,
+        uint256 rateId
+    ) external view returns (uint256);
 }
