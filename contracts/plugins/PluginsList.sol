@@ -35,6 +35,7 @@ library PluginsList {
     bytes32 public constant BANK_BALANCE_OF = keccak256(abi.encode("BANK_BALANCE_OF"));
 
     bytes32 public constant SOULBOUND_GENERATE = keccak256(abi.encode("SOULBOUND_GENERATE"));
+    bytes32 public constant SOULBOUND_BALANCE_OF = keccak256(abi.encode("SOULBOUND_BALANCE_OF"));
 
     function version() external pure returns (string memory) {
         return "1";

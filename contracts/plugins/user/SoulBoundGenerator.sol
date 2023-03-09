@@ -14,14 +14,14 @@ import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../libraries/DataTypes.sol";
-import "../../libraries/MakeId.sol";
+import "../../libraries/MakeTokenId.sol";
 import "./libraries/UserLib.sol";
 
 
 contract SoulBoundGenerator is IExecutePlugin, Context{
 
     using UserLib for IRegistry;
-    using MakeId for address;
+    using MakeTokenId for address;
 
     uint256 private constant PLUGIN_VERSION = 1;
     bytes32 public PLUGIN_NAME = PluginsList.SOULBOUND_GENERATE;

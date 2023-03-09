@@ -115,6 +115,8 @@ describe("Test SoulBoundGenerator basic functionality", function () {
             [third.address, communityAddress]
         );
         id = ethers.utils.formatBytes32String("37");
+
+        let beforeBalance = await
         await executor.connect(third).run(id, pluginList.SOULBOUND_GENERATE(), version, data);
 
     });

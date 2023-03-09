@@ -3,7 +3,7 @@
 pragma solidity 0.8.15;
 
 
-library MakeId {
+library MakeTokenId {
 
     uint256 constant ADDITIONAL_ID = 1_000_000;
 
