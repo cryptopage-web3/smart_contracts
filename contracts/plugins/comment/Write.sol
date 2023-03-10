@@ -17,26 +17,15 @@ import "../interfaces/IExecutePlugin.sol";
 import "../../rules/community/interfaces/IBaseRules.sol";
 import "../../rules/community/interfaces/IBaseRulesWithPostId.sol";
 import "../../libraries/DataTypes.sol";
+import "../BasePlugin.sol";
 
 
-contract Write is IExecutePlugin, Context{
-
-    uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_WRITE_COMMENT;
-
-    IRegistry public registry;
-
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Write: caller is not the executor");
-        _;
-    }
+contract Write is IExecutePlugin, BasePlugin {
 
     constructor(address _registry) {
+        PLUGIN_VERSION = 1;
+        PLUGIN_NAME = PluginsList.COMMUNITY_WRITE_COMMENT;
         registry = IRegistry(_registry);
-    }
-
-    function version() external pure returns (uint256) {
-        return PLUGIN_VERSION;
     }
 
     function execute(
@@ -46,10 +35,12 @@ contract Write is IExecutePlugin, Context{
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         uint256 beforeGas = gasleft();
+        require(_version == PLUGIN_VERSION, "Write: wrong version");
 
-        checkData(_version, _sender);
         (address _communityId , uint256 _postId, , , , , ) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
+
+        checkPlugin(_communityId);
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         checkBaseRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);
@@ -108,11 +99,5 @@ contract Write is IExecutePlugin, Context{
             IBaseRulesWithPostId(rulesContract).validate(_communityId, _sender, _postId),
             "RePost: wrong rules with postId validate"
         );
-    }
-
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Write: wrong _version");
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Write: plugin is not trusted");
-        require(_sender != address(0) , "Write: _sender is zero");
     }
 }

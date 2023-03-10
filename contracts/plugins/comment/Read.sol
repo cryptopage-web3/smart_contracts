@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts/utils/Context.sol";
-
 import "../../account/interfaces/IAccount.sol";
 import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/IPostData.sol";
@@ -16,20 +14,15 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../../rules/community/interfaces/IPostCommentingRules.sol";
 import "../../libraries/DataTypes.sol";
+import "../BasePlugin.sol";
 
 
-contract Read is Context {
-    uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_READ_COMMENT;
-
-    IRegistry public registry;
+contract Read is BasePlugin {
 
     constructor(address _registry) {
+        PLUGIN_VERSION = 1;
+        PLUGIN_NAME = PluginsList.COMMUNITY_READ_COMMENT;
         registry = IRegistry(_registry);
-    }
-
-    function version() external pure returns (uint256) {
-        return PLUGIN_VERSION;
     }
 
     function read(
@@ -60,14 +53,5 @@ contract Read is Context {
             IPostCommentingRules(rulesContract).validate(_communityId, _sender, _postId),
             "Write: wrong rules validate"
         );
-    }
-
-    function checkPlugin(address _communityId) private view {
-        (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
-        require(enable, "Info: wrong enable plugin");
-        require(pluginContract != address(0), "Info: wrong plugin contract");
-
-        bool isLinked = ICommunityBlank(_communityId).isLinkedPlugin(PLUGIN_NAME, PLUGIN_VERSION);
-        require(isLinked, "Info: plugin is not linked for the community");
     }
 }
