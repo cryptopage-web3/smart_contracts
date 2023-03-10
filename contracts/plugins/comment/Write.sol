@@ -10,17 +10,14 @@ import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/ICommunityData.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
-import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
-import "../../rules/community/interfaces/IBaseRules.sol";
-import "../../rules/community/interfaces/IBaseRulesWithPostId.sol";
 import "../../libraries/DataTypes.sol";
-import "../BasePlugin.sol";
+import "../BasePluginWithRules.sol";
 
 
-contract Write is IExecutePlugin, BasePlugin {
+contract Write is IExecutePlugin, BasePluginWithRules {
 
     constructor(address _registry) {
         PLUGIN_VERSION = 1;
@@ -77,27 +74,5 @@ contract Write is IExecutePlugin, BasePlugin {
         );
 
         return true;
-    }
-
-    function checkBaseRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
-        address rulesContract = IRule(registry.rule()).getRuleContract(
-            _groupRulesName,
-            PLUGIN_VERSION
-        );
-        require(
-            IBaseRules(rulesContract).validate(_communityId, _sender),
-            "RePost: wrong base rules validate"
-        );
-    }
-
-    function checkRuleWithPostId(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
-        address rulesContract = IRule(registry.rule()).getRuleContract(
-            _groupRulesName,
-            PLUGIN_VERSION
-        );
-        require(
-            IBaseRulesWithPostId(rulesContract).validate(_communityId, _sender, _postId),
-            "RePost: wrong rules with postId validate"
-        );
     }
 }
