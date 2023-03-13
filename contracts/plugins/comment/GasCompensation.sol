@@ -2,14 +2,10 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts/utils/Context.sol";
-
-import "../../account/interfaces/IAccount.sol";
 import "../../bank/interfaces/IBank.sol";
 import "../../community/interfaces/IPostData.sol";
 import "../../community/interfaces/ICommentData.sol";
 import "../../registry/interfaces/IRegistry.sol";
-
 import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
@@ -36,8 +32,6 @@ contract GasCompensation is IExecutePlugin, BasePlugin {
         address ,
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
-        require(_version == PLUGIN_VERSION, "Write: wrong version");
-
         (uint256 postId, uint256[] memory commentIds) = abi.decode(_data,(uint256,uint256[]));
 
         DataTypes.GasCompensationComment memory commentVars;
@@ -53,7 +47,7 @@ contract GasCompensation is IExecutePlugin, BasePlugin {
 
         for (uint256 i = 0; i < commentIds.length; i++) {
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
-            checkPlugin(communityId);
+            checkPlugin(_version, communityId);
 
             commentVars.commentId = commentIds[i];
             (uint256 gas, address creator, address owner) = ICommentData(registry.commentData()).setGasCompensation(

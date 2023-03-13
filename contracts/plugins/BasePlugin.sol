@@ -24,7 +24,8 @@ abstract contract BasePlugin is Context {
         return PLUGIN_VERSION;
     }
 
-    function checkPlugin(address _communityId) internal virtual view {
+    function checkPlugin(uint256 _version, address _communityId) internal virtual view {
+        require(_version == PLUGIN_VERSION, "BasePlugin: wrong version");
         (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
         require(enable, "BasePlugin: wrong enable plugin");
         require(pluginContract != address(0), "BaseWritePlugin: wrong plugin contract");

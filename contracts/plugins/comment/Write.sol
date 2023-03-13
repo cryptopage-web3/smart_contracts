@@ -32,12 +32,11 @@ contract Write is IExecutePlugin, BasePluginWithRules {
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
         uint256 beforeGas = gasleft();
-        require(_version == PLUGIN_VERSION, "Write: wrong version");
 
         (address _communityId , uint256 _postId, , , , , ) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
 
-        checkPlugin(_communityId);
+        checkPlugin(_version, _communityId);
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         checkBaseRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);

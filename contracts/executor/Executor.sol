@@ -63,8 +63,7 @@ contract Executor is OwnableUpgradeable, IExecutor {
     }
 
     function runPlugin(bytes32 _id, bytes32 _pluginName, uint256 _version, bytes memory _data, address _sender) private {
-        (bool enable, address pluginContract) = registry.getPlugin(_pluginName, _version);
-        checkPlugin(enable, pluginContract);
+        ( , address pluginContract) = registry.getPlugin(_pluginName, _version);
         require(!executedId[_id], "Executor: wrong id");
         executedId[_id] = true;
 
@@ -89,10 +88,5 @@ contract Executor is OwnableUpgradeable, IExecutor {
     ) private view {
         address signer = ECDSAUpgradeable.recover(_digest, _validatorSig);
         require(signer == validator, "Executor: not signed by validator");
-    }
-
-    function checkPlugin(bool _enable, address _pluginContract) private pure {
-        require(_enable, "Executor: wrong enable plugin");
-        require(_pluginContract != address(0), "Executor: wrong plugin contract");
     }
 }

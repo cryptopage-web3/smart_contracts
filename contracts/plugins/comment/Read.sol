@@ -32,7 +32,7 @@ contract Read is BasePlugin {
         address sender = _msgSender();
         address communityId = IPostData(registry.postData()).getCommunityId(_postId);
 
-        checkPlugin(communityId);
+        checkPlugin(PLUGIN_VERSION, communityId);
         checkRule(RulesList.POST_COMMENTING_RULES, communityId, sender, _postId);
 
         DataTypes.MinSimpleVars memory vars;
