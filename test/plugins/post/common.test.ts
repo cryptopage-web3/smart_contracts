@@ -274,8 +274,13 @@ describe("Test Post basic functionality", function () {
             ["COMMUNITY_JOIN"])
         );
 
+
         let communities = await communityData.getCommunities(0, 1);
         let secondCommunityAddress = communities[1];
+
+        let communityBlank = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
+        let secondCommunity = await communityBlank.attach(secondCommunityAddress);
+        await secondCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_REPOST(), version);
 
         let id = ethers.utils.formatBytes32String("191");
         let data = defaultAbiCoder.encode([ "address" ], [secondCommunityAddress]);

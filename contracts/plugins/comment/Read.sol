@@ -14,10 +14,10 @@ import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../../rules/community/interfaces/IPostCommentingRules.sol";
 import "../../libraries/DataTypes.sol";
-import "../BasePlugin.sol";
+import "../BasePluginWithRules.sol";
 
 
-contract Read is BasePlugin {
+contract Read is BasePluginWithRules {
 
     constructor(address _registry) {
         PLUGIN_VERSION = 1;
@@ -33,7 +33,7 @@ contract Read is BasePlugin {
         address communityId = IPostData(registry.postData()).getCommunityId(_postId);
 
         checkPlugin(PLUGIN_VERSION, communityId);
-        checkRule(RulesList.POST_COMMENTING_RULES, communityId, sender, _postId);
+        checkRuleWithPostId(RulesList.POST_COMMENTING_RULES, communityId, sender, _postId);
 
         DataTypes.MinSimpleVars memory vars;
         vars.pluginName = PLUGIN_NAME;
@@ -42,16 +42,5 @@ contract Read is BasePlugin {
 
         outData = ICommentData(registry.commentData()).readComment(vars);
         outData.communityId = communityId;
-    }
-
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender, uint256 _postId) private view {
-        address rulesContract = IRule(registry.rule()).getRuleContract(
-            _groupRulesName,
-            PLUGIN_VERSION
-        );
-        require(
-            IPostCommentingRules(rulesContract).validate(_communityId, _sender, _postId),
-            "Write: wrong rules validate"
-        );
     }
 }
