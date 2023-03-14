@@ -40,6 +40,8 @@ contract RePost is IExecutePlugin, BasePluginWithRules{
         gasVars.version = PLUGIN_VERSION;
 
         (address _userCommunityId , uint256 _postId) = abi.decode(_data,(address, uint256));
+
+        require(_userCommunityId != address(0), "RePost: wrong community");
         checkPlugin(_version, _userCommunityId);
 
         DataTypes.MinSimpleVars memory vars;

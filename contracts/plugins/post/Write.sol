@@ -43,6 +43,8 @@ contract Write is IExecutePlugin, BasePluginWithRules {
 
         (address _communityId , address _repostFromCommunity, , , , , , ) =
         abi.decode(_data,(address, address, address, string, uint256, string[], bool, bool));
+
+        require(_communityId != address(0), "Write: wrong community");
         checkPlugin(_version, _communityId);
 
         require(_repostFromCommunity == address(0), "Write: wrong _repostFromCommunity");

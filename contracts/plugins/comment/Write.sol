@@ -36,7 +36,9 @@ contract Write is IExecutePlugin, BasePluginWithRules {
         (address _communityId , uint256 _postId, , , , , ) =
         abi.decode(_data,(address, uint256, address, string, bool, bool, bool));
 
+        require(_communityId != address(0), "Write: wrong community");
         checkPlugin(_version, _communityId);
+
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
 
         checkBaseRule(RulesList.USER_VERIFICATION_RULES, _communityId, _sender);

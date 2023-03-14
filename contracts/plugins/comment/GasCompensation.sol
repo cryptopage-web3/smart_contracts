@@ -47,6 +47,7 @@ contract GasCompensation is IExecutePlugin, BasePlugin {
 
         for (uint256 i = 0; i < commentIds.length; i++) {
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
+            require(communityId != address(0), "GasCompensation: wrong community");
             checkPlugin(_version, communityId);
 
             commentVars.commentId = commentIds[i];

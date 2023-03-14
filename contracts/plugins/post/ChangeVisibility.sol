@@ -28,6 +28,8 @@ contract ChangeVisibility is IExecutePlugin, BasePluginWithRules {
     ) external override onlyExecutor returns(bool) {
         (uint256 _postId, ) = abi.decode(_data,(uint256, bool));
         address _communityId = IPostData(registry.postData()).getCommunityId(_postId);
+
+        require(_communityId != address(0), "ChangeVisibility: wrong community");
         checkPlugin(_version, _communityId);
 
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "ChangeVisibility: wrong _sender");

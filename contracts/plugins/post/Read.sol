@@ -29,7 +29,9 @@ contract Read is BasePluginWithRules {
         address sender = _msgSender();
         address communityId = IPostData(registry.postData()).getCommunityId(_postId);
 
+        require(communityId != address(0), "Read: wrong community");
         checkPlugin(PLUGIN_VERSION, communityId);
+
         checkRuleWithPostId(RulesList.POST_READING_RULES, communityId, sender, _postId);
 
         DataTypes.MinSimpleVars memory vars;

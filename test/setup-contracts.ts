@@ -117,6 +117,8 @@ export default async function setupContracts() {
 
     let communityBlank = await ethers.getContractFactory("contracts/community/CommunityBlank.sol:CommunityBlank");
     let createdCommunity = await communityBlank.attach(createdCommunityAddress[0]);
+    await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_BURN_POST(), version);
+    await createdCommunity.connect(owner).linkPlugin(pluginList.COMMUNITY_EDIT_MODERATORS(), version);
 
     let userVerificationRulesBlank = await ethers.getContractFactory("contracts/rules/community/UserVerificationRules.sol:UserVerificationRules");
     let userVerificationRules = await userVerificationRulesBlank.attach(await rule.getRuleContract(ruleList.USER_VERIFICATION_RULES(), version));

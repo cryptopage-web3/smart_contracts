@@ -2,32 +2,19 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts/utils/Context.sol";
-
 import "../../account/interfaces/IAccount.sol";
 import "../../registry/interfaces/IRegistry.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../PluginsList.sol";
+import "../BasePluginWithRules.sol";
 
 
-contract Quit is IExecutePlugin, Context {
-
-    uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.COMMUNITY_QUIT;
-
-    IRegistry public registry;
-
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "Quit: caller is not the executor");
-        _;
-    }
+contract Quit is IExecutePlugin, BasePluginWithRules {
 
     constructor(address _registry) {
+        PLUGIN_VERSION = 1;
+        PLUGIN_NAME = PluginsList.COMMUNITY_QUIT;
         registry = IRegistry(_registry);
-    }
-
-    function version() external pure returns (uint256) {
-        return PLUGIN_VERSION;
     }
 
     function execute(
@@ -36,7 +23,10 @@ contract Quit is IExecutePlugin, Context {
         address _sender,
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
-        checkData(_version, _sender);
+        (address _communityId) = abi.decode(_data,(address));
+
+        require(_communityId != address(0), "Quit: wrong community");
+        checkPlugin(_version, _communityId);
 
         DataTypes.GeneralVars memory vars;
         vars.executedId = _executedId;
@@ -51,11 +41,5 @@ contract Quit is IExecutePlugin, Context {
         );
 
         return true;
-    }
-
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "Quit: wrong _version");
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Quit: plugin is not trusted");
-        require(_sender != address(0) , "Quit: _sender is zero");
     }
 }

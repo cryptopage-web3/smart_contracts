@@ -49,6 +49,7 @@ contract GasCompensation is IExecutePlugin, BasePlugin {
             bytes memory postData = abi.encode(postId);
             postVars.data = postData;
             address communityId = IPostData(registry.postData()).getCommunityId(postId);
+            require(communityId != address(0), "GasCompensation: wrong community");
             checkPlugin(_version, communityId);
 
             (uint256 gas, address creator) = IPostData(registry.postData()).setGasCompensation(postVars);

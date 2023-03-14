@@ -28,9 +28,11 @@ abstract contract BasePlugin is Context {
         require(_version == PLUGIN_VERSION, "BasePlugin: wrong version");
         (bool enable, address pluginContract) = registry.getPlugin(PLUGIN_NAME, PLUGIN_VERSION);
         require(enable, "BasePlugin: wrong enable plugin");
-        require(pluginContract != address(0), "BaseWritePlugin: wrong plugin contract");
+        require(pluginContract == address(this), "BaseWritePlugin: wrong plugin contract");
 
-        bool isLinked = ICommunityBlank(_communityId).isLinkedPlugin(PLUGIN_NAME, PLUGIN_VERSION);
-        require(isLinked, "BasePlugin: plugin is not linked for the community");
+        if (_communityId != address(0)) {
+            bool isLinked = ICommunityBlank(_communityId).isLinkedPlugin(PLUGIN_NAME, PLUGIN_VERSION);
+            require(isLinked, "BasePlugin: plugin is not linked for the community");
+        }
     }
 }

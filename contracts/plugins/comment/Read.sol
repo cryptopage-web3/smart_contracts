@@ -31,6 +31,7 @@ contract Read is BasePluginWithRules {
     ) external view returns(DataTypes.CommentInfo memory outData) {
         address sender = _msgSender();
         address communityId = IPostData(registry.postData()).getCommunityId(_postId);
+        require(communityId != address(0), "Read: wrong community");
 
         checkPlugin(PLUGIN_VERSION, communityId);
         checkRuleWithPostId(RulesList.POST_COMMENTING_RULES, communityId, sender, _postId);

@@ -28,6 +28,8 @@ contract Burn is IExecutePlugin, BasePluginWithRules {
     ) external override onlyExecutor returns(bool) {
         (uint256 _postId, ) = abi.decode(_data,(uint256, uint256));
         address _communityId = IPostData(registry.postData()).getCommunityId(_postId);
+
+        require(_communityId != address(0), "Burn: wrong community");
         checkPlugin(_version, _communityId);
 
         require(IAccount(registry.account()).isCommunityUser(_communityId, _sender), "Write: wrong _sender");
