@@ -9,7 +9,7 @@ import "./interfaces/IToken.sol";
 import "../../registry/interfaces/IRegistry.sol";
 
 /// @title Contract of Page.Token
-/// @author Crypto.Page Team
+/// @author  Crypto.Page Team
 /// @notice
 /// @dev
 contract Token is IToken, ERC20Upgradeable {
