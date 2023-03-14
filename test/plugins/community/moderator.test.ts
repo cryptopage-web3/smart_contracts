@@ -64,7 +64,7 @@ describe("Test Info community basic functionality", function () {
         await executor.connect(creator).run(id, pluginList.COMMUNITY_EDIT_MODERATORS(), version, data);
 
         let pluginAddress = await registry.getPluginContract(pluginList.COMMUNITY_INFO(), version);
-        let pluginFactory = await ethers.getContractFactory("contracts/plugins/community/InfoByCommunity.sol:Info");
+        let pluginFactory = await ethers.getContractFactory("contracts/plugins/community/Info.sol:Info");
         let plugin = await pluginFactory.attach(pluginAddress);
 
         let communityInfo = await plugin.connect(third).read(communityAddress);

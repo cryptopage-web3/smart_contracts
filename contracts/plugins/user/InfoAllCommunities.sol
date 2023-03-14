@@ -3,13 +3,7 @@
 pragma solidity 0.8.15;
 
 import "../../account/interfaces/IAccount.sol";
-import "../../community/interfaces/IPostData.sol";
-import "../../community/interfaces/IPostData.sol";
-import "../../community/interfaces/ICommentData.sol";
 import "../../registry/interfaces/IRegistry.sol";
-
-import "../../rules/interfaces/IRule.sol";
-import "../../rules/community/RulesList.sol";
 import "../PluginsList.sol";
 import "../../libraries/DataTypes.sol";
 import "../../libraries/UserLib.sol";

@@ -2,60 +2,44 @@
 
 pragma solidity 0.8.15;
 
-import "@openzeppelin/contracts/utils/Context.sol";
-
 import "../../registry/interfaces/IRegistry.sol";
 import "../../account/interfaces/IAccount.sol";
-
-import "../../rules/interfaces/IRule.sol";
 import "../../rules/community/RulesList.sol";
-import "../../rules/community/interfaces/IReputationManagementRules.sol";
 import "../PluginsList.sol";
 import "../interfaces/IExecutePlugin.sol";
 import "../../tokens/soulbound/interfaces/ISoulBound.sol";
 import "../../libraries/DataTypes.sol";
 import "../../libraries/MakeTokenId.sol";
 import "../../libraries/UserLib.sol";
+import "../BasePluginWithRules.sol";
 
 
-contract SoulBoundGenerator is IExecutePlugin, Context{
+contract SoulBoundGenerator is IExecutePlugin, BasePluginWithRules {
 
     using UserLib for IRegistry;
     using MakeTokenId for address;
 
-    uint256 private constant PLUGIN_VERSION = 1;
-    bytes32 public PLUGIN_NAME = PluginsList.SOULBOUND_GENERATE;
-
-    IRegistry public registry;
     ISoulBound public soulBound;
 
-    modifier onlyExecutor() {
-        require(registry.executor() == _msgSender(), "SoulBoundGenerator: caller is not the executor");
-        _;
-    }
-
     constructor(address _registry) {
+        PLUGIN_VERSION = 1;
+        PLUGIN_NAME = PluginsList.SOULBOUND_GENERATE;
         registry = IRegistry(_registry);
         soulBound = ISoulBound(registry.soulBound());
-    }
-
-    function version() external pure returns (uint256) {
-        return PLUGIN_VERSION;
     }
 
     function execute(
         bytes32 _executedId,
         uint256 _version,
-        address _sender,
+        address ,
         bytes calldata _data
     ) external override onlyExecutor returns(bool) {
-        checkData(_version, _sender);
-        (address _user, address _communityId) =
-        abi.decode(_data,(address,address));
+        (address _user, address _communityId) = abi.decode(_data,(address,address));
 
+        require(_communityId != address(0), "SoulBoundGenerator: wrong community");
+        checkPlugin(_version, _communityId);
         require(IAccount(registry.account()).isCommunityUser(_communityId, _user), "SoulBoundGenerator: wrong _user");
-
-        checkRule(RulesList.REPUTATION_MANAGEMENT_RULES, _communityId, _user);
+        checkBaseRule(RulesList.REPUTATION_MANAGEMENT_RULES, _communityId, _user);
 
         DataTypes.UserRateCount memory rate = registry.getUserRate(_user, _communityId);
 
@@ -65,23 +49,6 @@ contract SoulBoundGenerator is IExecutePlugin, Context{
         makeMint(_executedId, _user, _communityId, rate.downCount, uint256(DataTypes.UserRatesType.FOR_DOWN));
 
         return true;
-    }
-
-    function checkRule(bytes32 _groupRulesName, address _communityId, address _sender) private view {
-        address rulesContract = IRule(registry.rule()).getRuleContract(
-            _groupRulesName,
-            PLUGIN_VERSION
-        );
-        require(
-            IBaseRules(rulesContract).validate(_communityId, _sender),
-            "Write: wrong rules validate"
-        );
-    }
-
-    function checkData(uint256 _version, address _sender) private view {
-        require(_version == PLUGIN_VERSION, "SoulBoundGenerator: wrong _version");
-        require(registry.isEnablePlugin(PLUGIN_NAME, PLUGIN_VERSION),"Deposit: plugin is not trusted");
-        require(_sender != address(0) , "SoulBoundGenerator: _sender is zero");
     }
 
     function makeMint(bytes32 _executedId, address _user, address _communityId, uint256 _rateAmount, uint256 _rateId) private {
